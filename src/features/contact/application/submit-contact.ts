@@ -45,8 +45,7 @@ export async function submitContactMessageAction(
 
   const data = parsed.data;
   const message = data.message.trim();
-  /** Stored for admin inbox; form no longer collects a separate subject. */
-  const subject = message.slice(0, 160);
+  const subject = data.subject.trim();
   const spamScore = scoreContactSpam({
     name: data.name,
     email: data.email,

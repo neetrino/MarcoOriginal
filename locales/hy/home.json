@@ -2,19 +2,17 @@
   "title": "White Shop",
   "subtitle": "Բազմալեզու խանութը գործում է։",
   "cta": "Դիտել ապրանքները",
-  "featuredTitle": "Ընտրված ապրանքներ",
+  "featuredTitle": "Հատուկ առաջարկներ",
+  "newArrivalsTitle": "Նորույթներ",
+  "emptyNewArrivals": "Նորույթներ դեռ չկան։",
+  "brandsTitle": "Բրենդներ",
+  "brandsPaginationLabel": "Բրենդների էջեր",
+  "productsPaginationLabel": "Ապրանքների էջեր",
+  "reelsPaginationLabel": "Ռիլլերի էջեր",
+  "reelsTitle": "Ռիլլեր",
+  "untitledReel": "Առանց վերնագրի",
+  "playReel": "Դիտել reel-ը",
+  "closeReel": "Փակել",
   "viewAll": "Տեսնել ավելին",
-  "emptyFeatured": "Ընտրված ապրանքներ դեռ չկան։",
-  "aboutEyebrow": "Մեր մասին",
-  "aboutTitle": "Մենք առաջարկում ենք որակյալ ապրանքներ",
-  "aboutDescription": "Բացահայտեք խնամքով ընտրված տեսականի՝ հուսալի առաքմամբ և հաճախորդակենտրոն աջակցությամբ։",
-  "aboutCta": "Իմանալ ավելին",
-  "features": {
-    "deliveryTitle": "Արագ առաքում",
-    "deliveryDescription": "Արագ և հուսալի առաքում ձեր դուռը։",
-    "qualityTitle": "Լավագույն որակ",
-    "qualityDescription": "Խնամքով ընտրված ապրանքներ, որոնց կարելի է վստահել։",
-    "returnTitle": "Անվճար վերադարձ",
-    "returnDescription": "Հեշտ վերադարձ, եթե ինչ-որ բան ճիշտ չէ։"
-  }
+  "emptyFeatured": "Ընտրված ապրանքներ դեռ չկան։"
 }

@@ -1,14 +1,11 @@
 "use server";
 
 import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidateHero } from "@/features/hero/application/revalidate-hero";
 
 import { auditLogs, heroSlides, mediaAssets, type HeroTranslationsJson } from "@/db/schema";
 import { withTransaction } from "@/db/transaction";
-import {
-  persistHeroImage,
-  removeHeroImage,
-} from "@/features/hero/application/persist-hero-media";
+import { applyHeroSlideMediaFromForm } from "@/features/hero/application/persist-hero-media";
 import {
   heroRuleErrorMessage,
   validateHeroTranslations,
@@ -24,45 +21,34 @@ import {
   type UpsertHeroSlideInput,
 } from "@/features/hero/schemas/admin-hero";
 import { requireAdmin } from "@/lib/auth/policies";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createId } from "@/lib/id";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { err, ok, type Result } from "@/lib/result";
 
-function buildTranslations(
-  data: UpsertHeroSlideInput,
-  existing?: HeroTranslationsJson,
-): HeroTranslationsJson {
-  const previous =
-    existing?.en ?? existing?.hy ?? existing?.ru ?? undefined;
-
+function buildTranslations(data: UpsertHeroSlideInput): HeroTranslationsJson {
   const copy = {
     title: data.title,
     subtitle: data.subtitle || undefined,
-    buttonLabel: previous?.buttonLabel,
-    buttonUrl: previous?.buttonUrl,
+    buttonLabel: data.buttonLabel,
+    buttonUrl: data.buttonUrl,
   };
 
   return { hy: copy, en: copy, ru: copy };
 }
 
+function optionalFormText(formData: FormData, key: string): string | undefined {
+  const value = String(formData.get(key) ?? "").trim();
+  return value || undefined;
+}
+
 function parseModalFormData(formData: FormData): UpsertHeroSlideInput | null {
   const parsed = upsertHeroSlideSchema.safeParse({
     title: formData.get("title"),
-    subtitle: String(formData.get("subtitle") ?? "") || undefined,
+    subtitle: optionalFormText(formData, "subtitle"),
+    buttonLabel: optionalFormText(formData, "buttonLabel"),
+    buttonUrl: optionalFormText(formData, "buttonUrl"),
   });
   return parsed.success ? parsed.data : null;
-}
-
-function revalidateHero(locale: string, slideId?: string): void {
-  revalidatePath(`/${locale}/admin/hero`);
-  if (slideId) {
-    revalidatePath(`/${locale}/admin/hero/${slideId}`);
-  }
-  for (const loc of ["hy", "en", "ru"] as const) {
-    revalidatePath(`/${loc}`);
-  }
-  updateTag(CACHE_TAGS.hero);
 }
 
 /** Creates a hero slide from the admin modal (fields + optional image). */
@@ -90,10 +76,17 @@ export async function createHeroSlideAction(
 
   try {
     await withTransaction(async (tx) => {
+      const [last] = await tx
+        .select({ sortOrder: heroSlides.sortOrder })
+        .from(heroSlides)
+        .orderBy(desc(heroSlides.sortOrder))
+        .limit(1);
+      const sortOrder = (last?.sortOrder ?? -1) + 1;
+
       await tx.insert(heroSlides).values({
         id,
         translations,
-        sortOrder: 0,
+        sortOrder,
         isActive: true,
       });
 
@@ -106,18 +99,15 @@ export async function createHeroSlideAction(
         afterDiff: {
           title: data.title,
           isActive: true,
-          sortOrder: 0,
+          sortOrder,
         },
         correlationId: createId(),
       });
     });
 
-    const image = formData.get("image");
-    if (image instanceof File && image.size > 0) {
-      const mediaResult = await persistHeroImage(id, image);
-      if (mediaResult.error) {
-        return err("VALIDATION_ERROR", mediaResult.error);
-      }
+    const mediaError = await applyHeroSlideMediaFromForm(id, formData);
+    if (mediaError) {
+      return err("VALIDATION_ERROR", mediaError);
     }
 
     revalidateHero(locale, id);
@@ -157,7 +147,7 @@ export async function updateHeroSlideAction(
         throw new Error("NOT_FOUND");
       }
 
-      const translations = buildTranslations(data, row.translations);
+      const translations = buildTranslations(data);
       const ruleError = validateHeroTranslations(translations);
       if (ruleError) {
         throw new Error(`RULE:${ruleError}`);
@@ -192,16 +182,9 @@ export async function updateHeroSlideAction(
       return row;
     });
 
-    if (formData.get("removeImage") === "1") {
-      await removeHeroImage(slideId);
-    }
-
-    const image = formData.get("image");
-    if (image instanceof File && image.size > 0) {
-      const mediaResult = await persistHeroImage(slideId, image);
-      if (mediaResult.error) {
-        return err("VALIDATION_ERROR", mediaResult.error);
-      }
+    const mediaError = await applyHeroSlideMediaFromForm(slideId, formData);
+    if (mediaError) {
+      return err("VALIDATION_ERROR", mediaError);
     }
 
     revalidateHero(locale, existing.id);

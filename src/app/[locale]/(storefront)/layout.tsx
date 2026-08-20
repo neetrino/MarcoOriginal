@@ -35,7 +35,7 @@ export default async function StorefrontLayout({
   );
 
   return (
-    <div className="storefront-shell flex min-h-dvh flex-1 flex-col bg-gray-50">
+    <div className="storefront-shell flex min-h-dvh flex-1 flex-col bg-white">
       <SiteHeader
         locale={locale}
         currency={currency}

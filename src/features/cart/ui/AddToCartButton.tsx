@@ -13,6 +13,7 @@ type AddToCartButtonProps = {
   label: string;
   disabled?: boolean;
   className?: string;
+  iconClassName?: string;
   size?: "sm" | "md";
   imageUrl?: string | null;
 };
@@ -22,6 +23,7 @@ export function AddToCartButton({
   label,
   disabled = false,
   className = "",
+  iconClassName,
   size = "md",
   imageUrl = null,
 }: AddToCartButtonProps) {
@@ -62,7 +64,9 @@ export function AddToCartButton({
     >
       <ShoppingCart
         className={`${iconClass} ${
-          justAdded ? "fill-gray-900 text-gray-900" : "text-gray-700"
+          justAdded
+            ? `fill-current ${iconClassName ?? "text-gray-900"}`
+            : (iconClassName ?? "text-gray-700")
         }`}
         aria-hidden
       />

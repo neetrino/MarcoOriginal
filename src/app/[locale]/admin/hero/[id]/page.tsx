@@ -6,15 +6,15 @@ type AdminHeroDetailPageProps = {
   params: Promise<{ locale: string; id: string }>;
 };
 
-/** Edit UI moved to the hero list modal. */
+/** Hero tile editor lives on the layout page. */
 export default async function AdminHeroDetailPage({
   params,
 }: AdminHeroDetailPageProps) {
-  const { locale, id } = await params;
+  const { locale } = await params;
   if (!isLocale(locale)) {
     redirect("/");
   }
 
-  redirect(`/${locale}/admin/hero?edit=${id}`);
+  redirect(`/${locale}/admin/hero`);
 }
 

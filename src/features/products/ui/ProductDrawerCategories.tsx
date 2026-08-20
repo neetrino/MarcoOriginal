@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-import { useId, useState, useTransition } from "react";
+import { ChevronDown, Search } from "lucide-react";
+import { useId, useMemo, useState, useTransition } from "react";
 
 import {
   ADMIN_INPUT,
@@ -11,11 +11,24 @@ import { createCategoryAction } from "@/features/categories/actions";
 import { slugifyCategoryTitle } from "@/features/categories/domain/slugify";
 import type { AdminCategoryOption } from "@/features/products/application/list-admin-products";
 
+type CategoryCopy = {
+  label: string;
+  placeholder: string;
+  empty: string;
+  add: string;
+  titleLabel: string;
+  titlePlaceholder: string;
+  addSubmit: string;
+  adding: string;
+  cancel: string;
+};
+
 type ProductDrawerCategoriesProps = {
   locale: string;
   categories: AdminCategoryOption[];
   selectedIds: string[];
   disabled: boolean;
+  copy: CategoryCopy;
   onCategoriesChange: (categories: AdminCategoryOption[]) => void;
   onSelectedChange: (ids: string[]) => void;
 };
@@ -25,11 +38,13 @@ export function ProductDrawerCategories({
   categories,
   selectedIds,
   disabled,
+  copy,
   onCategoriesChange,
   onSelectedChange,
 }: ProductDrawerCategoriesProps) {
   const listId = useId();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,10 +53,13 @@ export function ProductDrawerCategories({
   const selectedTitles = categories
     .filter((category) => selectedIds.includes(category.id))
     .map((category) => category.title);
-  const triggerLabel =
-    selectedTitles.length === 0
-      ? "Select categories"
-      : selectedTitles.join(", ");
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return categories;
+    return categories.filter((category) =>
+      category.title.toLowerCase().includes(needle),
+    );
+  }, [categories, query]);
 
   function toggleCategory(id: string): void {
     if (selectedIds.includes(id)) {
@@ -83,30 +101,42 @@ export function ProductDrawerCategories({
 
   return (
     <div>
-      <span className={ADMIN_LABEL}>Categories</span>
+      <span className={ADMIN_LABEL}>{copy.label}</span>
       <div className={`relative mt-1 ${open ? "z-50" : "z-0"}`}>
-        <button
-          type="button"
-          disabled={disabled || isPending}
-          aria-expanded={open}
-          aria-controls={listId}
-          onClick={() => setOpen((value) => !value)}
-          className={`${ADMIN_INPUT} flex items-center justify-between gap-2 pr-3 text-left disabled:opacity-50`}
-        >
-          <span
-            className={`min-w-0 flex-1 truncate ${
-              selectedTitles.length === 0 ? "text-gray-400" : "text-gray-900"
-            }`}
-          >
-            {triggerLabel}
-          </span>
-          <ChevronDown
-            className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              open ? "rotate-180" : ""
-            }`}
-            aria-hidden
+        <div className={`${ADMIN_INPUT} flex items-center gap-2 pr-3`}>
+          <Search className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
+          <input
+            value={query}
+            disabled={disabled || isPending}
+            placeholder={
+              selectedTitles.length > 0
+                ? selectedTitles.join(", ")
+                : copy.placeholder
+            }
+            aria-expanded={open}
+            aria-controls={listId}
+            className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400"
+            onFocus={() => setOpen(true)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setOpen(true);
+            }}
           />
-        </button>
+          <button
+            type="button"
+            disabled={disabled || isPending}
+            aria-label={copy.label}
+            className="shrink-0 text-gray-400"
+            onClick={() => setOpen((value) => !value)}
+          >
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                open ? "rotate-180" : ""
+              }`}
+              aria-hidden
+            />
+          </button>
+        </div>
 
         <div
           className={`absolute top-[calc(100%+0.5rem)] left-0 z-[100] grid w-full transition-[grid-template-rows,opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -121,12 +151,12 @@ export function ProductDrawerCategories({
               id={listId}
               className="max-h-56 overflow-y-auto rounded-2xl border border-gray-100 bg-white py-2"
             >
-              {categories.length === 0 ? (
+              {filtered.length === 0 ? (
                 <p className="px-4 py-2.5 text-sm text-gray-500">
-                  No categories yet.
+                  {copy.empty}
                 </p>
               ) : (
-                categories.map((category) => {
+                filtered.map((category) => {
                   const selected = selectedIds.includes(category.id);
                   return (
                     <button
@@ -177,7 +207,7 @@ export function ProductDrawerCategories({
           onClick={() => setShowAdd((value) => !value)}
           className="inline-flex items-center rounded-xl border border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50"
         >
-          + Add category
+          {copy.add}
         </button>
       </div>
 
@@ -185,12 +215,12 @@ export function ProductDrawerCategories({
         <div className="mt-3 space-y-2 rounded-xl border border-gray-200 bg-gray-50 p-3">
           <label className="block">
             <span className={ADMIN_LABEL}>
-              Category title <span className="text-red-600">*</span>
+              {copy.titleLabel} <span className="text-red-600">*</span>
             </span>
             <input
               value={newTitle}
               onChange={(event) => setNewTitle(event.target.value)}
-              placeholder="Enter category title"
+              placeholder={copy.titlePlaceholder}
               className={ADMIN_INPUT}
               disabled={disabled || isPending}
             />
@@ -202,7 +232,7 @@ export function ProductDrawerCategories({
               onClick={createCategory}
               className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
             >
-              {isPending ? "Adding…" : "Add"}
+              {isPending ? copy.adding : copy.addSubmit}
             </button>
             <button
               type="button"
@@ -214,7 +244,7 @@ export function ProductDrawerCategories({
               }}
               className="text-sm font-medium text-gray-600 hover:text-gray-900"
             >
-              Cancel
+              {copy.cancel}
             </button>
           </div>
           {error ? <p className="text-sm text-red-700">{error}</p> : null}

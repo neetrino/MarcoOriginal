@@ -2,9 +2,9 @@
 
 **Database.** PostgreSQL (Neon)
 **ORM/migrations.** Drizzle ORM / Drizzle Kit
-**Կարգավիճակ.** Canonical 25-table schema migrated; idempotent seed available (`pnpm db:seed`)
-**Canonical table count.** 25
-**Վերջին թարմացում.** 2026-07-18
+**Կարգավիճակ.** Canonical 29-table schema migrated; idempotent seed available (`pnpm db:seed`)
+**Canonical table count.** 29
+**Վերջին թարմացում.** 2026-08-20
 
 ## 1. Սխեմայի նպատակը
 
@@ -29,7 +29,7 @@
 - Financial, stock և audit records-ը hard delete չեն ընդունում։
 - Flexible JSONB-ը միշտ Zod schema/version ունի և business-critical relational կապերը չի փոխարինում։
 
-## 3. Canonical 25-table inventory
+## 3. Canonical 29-table inventory
 
 | # | Table | Domain | Նշանակություն |
 |---:|---|---|---|
@@ -40,29 +40,34 @@
 | 5 | `store_settings` | System | Typed public store configuration |
 | 6 | `products` | Catalog | Product, translations, price, current stock |
 | 7 | `categories` | Catalog | Hierarchy և translations |
-| 8 | `product_categories` | Catalog | Product/category many-to-many կապ |
-| 9 | `stock_movements` | Inventory | Immutable stock ledger |
-| 10 | `hero_slides` | Content | Hero configuration և translations |
-| 11 | `blog_posts` | Content | Blog content, translations և tags |
-| 12 | `carts` | Commerce | Guest/customer cart identity/lifecycle |
-| 13 | `cart_items` | Commerce | Cart product quantities |
-| 14 | `wishlist_items` | Commerce | Customer wishlist entries |
-| 15 | `promotions` | Pricing | Coupons և automatic discounts մեկ rule model-ում |
-| 16 | `promotion_users` | Pricing | User-restricted promotion allowlist |
-| 17 | `delivery_rules` | Fulfillment | Location-based delivery pricing |
-| 18 | `orders` | Orders | Order, address/money/promotion snapshots, idempotency |
-| 19 | `order_items` | Orders | Immutable purchased-item snapshots |
-| 20 | `order_events` | Orders | Status, notes և payment provider events |
-| 21 | `payments` | Payments | Payment attempts/current provider state |
-| 22 | `reviews` | Engagement | Verified-purchase reviews/moderation |
-| 23 | `contact_messages` | Support | Contact inbox |
-| 24 | `audit_logs` | Security | Immutable admin/security audit |
-| 25 | `outbox_events` | Reliability | Reliable post-commit email/provider/cache work |
+| 8 | `brands` | Catalog | Brand title, unique SKU, translations, logo |
+| 9 | `attributes` | Catalog | Global attribute names (color, size, material) |
+| 10 | `attribute_values` | Catalog | Color swatches and image swatches per attribute |
+| 11 | `product_categories` | Catalog | Product/category many-to-many կապ |
+| 12 | `stock_movements` | Inventory | Immutable stock ledger |
+| 13 | `hero_slides` | Content | Hero configuration և translations |
+| 14 | `blog_posts` | Content | Blog content, translations և tags |
+| 15 | `reels` | Content | Homepage reel videos, titles և counters |
+| 16 | `carts` | Commerce | Guest/customer cart identity/lifecycle |
+| 17 | `cart_items` | Commerce | Cart product quantities |
+| 18 | `wishlist_items` | Commerce | Customer wishlist entries |
+| 19 | `promotions` | Pricing | Coupons և automatic discounts մեկ rule model-ում |
+| 20 | `promotion_users` | Pricing | User-restricted promotion allowlist |
+| 21 | `delivery_rules` | Fulfillment | Location-based delivery pricing |
+| 22 | `orders` | Orders | Order, address/money/promotion snapshots, idempotency |
+| 23 | `order_items` | Orders | Immutable purchased-item snapshots |
+| 24 | `order_events` | Orders | Status, notes և payment provider events |
+| 25 | `payments` | Payments | Payment attempts/current provider state |
+| 26 | `reviews` | Engagement | Verified-purchase reviews/moderation |
+| 27 | `contact_messages` | Support | Contact inbox |
+| 28 | `audit_logs` | Security | Immutable admin/security audit |
+| 29 | `outbox_events` | Reliability | Reliable post-commit email/provider/cache work |
 
 ### Count assumptions
 
 - Login-ը email/password է։ OAuth ավելացնելիս կարող է ավելանալ `accounts` table։
 - Product variants-ը launch scope-ում table չունի։ Variants ավելացնելիս առանձին schema migration է պահանջվում։
+- Catalog `attributes` / `attribute_values`-ը global swatch dictionary են (գույն/նկար), ոչ product SKU variants։
 - COD և online payment attempts-ը երկուսն էլ տեղավորվում են `payments`-ում։
 - Verification/reset tokens-ը PostgreSQL table չեն. դրանք Upstash Redis-ում hashed, expiring, atomic single-use records են։
 
@@ -113,16 +118,22 @@ Entity ownership-ը պահվում է typed nullable FKs-ով՝
 
 - `product_id`
 - `category_id`
+- `brand_id`
 - `hero_slide_id`
 - `blog_post_id`
+- `reel_id`
+- `attribute_value_id`
 
 `CHECK` constraint-ը պահանջում է՝ ready entity media-ի համար ճիշտ մեկ owner, pending upload-ի համար owner-ի ժամանակավոր բացակայություն, branding asset-ի համար explicit `purpose`։ Generic `owner_type + owner_id` polymorphic կապ չի օգտագործվում, որպեսզի foreign key protection-ը չկորչի։
 
 Partial unique constraints՝
 
 - մեկ primary media per product,
+- մեկ primary media per brand,
 - մեկ desktop և մեկ mobile media role per hero slide,
-- մեկ cover media per blog post/category՝ ըստ role policy-ի։
+- մեկ cover media per blog post/category՝ ըստ role policy-ի,
+- մեկ `REEL_VIDEO` media per reel,
+- մեկ image per attribute IMAGE value։
 
 Full CDN URL չի պահվում. URL-ը կառուցվում է config-ից։
 
@@ -144,7 +155,7 @@ Typed key/value model՝ store identity, public contacts/address, locales/currenc
 | Pricing | base/compare-at AMD integer amounts, non-negative checks |
 | Inventory | `stock_on_hand`, low-stock threshold, optional optimistic version; non-negative առանց backorder approval-ի |
 | Lifecycle | draft/active/archived, featured/upcoming, timestamps/deleted_at |
-| Presentation | badge label translations/style/position |
+| Presentation | badge label translations/style/position; sales class (retail/wholesale); warranty years (0–3); tags JSONB (text/percent + optional card color) |
 
 Translation JSON schema-ն թույլ է տալիս partial locales (`DEC-017`)։ Publish-ին պարտադիր է առնվազն մեկ լրիվ locale object; բացակա locale-ը այդ storefront լեզվում չի ցուցադրվում։ Fixed locale slug uniqueness-ը enforce է արվում expression unique indexes-ով միայն առկա locale keys-ի համար, օրինակ `translations->'hy'->>'slug'`։
 
@@ -158,11 +169,35 @@ Self-referencing `parent_id`, `translations JSONB`, sort order, active/archive s
 - Self/descendant parent արգելքը application recursive check + transaction guard է։
 - Children/products ունեցող category-ն reassign կամ archive է արվում։
 
-### 6.3 `product_categories`
+### 6.3 `brands`
+
+Brand identity for the catalog: unique SKU, `translations JSONB` (title/slug), sort order և timestamps/`deleted_at`։ Logo-ն resolve է լինում `media_assets.brand_id` + primary role-ով։
+
+- SKU-ն generate է լինում title-ից և unique է ամբողջ table-ում։
+- Product-brand կապը այս table-ում չէ. առանձին relation կավելացվի երբ products-ին bind արվի։
+
+### 6.4 `attributes`
+
+Global catalog attributes (Color, Size, Material)։ Unique `key` generate է լինում անունից (lowercase, առանց բացատների), `translations JSONB` (title/slug), sort order և timestamps/`deleted_at`։
+
+- Key-ը unique է ամբողջ table-ում, ներառյալ soft-deleted rows։
+- Product bind-ը այս table-ում չէ. առանձին relation կավելացվի երբ products-ին կապվի։
+
+### 6.5 `attribute_values`
+
+Per-attribute named values with optional color/image swatches, sort order և timestamps։
+
+- `translations JSONB` պահում է value title/slug բոլոր locale-ներում։
+- Optional `color_hex` (`#RRGGBB`)։ Unique `(attribute_id, color_hex)` երբ գույն կա։
+- Optional image-ը resolve է լինում `media_assets.attribute_value_id` + primary role-ով։
+- `kind` (`TEXT`/`COLOR`/`IMAGE`) նշում է հիմնական swatch տեսակը։
+- Attribute delete-ը նախ հանում է media/values, հետո soft-delete է անում parent-ը։
+
+### 6.6 `product_categories`
 
 Composite unique `(product_id, category_id)`, optional `is_primary`, sort metadata և reverse lookup indexes։ Պահվում է, որովհետև product-ը կարող է ունենալ մի քանի category։
 
-### 6.4 `stock_movements`
+### 6.7 `stock_movements`
 
 Immutable ledger՝ product, signed delta, reason (`ORDER`,`CANCEL`,`RETURN`,`ADMIN_ADJUSTMENT`,`IMPORT`...), optional order/actor, resulting balance, correlation ID և timestamp։
 
@@ -179,6 +214,10 @@ Direct unexplained stock overwrite չի թույլատրվում։
 Author, status, publish timestamp, `translations JSONB` (title/slug/excerpt/sanitized content/SEO), `tags JSONB`/validated string array և timestamps/archive state։ Locale slug expression indexes-ը unique են։ Cover-ը `media_assets` relation է։
 
 Tags-ը standalone taxonomy չէ initial scope-ում, հետևաբար առանձին tag tables պետք չեն։
+
+### 7.3 `reels`
+
+Admin-uploaded homepage videos։ `translations JSONB` (optional per-locale title), active flag, sort order, non-negative like/view counters և timestamps։ Video-ն resolve է լինում `media_assets.reel_id + REEL_VIDEO` role-ով։
 
 ## 8. Cart և wishlist
 
@@ -342,7 +381,7 @@ Actual indexes-ը validate են արվում representative data-ի `EXPLAIN (AN
 | `audit_logs` / `outbox_events` | Immutable evidence vs mutable retry queue |
 | `users` / `addresses` | Multiple saved addresses և independent defaults |
 
-## 17. Optional future tables — canonical 25-ի մեջ չեն
+## 17. Optional future tables — canonical 29-ի մեջ չեն
 
 - `accounts` — OAuth/social login ավելացնելիս։
 - Variant/inventory tables — իրական product variants ավելացնելիս։
@@ -353,7 +392,7 @@ Actual indexes-ը validate են արվում representative data-ի `EXPLAIN (AN
 
 ## 18. Migration և seed acceptance criteria
 
-- [x] Fresh migration-ը ստեղծում է ճիշտ 25 application table։
+- [x] Fresh migration-ը ստեղծում է ճիշտ 29 application table։
 - [x] Յուրաքանչյուր FK ունի explicit delete behavior։
 - [ ] JSONB schemas/versioning և locale expression indexes tested են։
 - [ ] Money/range/exactly-one-owner/target constraints tested են։

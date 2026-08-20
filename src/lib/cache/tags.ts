@@ -12,6 +12,8 @@ export const CACHE_TAGS = {
   blogPostSlug: (locale: string, slug: string) =>
     `blog-slug:${locale}:${slug}`,
   settings: "settings",
+  reels: "reels",
+  brands: "brands",
 } as const;
 
 /** Default revalidation window for public catalog/content caches (seconds). */

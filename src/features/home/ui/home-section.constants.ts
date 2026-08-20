@@ -1,0 +1,47 @@
+/** Home section visual tokens — aligned with marco.am / Figma storefront. */
+
+export const HOME_TITLE_FONT_SIZE_CLAMP = "clamp(22px, 3.6vw, 40px)";
+export const HOME_TITLE_LINE_HEIGHT = "1.02";
+export const HOME_TITLE_LETTER_SPACING_PX = -0.6;
+export const HOME_TITLE_TEXT_TO_BAR_GAP_PX = 8;
+export const HOME_TITLE_BAR_THICKNESS_PX = 4;
+export const HOME_TITLE_BAR_STUB_PERCENT = 28;
+export const HOME_TITLE_TO_RAIL_GAP_PX = 42;
+export const HOME_TITLE_INSET_LEFT_PX = 16;
+
+export const HOME_NAV_BUTTON_WIDTH_PX = 30;
+export const HOME_NAV_BUTTON_HEIGHT_PX = 24;
+export const HOME_NAV_BUTTON_WIDTH_MOBILE_PX = 44;
+export const HOME_NAV_BUTTON_HEIGHT_MOBILE_PX = 34;
+
+export const HOME_DOT_SIZE_PX = 8;
+export const HOME_DOT_GAP_PX = 10;
+export const HOME_DOT_GAP_MOBILE_PX = 6;
+
+export const HOME_RAIL_TO_DOTS_GAP_PX = 25;
+export const HOME_DOTS_TO_CTA_GAP_PX = 28;
+
+export const HOME_PRODUCT_CARD_BG = "#f6f6f6";
+export const HOME_PRODUCT_CARD_RADIUS_PX = 34;
+export const HOME_PRODUCT_CARD_HEIGHT_PX = 400;
+export const HOME_PRODUCT_CARD_GAP_PX = 24;
+export const HOME_PRODUCT_DESKTOP_PAGE_SIZE = 4;
+export const HOME_PRODUCT_MOBILE_PAGE_SIZE = 2;
+
+export const HOME_CART_BUTTON_SIZE_PX = 48;
+export const HOME_CART_CUTOUT_SIZE_PX = 96;
+
+export const HOME_BRANDS_PAGE_SIZE = 4;
+export const HOME_BRANDS_CARD_MIN_HEIGHT_PX = 152;
+export const HOME_BRANDS_CARD_RADIUS_PX = 20;
+export const HOME_BRANDS_CARD_GAP_PX = 12;
+export const HOME_BRANDS_LOGO_HEIGHT_PX = 96;
+export const HOME_BRANDS_TITLE_TO_RAIL_GAP_PX = 56;
+export const HOME_BRANDS_AFTER_PRODUCTS_GAP_PX = 54;
+
+export const HOME_REELS_CIRCLE_DESKTOP_PX = 128;
+export const HOME_REELS_CIRCLE_MOBILE_PX = 88;
+export const HOME_REELS_TITLE_INSET_DESKTOP_PX = 40;
+export const HOME_REELS_TITLE_TO_RAIL_GAP_PX = 32;
+export const HOME_REELS_BAR_EXTEND_RIGHT_PX = 19;
+export const HOME_REELS_LABEL_FONT_SIZE_PX = 14;

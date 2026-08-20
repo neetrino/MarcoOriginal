@@ -54,8 +54,8 @@ export function HeroSlideControls({
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <div className="flex items-center gap-1">
+    <div className="inline-flex flex-col items-center gap-1">
+      <div className="inline-flex items-center justify-center gap-1">
         <button
           type="button"
           disabled={isPending}

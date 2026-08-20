@@ -1,9 +1,8 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import Image from "next/image";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { SideSheet } from "@/components/ui/SideSheet";
 import {
@@ -14,30 +13,57 @@ import {
   createCategoryFromDrawerAction,
   updateCategoryFromDrawerAction,
 } from "@/features/categories/actions";
-import { slugifyCategoryTitle } from "@/features/categories/domain/slugify";
 import type { AdminCategoryListItem } from "@/features/categories/application/list-admin-categories";
+import {
+  filledTranslationsFromDrafts,
+  translationsFromDrafts,
+} from "@/features/categories/domain/category-translations";
+import { CategoryDrawerImageField } from "@/features/categories/ui/CategoryDrawerImageField";
+import { CategoryLocaleTabs } from "@/features/categories/ui/CategoryLocaleTabs";
+import { CategoryParentField } from "@/features/categories/ui/CategoryParentField";
+import {
+  draftsFromCategory,
+  emptyCategoryDrafts,
+  withDraftTitle,
+} from "@/features/categories/ui/category-drawer-drafts";
+import { defaultLocale, isLocale, localeLabels, type Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
+
+type CategoriesCopy = Dictionary["admin"]["categories"];
 
 type AddCategoryDrawerProps = {
   locale: string;
   open: boolean;
   onClose: () => void;
   categories: AdminCategoryListItem[];
+  copy: CategoriesCopy;
   category?: AdminCategoryListItem | null;
+  requireParent?: boolean;
+  defaultParentId?: string;
 };
+
+function previewFromFile(current: string | null, file: File | null): string | null {
+  if (current?.startsWith("blob:")) URL.revokeObjectURL(current);
+  return file ? URL.createObjectURL(file) : null;
+}
 
 export function AddCategoryDrawer({
   locale,
   open,
   onClose,
   categories,
+  copy,
   category = null,
+  requireParent = false,
+  defaultParentId = "",
 }: AddCategoryDrawerProps) {
   const router = useRouter();
   const isEdit = category != null;
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugTouched, setSlugTouched] = useState(false);
+  const showParent = isEdit || requireParent;
+  const [activeLocale, setActiveLocale] = useState<Locale>(
+    isLocale(locale) ? locale : defaultLocale,
+  );
+  const [drafts, setDrafts] = useState(emptyCategoryDrafts);
   const [parentId, setParentId] = useState("");
   const [status, setStatus] = useState<"ACTIVE" | "ARCHIVED">("ACTIVE");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -47,246 +73,195 @@ export function AddCategoryDrawer({
   const [isPending, startTransition] = useTransition();
   const [prevOpen, setPrevOpen] = useState(open);
   const [prevCategory, setPrevCategory] = useState(category);
+  const [prevParent, setPrevParent] = useState(defaultParentId);
 
-  if (open !== prevOpen || category !== prevCategory) {
+  if (
+    open !== prevOpen ||
+    category !== prevCategory ||
+    defaultParentId !== prevParent
+  ) {
     setPrevOpen(open);
     setPrevCategory(category);
+    setPrevParent(defaultParentId);
     if (open) {
-      if (category) {
-        setTitle(category.title);
-        setSlug(category.slug);
-        setSlugTouched(true);
-        setParentId(category.parentId ?? "");
-        setStatus(category.status === "ARCHIVED" ? "ARCHIVED" : "ACTIVE");
-        setImageFile(null);
-        setImagePreview(category.imageUrl);
-        setRemoveExistingImage(false);
-        setError(null);
-      } else {
-        setTitle("");
-        setSlug("");
-        setSlugTouched(false);
-        setParentId("");
-        setStatus("ACTIVE");
-        setImageFile(null);
-        setImagePreview(null);
-        setRemoveExistingImage(false);
-        setError(null);
-      }
+      setActiveLocale(isLocale(locale) ? locale : defaultLocale);
+      setDrafts(draftsFromCategory(category));
+      setParentId(category?.parentId ?? defaultParentId);
+      setStatus(category?.status === "ARCHIVED" ? "ARCHIVED" : "ACTIVE");
+      setImageFile(null);
+      setImagePreview(category?.imageUrl ?? null);
+      setRemoveExistingImage(false);
+      setError(null);
     }
   }
 
-  const displaySlug = slugTouched ? slug : slugifyCategoryTitle(title) || "---";
-  const parentOptions = categories.filter((item) => item.id !== category?.id);
+  const draft = drafts[activeLocale];
+  const drawerTitle = isEdit
+    ? copy.drawerEdit
+    : requireParent
+      ? copy.drawerAddSubcategory
+      : copy.drawerAddCategory;
+
+  function submitDrawer(): void {
+    const translations = isEdit
+      ? filledTranslationsFromDrafts(drafts)
+      : translationsFromDrafts(drafts);
+    if (!translations || Object.keys(translations).length === 0) return;
+    if (requireParent && !parentId) {
+      setError(copy.parentRequired);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set("translations", JSON.stringify(translations));
+    formData.set("parentId", parentId);
+    formData.set("status", status);
+    if (imageFile) formData.set("image", imageFile);
+    if (removeExistingImage) formData.set("removeImage", "1");
+
+    startTransition(async () => {
+      setError(null);
+      const result =
+        isEdit && category
+          ? await updateCategoryFromDrawerAction(locale, category.id, formData)
+          : await createCategoryFromDrawerAction(locale, formData);
+      if (!result.ok) {
+        setError(result.error.message);
+        return;
+      }
+      onClose();
+      router.refresh();
+    });
+  }
 
   return (
     <SideSheet
       open={open}
       onClose={onClose}
-      ariaLabel={isEdit ? "Edit Category" : "Add Category"}
+      ariaLabel={drawerTitle}
       panelClassName="w-full max-w-lg"
     >
-      <div className="border-b border-gray-200 px-5 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">
-          {isEdit ? "Edit Category" : "Add Category"}
-        </h2>
+      <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+        <h2 className="text-lg font-semibold text-gray-900">{drawerTitle}</h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-sm text-gray-500 hover:text-gray-800"
+        >
+          {copy.close}
+        </button>
       </div>
 
-        <form
-          className="flex min-h-0 flex-1 flex-col"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const nextSlug =
-              slugTouched && slug.trim()
-                ? slug.trim()
-                : slugifyCategoryTitle(title);
+      <form
+        className="flex min-h-0 flex-1 flex-col"
+        onSubmit={(event) => {
+          event.preventDefault();
+          submitDrawer();
+        }}
+      >
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+          <CategoryLocaleTabs
+            value={activeLocale}
+            disabled={isPending}
+            ariaLabel={copy.localeGroup}
+            onChange={setActiveLocale}
+          />
 
-            const formData = new FormData();
-            formData.set("title", title.trim());
-            formData.set("slug", nextSlug);
-            formData.set("parentId", parentId);
-            formData.set("status", status);
-            if (imageFile) {
-              formData.set("image", imageFile);
-            }
-            if (removeExistingImage) {
-              formData.set("removeImage", "1");
-            }
-
-            startTransition(async () => {
-              setError(null);
-              const result =
-                isEdit && category
-                  ? await updateCategoryFromDrawerAction(
-                      locale,
-                      category.id,
-                      formData,
-                    )
-                  : await createCategoryFromDrawerAction(locale, formData);
-
-              if (!result.ok) {
-                setError(result.error.message);
-                return;
+          <label className="block">
+            <span className={ADMIN_LABEL}>
+              {copy.nameLabel} ({localeLabels[activeLocale]}){" "}
+              <span className="text-red-600">*</span>
+            </span>
+            <input
+              required
+              value={draft.title}
+              onChange={(event) =>
+                setDrafts((current) =>
+                  withDraftTitle(current, activeLocale, event.target.value, isEdit),
+                )
               }
+              placeholder={copy.namePlaceholder}
+              className={ADMIN_INPUT}
+              disabled={isPending}
+            />
+          </label>
 
-              onClose();
-              router.refresh();
-            });
-          }}
-        >
-          <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-            <label className="block">
-              <span className={ADMIN_LABEL}>
-                Category Title <span className="text-red-600">*</span>
-              </span>
-              <input
-                required
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Enter category title"
-                className={ADMIN_INPUT}
-                disabled={isPending}
-              />
-            </label>
+          {showParent ? (
+            <CategoryParentField
+              copy={copy}
+              categories={categories}
+              excludeId={category?.id}
+              value={parentId}
+              disabled={isPending}
+              required={requireParent && !isEdit}
+              onChange={setParentId}
+            />
+          ) : null}
 
-            <label className="block">
-              <span className={ADMIN_LABEL}>Slug</span>
-              <input
-                value={displaySlug === "---" ? "" : displaySlug}
-                onChange={(event) => {
-                  setSlugTouched(true);
-                  setSlug(event.target.value);
-                }}
-                placeholder="---"
-                className={ADMIN_INPUT}
-                disabled={isPending}
-              />
-              <span className="mt-1 block text-xs text-gray-500">
-                Generated automatically from the title and used on /products.
-              </span>
-            </label>
-
+          {isEdit ? (
             <div>
-              <span className={ADMIN_LABEL}>Parent Category</span>
+              <span className={ADMIN_LABEL}>{copy.status}</span>
               <SelectDropdown
-                ariaLabel="Parent Category"
-                value={parentId}
-                allLabel="None (Root Category)"
-                options={parentOptions.map((item) => ({
-                  label: item.title,
-                  value: item.id,
-                }))}
-                disabled={isPending}
-                deferChange={false}
-                className="mt-1"
-                onValueChange={setParentId}
-              />
-            </div>
-
-            <div>
-              <span className={ADMIN_LABEL}>Status</span>
-              <SelectDropdown
-                ariaLabel="Status"
+                ariaLabel={copy.status}
                 value={status}
                 options={[
-                  { label: "Published", value: "ACTIVE" },
-                  { label: "Archived", value: "ARCHIVED" },
+                  { label: copy.statusActive, value: "ACTIVE" },
+                  { label: copy.statusArchived, value: "ARCHIVED" },
                 ]}
                 disabled={isPending}
                 deferChange={false}
                 className="mt-1"
-                onValueChange={(next) =>
-                  setStatus(next as "ACTIVE" | "ARCHIVED")
-                }
+                onValueChange={(next) => {
+                  if (next === "ACTIVE" || next === "ARCHIVED") {
+                    setStatus(next);
+                  }
+                }}
               />
             </div>
+          ) : null}
 
-            <div>
-              <span className={ADMIN_LABEL}>Image</span>
-              <div className="mt-1 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center rounded-xl border border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  {imagePreview ? "Change Image" : "+ Upload Image"}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  className="hidden"
-                  disabled={isPending}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0] ?? null;
-                    event.target.value = "";
-                    setImagePreview((current) => {
-                      if (current?.startsWith("blob:")) {
-                        URL.revokeObjectURL(current);
-                      }
-                      return file ? URL.createObjectURL(file) : null;
-                    });
-                    setImageFile(file);
-                    setRemoveExistingImage(false);
-                  }}
-                />
-                {imagePreview ? (
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => {
-                      setImageFile(null);
-                      setImagePreview((current) => {
-                        if (current?.startsWith("blob:")) {
-                          URL.revokeObjectURL(current);
-                        }
-                        return null;
-                      });
-                      if (isEdit && category?.imageUrl) {
-                        setRemoveExistingImage(true);
-                      }
-                    }}
-                    className="text-sm font-medium text-gray-600 hover:text-red-600"
-                  >
-                    Remove
-                  </button>
-                ) : null}
-              </div>
-              {imagePreview ? (
-                <Image
-                  src={imagePreview}
-                  alt=""
-                  width={112}
-                  height={112}
-                  className="mt-3 h-28 w-28 rounded-xl border border-gray-200 object-cover"
-                  unoptimized={imagePreview.startsWith("blob:")}
-                />
-              ) : null}
-            </div>
+          <CategoryDrawerImageField
+            copy={copy}
+            imagePreview={imagePreview}
+            disabled={isPending}
+            onFileChange={(file) => {
+              setImagePreview((current) => previewFromFile(current, file));
+              setImageFile(file);
+              setRemoveExistingImage(false);
+            }}
+            onRemove={() => {
+              setImageFile(null);
+              setImagePreview((current) => previewFromFile(current, null));
+              if (isEdit && category?.imageUrl) setRemoveExistingImage(true);
+            }}
+          />
 
-            {error ? <p className="text-sm text-red-700">{error}</p> : null}
-          </div>
+          {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        </div>
 
-          <div className="flex items-center gap-4 border-t border-gray-200 px-5 py-4">
-            <Button type="submit" disabled={isPending || !title.trim()}>
-              {isPending
-                ? isEdit
-                  ? "Saving…"
-                  : "Creating…"
-                : isEdit
-                  ? "Save"
-                  : "Create Category"}
-            </Button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+        <div className="flex items-center gap-4 border-t border-gray-200 px-5 py-4">
+          <button
+            type="submit"
+            disabled={isPending || !draft.title.trim()}
+            className="rounded-xl bg-marco-yellow px-5 py-2.5 text-sm font-semibold text-marco-slate transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending
+              ? isEdit
+                ? copy.saving
+                : copy.creating
+              : isEdit
+                ? copy.submitSave
+                : copy.submitCreate}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            {copy.cancel}
+          </button>
+        </div>
+      </form>
     </SideSheet>
   );
 }

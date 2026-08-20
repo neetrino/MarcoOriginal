@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition, type FormEvent, type InvalidEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+
 import { SideSheet } from "@/components/ui/SideSheet";
-import {
-  ADMIN_INPUT,
-  ADMIN_LABEL,
-  ADMIN_TEXTAREA,
-} from "@/features/admin/ui/admin-form-classes";
 import type {
   AdminCategoryOption,
   AdminProductListItem,
@@ -17,11 +12,23 @@ import {
   createProductFromDrawerAction,
   updateProductFromDrawerAction,
 } from "@/features/products/application/upsert-product";
-import { ProductDrawerCategories } from "@/features/products/ui/ProductDrawerCategories";
+import { parseProductTags } from "@/features/products/domain/product-presentation";
+import { compareAtFromDiscountPercent } from "@/features/products/domain/product-discount";
 import {
-  ProductDrawerImages,
-  type ProductDraftImage,
-} from "@/features/products/ui/ProductDrawerImages";
+  parseProductSpecs,
+  slugifyProductTitle,
+} from "@/features/products/domain/product-specs";
+import { ProductDrawerBasicsTab } from "@/features/products/ui/ProductDrawerBasicsTab";
+import { ProductDrawerDescriptionTab } from "@/features/products/ui/ProductDrawerDescriptionTab";
+import { ProductDrawerHeader } from "@/features/products/ui/ProductDrawerHeader";
+import { ProductDrawerRestFields } from "@/features/products/ui/ProductDrawerRestFields";
+import {
+  ProductDrawerTabs,
+  type ProductDrawerTab,
+} from "@/features/products/ui/ProductDrawerTabs";
+import { useProductDrawerForm } from "@/features/products/ui/use-product-drawer-form";
+import { isLocale } from "@/lib/i18n/config";
+import { getDictionary, type Dictionary } from "@/lib/i18n/get-dictionary";
 
 type ProductDrawerProduct = Pick<
   AdminProductListItem,
@@ -36,6 +43,10 @@ type ProductDrawerProduct = Pick<
   | "status"
   | "categoryIds"
   | "images"
+  | "salesClass"
+  | "warrantyYears"
+  | "tags"
+  | "specifications"
 >;
 
 type ProductDrawerProps = {
@@ -46,16 +57,19 @@ type ProductDrawerProps = {
   categories: AdminCategoryOption[];
 };
 
-function imagesFromProduct(
-  product: ProductDrawerProduct | null,
-): ProductDraftImage[] {
-  if (!product) return [];
-  return product.images.map((image) => ({
-    key: image.id,
-    previewUrl: image.url,
-    isPrimary: image.isPrimary,
-    existingId: image.id,
-  }));
+function tabFromInvalidTarget(target: EventTarget | null): ProductDrawerTab | null {
+  if (!(target instanceof HTMLElement)) return null;
+  const tab = target.closest("[data-drawer-tab]")?.getAttribute("data-drawer-tab");
+  if (
+    tab === "basics" ||
+    tab === "description" ||
+    tab === "media" ||
+    tab === "catalog" ||
+    tab === "price"
+  ) {
+    return tab;
+  }
+  return null;
 }
 
 export function ProductDrawer({
@@ -63,298 +77,202 @@ export function ProductDrawer({
   open,
   onClose,
   product = null,
-  categories: initialCategories,
+  categories,
 }: ProductDrawerProps) {
-  const router = useRouter();
-  const isEdit = product != null;
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [images, setImages] = useState<ProductDraftImage[]>([]);
-  const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
-  const [categories, setCategories] =
-    useState<AdminCategoryOption[]>(initialCategories);
-  const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [priceAmount, setPriceAmount] = useState("");
-  const [compareAtAmount, setCompareAtAmount] = useState("");
-  const [sku, setSku] = useState("");
-  const [stockOnHand, setStockOnHand] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const [prevOpen, setPrevOpen] = useState(open);
-  const [prevProduct, setPrevProduct] = useState(product);
-  const [prevCategories, setPrevCategories] = useState(initialCategories);
-
-  if (
-    open !== prevOpen ||
-    product !== prevProduct ||
-    initialCategories !== prevCategories
-  ) {
-    setPrevOpen(open);
-    setPrevProduct(product);
-    setPrevCategories(initialCategories);
-    if (open) {
-      setCategories(initialCategories);
-      if (product) {
-        setTitle(product.title);
-        setSlug(product.slug);
-        setDescription(product.description);
-        setImages(imagesFromProduct(product));
-        setRemovedImageIds([]);
-        setCategoryIds(product.categoryIds);
-        setPriceAmount(String(product.priceAmount));
-        setCompareAtAmount(
-          product.compareAtAmount != null
-            ? String(product.compareAtAmount)
-            : "",
-        );
-        setSku(product.sku);
-        setStockOnHand(String(product.stockOnHand));
-        setError(null);
-      } else {
-        setTitle("");
-        setSlug("");
-        setDescription("");
-        setImages([]);
-        setRemovedImageIds([]);
-        setCategoryIds([]);
-        setPriceAmount("");
-        setCompareAtAmount("");
-        setSku("");
-        setStockOnHand("");
-        setError(null);
-      }
-    }
-  }
-
-  function handleImagesChange(next: ProductDraftImage[]): void {
-    const nextKeys = new Set(next.map((image) => image.key));
-    const removedExisting = images
-      .filter(
-        (image) =>
-          image.existingId &&
-          !nextKeys.has(image.key) &&
-          !removedImageIds.includes(image.existingId),
-      )
-      .map((image) => image.existingId as string);
-    if (removedExisting.length > 0) {
-      setRemovedImageIds((prev) => [...prev, ...removedExisting]);
-    }
-    setImages(next);
-  }
+  const copy = isLocale(locale)
+    ? getDictionary(locale).admin.productEditor
+    : getDictionary("hy").admin.productEditor;
+  const formKey = open ? (product?.id ?? "new") : "closed";
 
   return (
     <SideSheet
       open={open}
       onClose={onClose}
-      ariaLabel={isEdit ? "Edit product" : "Add new product"}
-      panelClassName="w-[min(100%,42rem)] sm:w-[40%]"
+      ariaLabel={copy.title}
+      panelClassName="w-[min(100%,80rem)]"
     >
-        <div className="border-b border-gray-200 px-5 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {isEdit ? "Edit product" : "Add new product"}
-          </h2>
-        </div>
-
-        <form
-          className="flex min-h-0 flex-1 flex-col"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const newImages = images.filter((image) => image.file);
-            const primaryImage = images.find((image) => image.isPrimary);
-            const primaryNewIndex = primaryImage?.file
-              ? newImages.findIndex((image) => image.key === primaryImage.key)
-              : null;
-
-            const payload = {
-              sku: sku.trim(),
-              title: title.trim(),
-              slug: slug.trim(),
-              description: description.trim() || undefined,
-              priceAmount: Number(priceAmount),
-              compareAtAmount: compareAtAmount.trim()
-                ? Number(compareAtAmount)
-                : null,
-              stockOnHand: Number(stockOnHand),
-              categoryIds,
-              status: (product?.status === "ACTIVE" ||
-              product?.status === "ARCHIVED"
-                ? product.status
-                : "DRAFT") as "DRAFT" | "ACTIVE" | "ARCHIVED",
-              primaryExistingId: primaryImage?.existingId ?? null,
-              primaryNewIndex:
-                primaryNewIndex != null && primaryNewIndex >= 0
-                  ? primaryNewIndex
-                  : null,
-              removeImageIds: removedImageIds,
-            };
-
-            const formData = new FormData();
-            formData.set("data", JSON.stringify(payload));
-            for (const image of newImages) {
-              if (image.file) formData.append("images", image.file);
-            }
-
-            startTransition(async () => {
-              setError(null);
-              const result =
-                isEdit && product
-                  ? await updateProductFromDrawerAction(
-                      locale,
-                      product.id,
-                      formData,
-                    )
-                  : await createProductFromDrawerAction(locale, formData);
-
-              if (!result.ok) {
-                setError(result.error.message);
-                return;
-              }
-
-              onClose();
-              router.refresh();
-            });
-          }}
-        >
-          <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label>
-                <span className={ADMIN_LABEL}>
-                  Title <span className="text-red-600">*</span>
-                </span>
-                <input
-                  required
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="Product title"
-                  className={ADMIN_INPUT}
-                  disabled={isPending}
-                />
-              </label>
-              <label>
-                <span className={ADMIN_LABEL}>
-                  Slug <span className="text-red-600">*</span>
-                </span>
-                <input
-                  required
-                  value={slug}
-                  onChange={(event) => setSlug(event.target.value)}
-                  placeholder="product-slug"
-                  className={ADMIN_INPUT}
-                  disabled={isPending}
-                />
-              </label>
-            </div>
-
-            <label className="block">
-              <span className={ADMIN_LABEL}>Description</span>
-              <textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Product description"
-                className={ADMIN_TEXTAREA}
-                disabled={isPending}
-              />
-            </label>
-
-            <ProductDrawerImages
-              images={images}
-              disabled={isPending}
-              onChange={handleImagesChange}
-            />
-
-            <ProductDrawerCategories
-              locale={locale}
-              categories={categories}
-              selectedIds={categoryIds}
-              disabled={isPending}
-              onCategoriesChange={setCategories}
-              onSelectedChange={setCategoryIds}
-            />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label>
-                <span className={ADMIN_LABEL}>
-                  Price <span className="text-red-600">*</span>
-                </span>
-                <input
-                  required
-                  min={0}
-                  type="number"
-                  value={priceAmount}
-                  onChange={(event) => setPriceAmount(event.target.value)}
-                  placeholder="AMD price"
-                  className={ADMIN_INPUT}
-                  disabled={isPending}
-                />
-              </label>
-              <label>
-                <span className={ADMIN_LABEL}>Compare at price</span>
-                <input
-                  min={0}
-                  type="number"
-                  value={compareAtAmount}
-                  onChange={(event) => setCompareAtAmount(event.target.value)}
-                  placeholder="Optional"
-                  className={ADMIN_INPUT}
-                  disabled={isPending}
-                />
-              </label>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label>
-                <span className={ADMIN_LABEL}>
-                  SKU <span className="text-red-600">*</span>
-                </span>
-                <input
-                  required
-                  value={sku}
-                  onChange={(event) => setSku(event.target.value)}
-                  placeholder="SKU"
-                  className={ADMIN_INPUT}
-                  disabled={isPending}
-                />
-              </label>
-              <label>
-                <span className={ADMIN_LABEL}>
-                  Quantity <span className="text-red-600">*</span>
-                </span>
-                <input
-                  required
-                  min={0}
-                  type="number"
-                  value={stockOnHand}
-                  onChange={(event) => setStockOnHand(event.target.value)}
-                  placeholder="Stock"
-                  className={ADMIN_INPUT}
-                  disabled={isPending}
-                />
-              </label>
-            </div>
-
-            {error ? <p className="text-sm text-red-700">{error}</p> : null}
-          </div>
-
-          <div className="sticky bottom-0 flex items-center gap-4 border-t border-gray-200 bg-white px-5 py-4">
-            <Button type="submit" disabled={isPending}>
-              {isPending
-                ? isEdit
-                  ? "Saving…"
-                  : "Creating…"
-                : isEdit
-                  ? "Save"
-                  : "Create"}
-            </Button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+      <ProductDrawerForm
+        key={formKey}
+        locale={locale}
+        product={product}
+        categories={categories}
+        copy={copy}
+        onClose={onClose}
+      />
     </SideSheet>
   );
+}
+
+function ProductDrawerForm({
+  locale,
+  product,
+  categories: initialCategories,
+  copy,
+  onClose,
+}: {
+  locale: string;
+  product: ProductDrawerProduct | null;
+  categories: AdminCategoryOption[];
+  copy: Dictionary["admin"]["productEditor"];
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const isEdit = product != null;
+  const form = useProductDrawerForm({
+    product,
+    initialCategories,
+  });
+  const [isPending, startTransition] = useTransition();
+
+  function handleInvalid(event: InvalidEvent<HTMLFormElement>): void {
+    const nextTab = tabFromInvalidTarget(event.target);
+    if (nextTab) form.setTab(nextTab);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    const newImages = form.images.filter((image) => image.file);
+    const primaryImage = form.images.find((image) => image.isPrimary);
+    const primaryNewIndex = primaryImage?.file
+      ? newImages.findIndex((image) => image.key === primaryImage.key)
+      : null;
+
+    const payload = {
+      sku: form.sku.trim(),
+      title: form.title.trim(),
+      slug: form.slug.trim() || slugifyProductTitle(form.title),
+      description: form.description,
+      specifications: parseProductSpecs(form.specifications),
+      priceAmount: Number(form.priceAmount),
+      compareAtAmount: compareAtFromDiscountPercent(
+        Number(form.priceAmount),
+        Number(form.discountPercent),
+      ),
+      categoryIds: form.categoryIds,
+      status: (product?.status === "ACTIVE" || product?.status === "ARCHIVED"
+        ? product.status
+        : "DRAFT") as "DRAFT" | "ACTIVE" | "ARCHIVED",
+      salesClass: form.salesClass,
+      warrantyYears: form.warrantyYears,
+      tags: parseProductTags(form.tags),
+      primaryExistingId: primaryImage?.existingId ?? null,
+      primaryNewIndex:
+        primaryNewIndex != null && primaryNewIndex >= 0
+          ? primaryNewIndex
+          : null,
+      removeImageIds: form.removedImageIds,
+    };
+
+    const formData = new FormData();
+    formData.set("data", JSON.stringify(payload));
+    for (const image of newImages) {
+      if (image.file) formData.append("images", image.file);
+    }
+
+    startTransition(async () => {
+      form.setError(null);
+      const result =
+        isEdit && product
+          ? await updateProductFromDrawerAction(locale, product.id, formData)
+          : await createProductFromDrawerAction(locale, formData);
+      if (!result.ok) {
+        form.setError(result.error.message);
+        return;
+      }
+      onClose();
+      router.refresh();
+    });
+  }
+
+  const submitLabel = isPending
+    ? isEdit
+      ? copy.saving
+      : copy.creating
+    : isEdit
+      ? copy.saveProduct
+      : copy.addProduct;
+
+  return (
+    <form
+      className="flex min-h-0 flex-1 flex-col"
+      onSubmit={handleSubmit}
+      onInvalid={handleInvalid}
+    >
+        <ProductDrawerHeader
+          editorLabel={copy.title}
+          title={form.title}
+          titlePlaceholder={copy.titlePlaceholder}
+          slug={form.slug}
+          slugPlaceholder={copy.slugPlaceholder}
+          cancelLabel={copy.cancel}
+          submitLabel={submitLabel}
+          disabled={isPending}
+          onTitleChange={form.handleTitleChange}
+          onCancel={onClose}
+        />
+
+        <div className="flex min-h-0 flex-1">
+          <ProductDrawerTabs
+            active={form.tab}
+            onChange={form.setTab}
+            labels={{
+              basics: copy.tabBasics,
+              description: copy.tabDescription,
+              media: copy.tabMedia,
+              catalog: copy.tabCatalog,
+              price: copy.tabPrice,
+            }}
+          />
+
+          <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/70 px-6 py-6">
+            <div hidden={form.tab !== "basics"} data-drawer-tab="basics">
+              <ProductDrawerBasicsTab
+                salesClass={form.salesClass}
+                warrantyYears={form.warrantyYears}
+                tags={form.tags}
+                disabled={isPending}
+                copy={copy}
+                onSalesClassChange={form.setSalesClass}
+                onWarrantyYearsChange={form.setWarrantyYears}
+                onTagsChange={form.setTags}
+              />
+            </div>
+
+            <div hidden={form.tab !== "description"} data-drawer-tab="description">
+              <ProductDrawerDescriptionTab
+                description={form.description}
+                specifications={form.specifications}
+                disabled={isPending}
+                copy={copy}
+                onDescriptionChange={form.setDescription}
+                onSpecificationsChange={form.setSpecifications}
+              />
+            </div>
+
+            <ProductDrawerRestFields
+              locale={locale}
+              tab={form.tab}
+              copy={copy}
+              images={form.images}
+              categories={form.categories}
+              categoryIds={form.categoryIds}
+              priceAmount={form.priceAmount}
+              discountPercent={form.discountPercent}
+              sku={form.sku}
+              disabled={isPending}
+              onImagesChange={form.handleImagesChange}
+              onCategoriesChange={form.setCategories}
+              onCategoryIdsChange={form.setCategoryIds}
+              onPriceAmountChange={form.setPriceAmount}
+              onDiscountPercentChange={form.setDiscountPercent}
+              onSkuChange={form.setSku}
+            />
+
+            {form.error ? (
+              <p className="mt-4 text-sm text-red-700">{form.error}</p>
+            ) : null}
+          </div>
+        </div>
+      </form>
+    );
 }

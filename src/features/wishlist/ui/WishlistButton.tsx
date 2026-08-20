@@ -15,6 +15,8 @@ type WishlistButtonProps = {
   isSignedIn: boolean;
   label: string;
   className?: string;
+  activeClassName?: string;
+  iconClassName?: string;
   size?: "sm" | "md";
 };
 
@@ -25,6 +27,8 @@ export function WishlistButton({
   isSignedIn,
   label,
   className = "",
+  activeClassName = "",
+  iconClassName,
   size = "md",
 }: WishlistButtonProps) {
   const router = useRouter();
@@ -67,13 +71,17 @@ export function WishlistButton({
       disabled={pending}
       aria-label={label}
       aria-pressed={inWishlist}
-      className={`inline-flex items-center justify-center rounded-full transition disabled:opacity-60 ${className}`}
+      className={`inline-flex items-center justify-center transition disabled:opacity-60 ${
+        inWishlist && activeClassName ? activeClassName : className
+      }`}
     >
       <Heart
         className={`${iconClass} ${
           inWishlist
-            ? "fill-red-500 text-red-500"
-            : "fill-transparent text-gray-700"
+            ? iconClassName
+              ? `fill-current ${iconClassName}`
+              : "fill-red-500 text-red-500"
+            : `fill-transparent ${iconClassName ?? "text-gray-700"}`
         }`}
         aria-hidden
       />

@@ -2,7 +2,6 @@
 
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { getDb } from "@/db/client";
 import {
@@ -13,34 +12,40 @@ import {
   type TranslationsJson,
 } from "@/db/schema";
 import { persistProductMedia } from "@/features/products/application/persist-product-media";
+import { parseProductTags } from "@/features/products/domain/product-presentation";
+import { parseProductSpecs } from "@/features/products/domain/product-specs";
+import {
+  DEFAULT_PRODUCT_STOCK,
+  PRODUCT_RESTOCK_AT,
+} from "@/features/products/domain/product-stock";
+import {
+  productUpsertSchema,
+  type ProductUpsertInput,
+} from "@/features/products/schemas/product-drawer";
 import { requireAdmin } from "@/lib/auth/policies";
 import { invalidateProductsCache } from "@/lib/cache/invalidate-public";
 import { createId } from "@/lib/id";
 import { isLocale, locales, type Locale } from "@/lib/i18n/config";
 import { err, ok, type Result } from "@/lib/result";
-
-const productUpsertSchema = z.object({
-  sku: z.string().trim().min(1).max(120),
-  title: z.string().trim().min(1).max(200),
-  slug: z.string().trim().min(1).max(200),
-  description: z.string().trim().max(5000).optional(),
-  priceAmount: z.number().int().nonnegative(),
-  compareAtAmount: z.number().int().nonnegative().nullable(),
-  stockOnHand: z.number().int().nonnegative(),
-  categoryIds: z.array(z.string().uuid()),
-  status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
-  primaryExistingId: z.string().uuid().nullable(),
-  primaryNewIndex: z.number().int().nullable(),
-  removeImageIds: z.array(z.string().uuid()),
-});
-
-export type ProductUpsertInput = z.infer<typeof productUpsertSchema>;
+import {
+  htmlToPlainText,
+  sanitizeProductShortHtml,
+} from "@/lib/sanitize/html";
 
 function buildTranslations(data: ProductUpsertInput): TranslationsJson {
+  const sanitized = data.description
+    ? sanitizeProductShortHtml(data.description)
+    : "";
+  const description = htmlToPlainText(sanitized) ? sanitized : undefined;
+  const specifications = parseProductSpecs(data.specifications).map((row) => ({
+    title: row.title,
+    value: row.value,
+  }));
   const entry = {
     title: data.title,
     slug: data.slug,
-    description: data.description || undefined,
+    description,
+    specifications: specifications.length > 0 ? specifications : undefined,
   };
   return { hy: entry, en: entry, ru: entry };
 }
@@ -151,8 +156,12 @@ export async function createProductFromDrawerAction(
     sku: data.sku,
     priceAmount: data.priceAmount,
     compareAtAmount: data.compareAtAmount,
-    stockOnHand: data.stockOnHand,
+    stockOnHand: DEFAULT_PRODUCT_STOCK,
+    lowStockThreshold: PRODUCT_RESTOCK_AT,
     status: data.status,
+    salesClass: data.salesClass,
+    warrantyYears: data.warrantyYears,
+    tags: parseProductTags(data.tags),
     translations: buildTranslations(data),
   });
 
@@ -161,16 +170,14 @@ export async function createProductFromDrawerAction(
     return err("VALIDATION_ERROR", categoryError);
   }
 
-  if (data.stockOnHand > 0) {
-    await getDb().insert(stockMovements).values({
-      id: createId(),
-      productId: id,
-      delta: data.stockOnHand,
-      reason: "ADMIN_ADJUSTMENT",
-      actorUserId: actor.id,
-      resultingBalance: data.stockOnHand,
-    });
-  }
+  await getDb().insert(stockMovements).values({
+    id: createId(),
+    productId: id,
+    delta: DEFAULT_PRODUCT_STOCK,
+    reason: "ADMIN_ADJUSTMENT",
+    actorUserId: actor.id,
+    resultingBalance: DEFAULT_PRODUCT_STOCK,
+  });
 
   const mediaResult = await persistProductMedia({
     productId: id,
@@ -212,13 +219,12 @@ export async function updateProductFromDrawerAction(
     );
   }
 
-  const actor = await requireAdmin(locale as Locale);
+  await requireAdmin(locale as Locale);
   const files = collectImageFiles(formData);
 
   const [existing] = await getDb()
     .select({
       id: products.id,
-      stockOnHand: products.stockOnHand,
       status: products.status,
       translations: products.translations,
     })
@@ -236,8 +242,10 @@ export async function updateProductFromDrawerAction(
       sku: data.sku,
       priceAmount: data.priceAmount,
       compareAtAmount: data.compareAtAmount,
-      stockOnHand: data.stockOnHand,
       status: data.status || existing.status,
+      salesClass: data.salesClass,
+      warrantyYears: data.warrantyYears,
+      tags: parseProductTags(data.tags),
       translations: buildTranslations(data),
       updatedAt: new Date(),
     })
@@ -249,18 +257,6 @@ export async function updateProductFromDrawerAction(
   );
   if (categoryError) {
     return err("VALIDATION_ERROR", categoryError);
-  }
-
-  const delta = data.stockOnHand - existing.stockOnHand;
-  if (delta !== 0) {
-    await getDb().insert(stockMovements).values({
-      id: createId(),
-      productId: existing.id,
-      delta,
-      reason: "ADMIN_ADJUSTMENT",
-      actorUserId: actor.id,
-      resultingBalance: data.stockOnHand,
-    });
   }
 
   const mediaResult = await persistProductMedia({

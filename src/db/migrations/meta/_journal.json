@@ -22,6 +22,48 @@
       "when": 1784471653841,
       "tag": "0002_narrow_caretaker",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787060029363,
+      "tag": "0003_tired_thanos",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787060120000,
+      "tag": "0004_reels",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787221456718,
+      "tag": "0005_spicy_star_brand",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787227982678,
+      "tag": "0006_overjoyed_lord_hawal",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787233749743,
+      "tag": "0007_overrated_shockwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787234655537,
+      "tag": "0008_groovy_squadron_supreme",
+      "breakpoints": true
     }
   ]
 }

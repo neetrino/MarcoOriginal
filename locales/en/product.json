@@ -4,10 +4,16 @@
   "outOfStock": "Out of stock",
   "quantity": "Quantity",
   "addToCart": "Add to cart",
+  "buyNow": "BUY NOW",
   "adding": "Adding…",
   "added": "Added to cart.",
   "addError": "Unable to add this product to the cart.",
   "related": "Related products",
+  "fullscreenImage": "View fullscreen image",
+  "previousImage": "Previous image",
+  "nextImage": "Next image",
+  "closeLightbox": "Close",
+  "warrantyYearsSuffix": "yr",
   "reviews": "Reviews",
   "reviewCount": "{count} reviews",
   "averageRating": "Average {average} / 5 ({count} reviews)",
@@ -30,5 +36,10 @@
   "reviewsUnlock": "Reviews unlock after a delivered purchase.",
   "signIn": "Sign in",
   "signInToReview": "to leave a verified-purchase review.",
-  "backToProducts": "Products"
+  "backToProducts": "Products",
+  "warranty1": "1 year",
+  "warranty2": "2 years",
+  "warranty3": "3 years",
+  "warrantyBadge": "warranty",
+  "specifications": "Specifications"
 }

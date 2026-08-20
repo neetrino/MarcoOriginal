@@ -1,8 +1,10 @@
-import Image from "next/image";
-
+import { ABOUT_HERO_YOUTUBE_VIDEO_ID } from "@/features/about/content/about-hero-video";
+import { AboutHeroVideo } from "@/features/about/ui/AboutHeroVideo";
 import {
-  ABOUT_HERO_IMAGE,
-} from "@/features/about/content/team-members";
+  ABOUT_ACCENT_BAR_CLASS,
+  ABOUT_EYEBROW_CLASS,
+  ABOUT_SECTION_INNER_CLASS,
+} from "@/features/about/ui/about-section-classes";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 type AboutHeroProps = {
@@ -10,31 +12,32 @@ type AboutHeroProps = {
 };
 
 export function AboutHero({ copy }: AboutHeroProps) {
+  const playLabel = copy.playVideoAria.replace("{title}", copy.title);
+
   return (
     <section className="bg-white py-16 md:py-24">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <div className="relative h-[400px] w-full overflow-hidden rounded-lg shadow-lg md:h-[500px] lg:h-[600px]">
-          <Image
-            src={ABOUT_HERO_IMAGE}
-            alt={copy.heroImageAlt}
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
-            priority
+      <div className={ABOUT_SECTION_INNER_CLASS}>
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <AboutHeroVideo
+            videoId={ABOUT_HERO_YOUTUBE_VIDEO_ID}
+            title={copy.title}
+            playLabel={playLabel}
           />
-        </div>
 
-        <div className="space-y-6">
-          <p className="text-sm font-semibold tracking-wider text-[#7CB342] uppercase md:text-base">
-            {copy.eyebrow}
-          </p>
-          <h1 className="text-4xl leading-tight font-bold text-gray-900 md:text-5xl lg:text-6xl">
-            {copy.title}
-          </h1>
-          <div className="space-y-4 text-base leading-relaxed text-gray-600 md:text-lg">
-            {copy.paragraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
+          <div className="space-y-6 lg:py-4">
+            <div className={ABOUT_ACCENT_BAR_CLASS} />
+
+            <p className={ABOUT_EYEBROW_CLASS}>{copy.eyebrow}</p>
+
+            <h1 className="text-4xl leading-tight font-bold text-gray-900 md:text-5xl lg:text-6xl">
+              {copy.title}
+            </h1>
+
+            <div className="space-y-4 text-base leading-relaxed text-gray-600 md:text-lg">
+              {copy.paragraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
           </div>
         </div>
       </div>

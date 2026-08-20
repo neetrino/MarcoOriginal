@@ -2,5 +2,18 @@
   "paginationLabel": "Страницы каталога",
   "previousPage": "Назад",
   "nextPage": "Далее",
-  "pageStatus": "Страница {page} из {total}"
+  "firstPage": "Первая",
+  "lastPage": "Последняя",
+  "pageStatus": "Страница {page} из {total}",
+  "brandsEmpty": "Брендов пока нет.",
+  "filtersLabel": "Фильтры",
+  "categories": "Категории",
+  "price": "Цена",
+  "brands": "Бренды",
+  "colors": "Цвета",
+  "expandCategory": "Показать подкатегории",
+  "collapseCategory": "Скрыть подкатегории",
+  "minPrice": "Минимальная цена",
+  "maxPrice": "Максимальная цена",
+  "empty": "Товары не найдены."
 }

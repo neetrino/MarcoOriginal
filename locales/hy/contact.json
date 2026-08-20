@@ -1,29 +1,30 @@
 {
-  "title": "Կապ",
-  "subtitle": "Ուղարկեք հաղորդագրություն, և մենք կպատասխանենք։",
-  "name": "Անուն",
-  "email": "Էլ. փոստ",
-  "phone": "Հեռախոս (ըստ ցանկության)",
-  "subject": "Թեմա",
-  "message": "Հաղորդագրություն",
-  "submit": "Ուղարկել",
-  "success": "Շնորհակալություն — հաղորդագրությունն ուղարկված է։",
-  "error": "Չհաջողվեց ուղարկել հաղորդագրությունը։",
-  "storePhone": "+374 XX XXX XXX",
-  "storeEmail": "info@shop.am",
-  "storeAddress": "Երևան, Աբովյան 10",
+  "title": "ԿԱՊ ՄԵԶ ՀԵՏ",
+  "writeToUsTitle": "Գրեք մեզ",
+  "mapSectionTitle": "Մեր հասցեները քարտեզում",
+  "storePhone": "060 500 406",
+  "storeEmail": "marcofurniture@mail.ru",
+  "storeAddress": "Ք․ Երևան Ալեք Մանուկյան 23",
   "social": {
-    "instagram": "https://instagram.com",
-    "facebook": "https://facebook.com",
-    "linkedin": "https://linkedin.com"
+    "instagram": "https://www.instagram.com/marco_electronics",
+    "facebook": "https://www.facebook.com/marcoelectronicss",
+    "linkedin": "",
+    "telegram": "https://t.me/+37460500406"
   },
-  "callTitle": "Զանգահարեք մեզ՝",
-  "callDescription": "Մենք հասանելի ենք 24/7, շաբաթը 7 օր։",
-  "writeTitle": "Գրեք մեզ՝",
-  "writeDescription": "Լրացրեք ձևը, և մենք կկապվենք ձեզ հետ 24 ժամվա ընթացքում։",
-  "emailLabel": "Էլ. փոստ՝",
-  "hqTitle": "Գլխամաս՝",
-  "hoursWeekdays": "Երկուշաբթի - Ուրբաթ՝ 9:00-20:00",
-  "hoursSaturday": "Շաբաթ՝ 11:00 - 15:00",
-  "mapTitle": "Խանութի գտնվելու վայրը"
+  "locations": {
+    "yerevan": "Ք․ Երևան Ալեք Մանուկյան 23",
+    "avan": "Ք․ Երևան, Ավան, Հր. Աճառյան 39/7",
+    "argavand": "Արգավանդ, Օդանավակայանի 1"
+  },
+  "form": {
+    "title": "Ուղարկել մեզ հաղորդագրություն",
+    "name": "Անուն *",
+    "email": "Էլ. փոստ *",
+    "subject": "Թեմա *",
+    "message": "Հաղորդագրություն",
+    "submit": "Ուղարկել",
+    "submitting": "Ուղարկվում է...",
+    "success": "Ձեր հաղորդագրությունը հաջողությամբ ուղարկվեց",
+    "error": "Սխալ: Չհաջողվեց ուղարկել հաղորդագրությունը"
+  }
 }

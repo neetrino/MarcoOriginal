@@ -2,5 +2,18 @@
   "paginationLabel": "Կատալոգի էջեր",
   "previousPage": "Նախորդ",
   "nextPage": "Հաջորդ",
-  "pageStatus": "Էջ {page} / {total}"
+  "firstPage": "Առաջին",
+  "lastPage": "Վերջին",
+  "pageStatus": "Էջ {page} / {total}",
+  "brandsEmpty": "Բրենդներ դեռ չկան։",
+  "filtersLabel": "Ֆիլտրեր",
+  "categories": "Կատեգորիաներ",
+  "price": "Գին",
+  "brands": "Բրենդներ",
+  "colors": "Գույներ",
+  "expandCategory": "Ցուցադրել ենթակատեգորիաները",
+  "collapseCategory": "Թաքցնել ենթակատեգորիաները",
+  "minPrice": "Նվազագույն գին",
+  "maxPrice": "Առավելագույն գին",
+  "empty": "Ապրանքներ չեն գտնվել։"
 }

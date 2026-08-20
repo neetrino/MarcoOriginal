@@ -24,7 +24,10 @@ export type AdminHeroSlideListItem = {
   isActive: boolean;
   title: string;
   subtitle: string | undefined;
-  imageUrl: string | null;
+  buttonLabel: string | undefined;
+  buttonUrl: string | undefined;
+  desktopImageUrl: string | null;
+  mobileImageUrl: string | null;
 };
 
 export type StorefrontHeroSlide = {
@@ -109,7 +112,10 @@ export async function listAdminHeroSlides(): Promise<AdminHeroSlideListItem[]> {
       isActive: row.isActive,
       title: copy.title || "Untitled",
       subtitle: copy.subtitle,
-      imageUrl: media?.desktop ?? media?.mobile ?? null,
+      buttonLabel: copy.buttonLabel,
+      buttonUrl: copy.buttonUrl,
+      desktopImageUrl: media?.desktop ?? null,
+      mobileImageUrl: media?.mobile ?? null,
     };
   });
 }

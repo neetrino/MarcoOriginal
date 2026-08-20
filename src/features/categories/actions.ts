@@ -7,15 +7,33 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { categories, type TranslationsJson } from "@/db/schema";
 import { persistCategoryImage, removeCategoryImage } from "@/features/categories/application/persist-category-media";
+import { isInvalidCategoryParent } from "@/features/categories/domain/category-tree";
 import { requireAdmin } from "@/lib/auth/policies";
 import { invalidateProductsCache } from "@/lib/cache/invalidate-public";
 import { createId } from "@/lib/id";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { err, ok, type Result } from "@/lib/result";
 
+const localeCopySchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  slug: z.string().trim().min(1).max(120),
+});
+
 const createCategorySchema = z.object({
   title: z.string().trim().min(1).max(120),
   slug: z.string().trim().min(1).max(120),
+  parentId: z.string().uuid().nullable(),
+  status: z.enum(["ACTIVE", "ARCHIVED"]),
+});
+
+const drawerFieldsSchema = z.object({
+  translations: z
+    .object({
+      hy: localeCopySchema.optional(),
+      en: localeCopySchema.optional(),
+      ru: localeCopySchema.optional(),
+    })
+    .refine((value) => Boolean(value.hy ?? value.en ?? value.ru)),
   parentId: z.string().uuid().nullable(),
   status: z.enum(["ACTIVE", "ARCHIVED"]),
 });
@@ -34,37 +52,84 @@ function revalidateCategories(locale: string): void {
   invalidateProductsCache({ allProductDetails: true });
 }
 
-async function insertCategory(
-  locale: Locale,
-  data: CreateCategoryInput,
-): Promise<Result<{ id: string }>> {
-  if (data.parentId) {
-    const [parent] = await getDb()
-      .select({ id: categories.id })
-      .from(categories)
-      .where(
-        and(
-          eq(categories.id, data.parentId),
-          isNull(categories.deletedAt),
-        ),
-      )
-      .limit(1);
-    if (!parent) {
-      return err("NOT_FOUND", "Parent category not found.");
-    }
-  }
+function parseParentId(formData: FormData): string | null {
+  const rawParent = formData.get("parentId");
+  if (typeof rawParent !== "string" || !rawParent.trim()) return null;
+  return rawParent.trim();
+}
 
+function parseDrawerPayload(formData: FormData) {
+  const rawTranslations = formData.get("translations");
+  if (typeof rawTranslations !== "string") return null;
+  try {
+    return drawerFieldsSchema.safeParse({
+      translations: JSON.parse(rawTranslations),
+      parentId: parseParentId(formData),
+      status: formData.get("status"),
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function loadCategoryLinks() {
+  return getDb()
+    .select({ id: categories.id, parentId: categories.parentId })
+    .from(categories)
+    .where(isNull(categories.deletedAt));
+}
+
+async function assertParent(
+  parentId: string | null,
+  categoryId?: string,
+): Promise<Result<true>> {
+  if (!parentId) return ok(true);
+
+  const links = await loadCategoryLinks();
+  if (!links.some((row) => row.id === parentId)) {
+    return err("NOT_FOUND", "Parent category not found.");
+  }
+  if (categoryId && isInvalidCategoryParent(categoryId, parentId, links)) {
+    return err(
+      "VALIDATION_ERROR",
+      "A category cannot be nested under itself or its descendant.",
+    );
+  }
+  return ok(true);
+}
+
+async function nextSortOrder(parentId: string | null): Promise<number> {
   const [maxSort] = await getDb()
     .select({ value: max(categories.sortOrder) })
     .from(categories)
-    .where(isNull(categories.deletedAt));
+    .where(
+      and(
+        isNull(categories.deletedAt),
+        parentId
+          ? eq(categories.parentId, parentId)
+          : isNull(categories.parentId),
+      ),
+    );
+  return (maxSort?.value ?? 0) + 1;
+}
+
+async function insertCategory(
+  locale: Locale,
+  data: {
+    translations: TranslationsJson;
+    parentId: string | null;
+    status: "ACTIVE" | "ARCHIVED";
+  },
+): Promise<Result<{ id: string }>> {
+  const parentCheck = await assertParent(data.parentId);
+  if (!parentCheck.ok) return parentCheck;
 
   const id = createId();
   await getDb().insert(categories).values({
     id,
     parentId: data.parentId,
-    translations: buildTranslations(data.title, data.slug),
-    sortOrder: (maxSort?.value ?? 0) + 1,
+    translations: data.translations,
+    sortOrder: await nextSortOrder(data.parentId),
     status: data.status,
   });
 
@@ -87,7 +152,32 @@ export async function createCategoryAction(
   }
 
   await requireAdmin(locale as Locale);
-  return insertCategory(locale, parsed.data);
+  return insertCategory(locale, {
+    translations: buildTranslations(parsed.data.title, parsed.data.slug),
+    parentId: parsed.data.parentId,
+    status: parsed.data.status,
+  });
+}
+
+async function persistDrawerImage(
+  locale: Locale,
+  categoryId: string,
+  formData: FormData,
+): Promise<Result<{ id: string }>> {
+  const image = formData.get("image");
+  const removeImage = formData.get("removeImage") === "1";
+
+  if (image instanceof File && image.size > 0) {
+    const mediaResult = await persistCategoryImage(categoryId, image);
+    if (mediaResult.error) {
+      return err("VALIDATION_ERROR", mediaResult.error);
+    }
+  } else if (removeImage) {
+    await removeCategoryImage(categoryId);
+  }
+
+  revalidateCategories(locale);
+  return ok({ id: categoryId });
 }
 
 /** Creates a category from the admin drawer (fields + optional image). */
@@ -99,35 +189,15 @@ export async function createCategoryFromDrawerAction(
     return err("INVALID_LOCALE", "Invalid locale.");
   }
 
-  const rawParent = formData.get("parentId");
-  const parsed = createCategorySchema.safeParse({
-    title: formData.get("title"),
-    slug: formData.get("slug"),
-    parentId:
-      typeof rawParent === "string" && rawParent.trim()
-        ? rawParent.trim()
-        : null,
-    status: formData.get("status"),
-  });
-
-  if (!parsed.success) {
+  const parsed = parseDrawerPayload(formData);
+  if (!parsed?.success) {
     return err("VALIDATION_ERROR", "Invalid category payload.");
   }
 
   await requireAdmin(locale as Locale);
   const created = await insertCategory(locale, parsed.data);
   if (!created.ok) return created;
-
-  const image = formData.get("image");
-  if (image instanceof File && image.size > 0) {
-    const mediaResult = await persistCategoryImage(created.value.id, image);
-    if (mediaResult.error) {
-      return err("VALIDATION_ERROR", mediaResult.error);
-    }
-    revalidateCategories(locale);
-  }
-
-  return created;
+  return persistDrawerImage(locale, created.value.id, formData);
 }
 
 /** Updates a category from the admin drawer (fields + optional image). */
@@ -140,29 +210,18 @@ export async function updateCategoryFromDrawerAction(
     return err("INVALID_LOCALE", "Invalid locale.");
   }
 
-  const rawParent = formData.get("parentId");
-  const parsed = createCategorySchema.safeParse({
-    title: formData.get("title"),
-    slug: formData.get("slug"),
-    parentId:
-      typeof rawParent === "string" && rawParent.trim()
-        ? rawParent.trim()
-        : null,
-    status: formData.get("status"),
-  });
-
-  if (!parsed.success) {
+  const parsed = parseDrawerPayload(formData);
+  if (!parsed?.success) {
     return err("VALIDATION_ERROR", "Invalid category payload.");
-  }
-
-  if (parsed.data.parentId === categoryId) {
-    return err("VALIDATION_ERROR", "A category cannot be its own parent.");
   }
 
   await requireAdmin(locale as Locale);
 
   const [existing] = await getDb()
-    .select({ id: categories.id })
+    .select({
+      id: categories.id,
+      translations: categories.translations,
+    })
     .from(categories)
     .where(and(eq(categories.id, categoryId), isNull(categories.deletedAt)))
     .limit(1);
@@ -171,46 +230,23 @@ export async function updateCategoryFromDrawerAction(
     return err("NOT_FOUND", "Category not found.");
   }
 
-  if (parsed.data.parentId) {
-    const [parent] = await getDb()
-      .select({ id: categories.id })
-      .from(categories)
-      .where(
-        and(
-          eq(categories.id, parsed.data.parentId),
-          isNull(categories.deletedAt),
-        ),
-      )
-      .limit(1);
-    if (!parent) {
-      return err("NOT_FOUND", "Parent category not found.");
-    }
-  }
+  const parentCheck = await assertParent(parsed.data.parentId, existing.id);
+  if (!parentCheck.ok) return parentCheck;
 
   await getDb()
     .update(categories)
     .set({
       parentId: parsed.data.parentId,
-      translations: buildTranslations(parsed.data.title, parsed.data.slug),
+      translations: {
+        ...existing.translations,
+        ...parsed.data.translations,
+      },
       status: parsed.data.status,
       updatedAt: new Date(),
     })
     .where(eq(categories.id, existing.id));
 
-  const image = formData.get("image");
-  const removeImage = formData.get("removeImage") === "1";
-
-  if (image instanceof File && image.size > 0) {
-    const mediaResult = await persistCategoryImage(existing.id, image);
-    if (mediaResult.error) {
-      return err("VALIDATION_ERROR", mediaResult.error);
-    }
-  } else if (removeImage) {
-    await removeCategoryImage(existing.id);
-  }
-
-  revalidateCategories(locale);
-  return ok({ id: existing.id });
+  return persistDrawerImage(locale, existing.id, formData);
 }
 
 /** Soft-deletes a category. */

@@ -4,10 +4,16 @@
   "outOfStock": "Нет в наличии",
   "quantity": "Количество",
   "addToCart": "В корзину",
+  "buyNow": "КУПИТЬ СЕЙЧАС",
   "adding": "Добавляем…",
   "added": "Добавлено в корзину.",
   "addError": "Не удалось добавить товар в корзину.",
   "related": "Похожие товары",
+  "fullscreenImage": "Полноэкранное изображение",
+  "previousImage": "Предыдущее изображение",
+  "nextImage": "Следующее изображение",
+  "closeLightbox": "Закрыть",
+  "warrantyYearsSuffix": "года",
   "reviews": "Отзывы",
   "reviewCount": "{count} отзывов",
   "averageRating": "Средняя {average} / 5 ({count} отзывов)",
@@ -30,5 +36,10 @@
   "reviewsUnlock": "Отзывы доступны после доставки заказа.",
   "signIn": "Войти",
   "signInToReview": "чтобы оставить отзыв о подтверждённой покупке.",
-  "backToProducts": "Товары"
+  "backToProducts": "Товары",
+  "warranty1": "1 год",
+  "warranty2": "2 года",
+  "warranty3": "3 года",
+  "warrantyBadge": "гарантия",
+  "specifications": "Характеристики"
 }

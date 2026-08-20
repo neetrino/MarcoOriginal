@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -55,6 +56,33 @@ export const heroSlides = pgTable(
   },
   (table) => [
     index("hero_slides_active_sort_idx").on(table.isActive, table.sortOrder),
+  ],
+);
+
+export type ReelTranslation = {
+  title: string;
+};
+
+export type ReelTranslationsJson = Partial<
+  Record<"hy" | "en" | "ru", ReelTranslation>
+>;
+
+export const reels = pgTable(
+  "reels",
+  {
+    id: idColumn(),
+    translations: jsonb("translations").$type<ReelTranslationsJson>().notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    likeCount: integer("like_count").notNull().default(0),
+    viewCount: integer("view_count").notNull().default(0),
+    createdAt: createdAtColumn(),
+    updatedAt: updatedAtColumn(),
+  },
+  (table) => [
+    index("reels_active_created_idx").on(table.isActive, table.createdAt),
+    check("reels_like_count_chk", sql`${table.likeCount} >= 0`),
+    check("reels_view_count_chk", sql`${table.viewCount} >= 0`),
   ],
 );
 

@@ -1,11 +1,19 @@
+import { Montserrat } from "next/font/google";
 import { notFound } from "next/navigation";
 
+import { listStorefrontBrands } from "@/features/brands/application/list-storefront-brands";
 import { listActiveHeroSlides } from "@/features/hero/application/queries";
-import { HomeAboutTeaser } from "@/features/home/ui/HomeAboutTeaser";
+import { mapProductCards } from "@/features/products/map-product-cards";
+import { HomeBrands } from "@/features/home/ui/HomeBrands";
 import { HomeFeaturedProducts } from "@/features/home/ui/HomeFeaturedProducts";
-import { HomeFeatures } from "@/features/home/ui/HomeFeatures";
 import { HomeHero } from "@/features/home/ui/HomeHero";
-import { getFeaturedProducts } from "@/features/products/queries";
+import { listActiveStorefrontReels } from "@/features/reels/application/queries";
+import { HomeReels } from "@/features/reels/ui/HomeReels";
+import {
+  getFeaturedProducts,
+  getNewestProducts,
+} from "@/features/products/queries";
+import { getCompareProductIds } from "@/features/compare/queries";
 import { getWishlistProductIds } from "@/features/wishlist/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -14,6 +22,12 @@ import {
   createDisplayPriceFormatter,
   getSelectedCurrency,
 } from "@/lib/money/display-price";
+
+const montserratHome = Montserrat({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "700", "900"],
+  display: "swap",
+});
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -28,82 +42,105 @@ export default async function HomePage({ params }: HomePageProps) {
 
   const locale: Locale = rawLocale;
   const dictionary = getDictionary(locale);
-  const [heroSlides, featuredProducts, currency, user] = await Promise.all([
+  const [
+    heroSlides,
+    featuredProducts,
+    newestProducts,
+    brands,
+    currency,
+    user,
+    homeReels,
+  ] = await Promise.all([
     listActiveHeroSlides(locale),
     getFeaturedProducts(locale),
+    getNewestProducts(locale),
+    listStorefrontBrands(locale),
     getSelectedCurrency(),
     getCurrentUser(),
+    listActiveStorefrontReels(locale),
   ]);
-  const [wishlistIds, formatPrice] = await Promise.all([
-    getWishlistProductIds(featuredProducts.map((product) => product.id)),
+  const catalogIds = [
+    ...new Set([
+      ...featuredProducts.map((product) => product.id),
+      ...newestProducts.map((product) => product.id),
+    ]),
+  ];
+  const [wishlistIds, compareIds, formatPrice] = await Promise.all([
+    getWishlistProductIds(catalogIds),
+    getCompareProductIds(),
     createDisplayPriceFormatter(locale, currency),
   ]);
 
-  const featuredCards = featuredProducts.map((product) => {
-    const price = formatPrice(product.priceAmount);
-    const compareAt =
-      product.compareAtAmount != null
-        ? formatPrice(product.compareAtAmount)
-        : null;
+  const featuredCards = mapProductCards(
+    featuredProducts,
+    locale,
+    formatPrice,
+    dictionary.product,
+    wishlistIds,
+    compareIds,
+  );
+  const newestCards = mapProductCards(
+    newestProducts,
+    locale,
+    formatPrice,
+    dictionary.product,
+    wishlistIds,
+    compareIds,
+  );
 
-    return {
-      id: product.id,
-      href: `/${locale}/products/${product.translation.slug}`,
-      title: product.translation.title,
-      priceFormatted: price.formatted,
-      compareAtFormatted: compareAt?.formatted ?? null,
-      discountPercent: product.discountPercent,
-      imageUrl: product.imageUrl,
-      inStock: product.stockOnHand > 0,
-      inWishlist: wishlistIds.has(product.id),
-    };
-  });
+  const productRail = {
+    locale,
+    viewAllLabel: dictionary.home.viewAll,
+    viewAllHref: `/${locale}/products`,
+    wishlistLabel: dictionary.nav.wishlist,
+    compareLabel: dictionary.nav.compare,
+    addToCartLabel: dictionary.product.addToCart,
+    previousPageLabel: dictionary.catalog.previousPage,
+    nextPageLabel: dictionary.catalog.nextPage,
+    paginationLabel: dictionary.home.productsPaginationLabel,
+    isSignedIn: Boolean(user),
+  };
 
   return (
-    <div className="-mx-4 -my-10 sm:-mx-6 lg:-mx-8">
-      <HomeHero
-        slides={heroSlides}
-        fallbackTitle={dictionary.home.title}
-        fallbackSubtitle={dictionary.home.subtitle}
-        fallbackCtaLabel={dictionary.home.cta}
-        fallbackCtaHref={`/${locale}/products`}
+    <div className={`${montserratHome.className} -mx-4 -my-10 bg-white sm:-mx-6 lg:-mx-8`}>
+      <HomeHero slides={heroSlides} />
+      <HomeReels
+        title={dictionary.home.reelsTitle}
+        playLabel={dictionary.home.playReel}
+        closeLabel={dictionary.home.closeReel}
+        previousPageLabel={dictionary.catalog.previousPage}
+        nextPageLabel={dictionary.catalog.nextPage}
+        paginationLabel={dictionary.home.reelsPaginationLabel}
+        reels={homeReels.map((reel) => ({
+          ...reel,
+          title: reel.title || dictionary.home.untitledReel,
+        }))}
       />
-
-      <HomeFeatures
-        items={[
-          {
-            title: dictionary.home.features.deliveryTitle,
-            description: dictionary.home.features.deliveryDescription,
-          },
-          {
-            title: dictionary.home.features.qualityTitle,
-            description: dictionary.home.features.qualityDescription,
-          },
-          {
-            title: dictionary.home.features.returnTitle,
-            description: dictionary.home.features.returnDescription,
-          },
-        ]}
-      />
-
       <HomeFeaturedProducts
-        locale={locale}
+        {...productRail}
+        headingId="home-special-offers"
         title={dictionary.home.featuredTitle}
-        viewAllLabel={dictionary.home.viewAll}
-        viewAllHref={`/${locale}/products`}
         emptyLabel={dictionary.home.emptyFeatured}
-        wishlistLabel={dictionary.nav.wishlist}
-        addToCartLabel={dictionary.product.addToCart}
-        isSignedIn={Boolean(user)}
         products={featuredCards}
       />
-
-      <HomeAboutTeaser
-        eyebrow={dictionary.home.aboutEyebrow}
-        title={dictionary.home.aboutTitle}
-        description={dictionary.home.aboutDescription}
-        ctaLabel={dictionary.home.aboutCta}
-        ctaHref={`/${locale}/about`}
+      <HomeFeaturedProducts
+        {...productRail}
+        headingId="home-new-arrivals"
+        priorityCount={0}
+        title={dictionary.home.newArrivalsTitle}
+        emptyLabel={dictionary.home.emptyNewArrivals}
+        products={newestCards}
+      />
+      <HomeBrands
+        locale={locale}
+        title={dictionary.home.brandsTitle}
+        viewAllLabel={dictionary.home.viewAll}
+        viewAllHref={`/${locale}/brand`}
+        emptyLabel={dictionary.catalog.brandsEmpty}
+        paginationLabel={dictionary.home.brandsPaginationLabel}
+        previousPageLabel={dictionary.catalog.previousPage}
+        nextPageLabel={dictionary.catalog.nextPage}
+        brands={brands}
       />
     </div>
   );

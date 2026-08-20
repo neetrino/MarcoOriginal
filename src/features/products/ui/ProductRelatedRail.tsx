@@ -1,0 +1,153 @@
+"use client";
+
+import { chunkItems } from "@/features/home/paginate";
+import { HomeRoundNavButtons } from "@/features/home/ui/HomeRoundNavButtons";
+import {
+  HOME_PRODUCT_CARD_GAP_PX,
+  HOME_PRODUCT_DESKTOP_PAGE_SIZE,
+  HOME_PRODUCT_MOBILE_PAGE_SIZE,
+} from "@/features/home/ui/home-section.constants";
+import { HOME_SCROLLER_CLASS } from "@/features/home/ui/home-section-classes";
+import { useIsMaxMd } from "@/features/home/ui/use-is-max-md";
+import { useSnapCarousel } from "@/features/home/ui/use-snap-carousel";
+import {
+  ProductCard,
+  type ProductCardItem,
+} from "@/features/products/ui/ProductCard";
+import type { Locale } from "@/lib/i18n/config";
+
+type ProductRelatedRailProps = {
+  locale: Locale;
+  title: string;
+  previousPageLabel: string;
+  nextPageLabel: string;
+  wishlistLabel: string;
+  compareLabel: string;
+  addToCartLabel: string;
+  isSignedIn: boolean;
+  products: readonly ProductCardItem[];
+};
+
+export function ProductRelatedRail({
+  locale,
+  title,
+  previousPageLabel,
+  nextPageLabel,
+  wishlistLabel,
+  compareLabel,
+  addToCartLabel,
+  isSignedIn,
+  products,
+}: ProductRelatedRailProps) {
+  const isMaxMd = useIsMaxMd();
+  const mobile = useSnapCarousel(
+    Math.max(chunkItems(products, HOME_PRODUCT_MOBILE_PAGE_SIZE).length, 1),
+  );
+  const desktop = useSnapCarousel(
+    Math.max(chunkItems(products, HOME_PRODUCT_DESKTOP_PAGE_SIZE).length, 1),
+  );
+  const active = isMaxMd ? mobile : desktop;
+  const showNav = products.length > HOME_PRODUCT_MOBILE_PAGE_SIZE;
+
+  return (
+    <section className="mt-16 border-t border-gray-200 pt-12 md:mt-20">
+      <div className="mb-10 flex items-center justify-between gap-4">
+        <h2 className="text-3xl font-bold text-marco-ink">{title}</h2>
+        {showNav ? (
+          <HomeRoundNavButtons
+            prevLabel={previousPageLabel}
+            nextLabel={nextPageLabel}
+            onPrev={() => active.scrollToPage(active.activePage - 1)}
+            onNext={() => active.scrollToPage(active.activePage + 1)}
+            canScrollPrev={active.canScrollPrev}
+            canScrollNext={active.canScrollNext}
+          />
+        ) : null}
+      </div>
+      <div className="md:hidden">
+        <RelatedSnapPages
+          scrollerRef={mobile.scrollerRef}
+          onScroll={mobile.onScroll}
+          pages={chunkItems(products, HOME_PRODUCT_MOBILE_PAGE_SIZE)}
+          columns={HOME_PRODUCT_MOBILE_PAGE_SIZE}
+          locale={locale}
+          wishlistLabel={wishlistLabel}
+          compareLabel={compareLabel}
+          addToCartLabel={addToCartLabel}
+          isSignedIn={isSignedIn}
+        />
+      </div>
+      <div className="hidden md:block">
+        <RelatedSnapPages
+          scrollerRef={desktop.scrollerRef}
+          onScroll={desktop.onScroll}
+          pages={chunkItems(products, HOME_PRODUCT_DESKTOP_PAGE_SIZE)}
+          columns={HOME_PRODUCT_DESKTOP_PAGE_SIZE}
+          locale={locale}
+          wishlistLabel={wishlistLabel}
+          compareLabel={compareLabel}
+          addToCartLabel={addToCartLabel}
+          isSignedIn={isSignedIn}
+        />
+      </div>
+    </section>
+  );
+}
+
+function RelatedSnapPages({
+  scrollerRef,
+  onScroll,
+  pages,
+  columns,
+  locale,
+  wishlistLabel,
+  compareLabel,
+  addToCartLabel,
+  isSignedIn,
+}: {
+  scrollerRef: ReturnType<typeof useSnapCarousel>["scrollerRef"];
+  onScroll: () => void;
+  pages: ProductCardItem[][];
+  columns: number;
+  locale: Locale;
+  wishlistLabel: string;
+  compareLabel: string;
+  addToCartLabel: string;
+  isSignedIn: boolean;
+}) {
+  return (
+    <div
+      ref={scrollerRef}
+      onScroll={onScroll}
+      className={HOME_SCROLLER_CLASS}
+      style={{
+        gap: HOME_PRODUCT_CARD_GAP_PX,
+        scrollSnapType: "x mandatory",
+      }}
+    >
+      {pages.map((page, pageIndex) => (
+        <div
+          key={`related-page-${pageIndex}`}
+          className="grid min-w-full shrink-0 snap-start pb-6"
+          style={{
+            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            gap: HOME_PRODUCT_CARD_GAP_PX,
+          }}
+        >
+          {page.map((product) => (
+            <div key={product.id} className="flex min-w-0 justify-center">
+              <ProductCard
+                product={product}
+                locale={locale}
+                wishlistLabel={wishlistLabel}
+                compareLabel={compareLabel}
+                addToCartLabel={addToCartLabel}
+                isSignedIn={isSignedIn}
+              />
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -36,7 +36,7 @@ function SettingsIcon() {
   );
 }
 
-/** Admin nav for capabilities that exist in this project (no brands/attributes). */
+/** Admin nav for catalog and operations. */
 export function getAdminMenuItems(locale: string): AdminMenuItem[] {
   const base = `/${locale}/admin`;
 
@@ -73,6 +73,26 @@ export function getAdminMenuItems(locale: string): AdminMenuItem[] {
       parentGroupId: "products",
       icon: (
         <MenuIcon d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+      ),
+    },
+    {
+      id: "brands",
+      label: "Brand",
+      href: `${base}/brands`,
+      isSubCategory: true,
+      parentGroupId: "products",
+      icon: (
+        <MenuIcon d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+      ),
+    },
+    {
+      id: "attributes",
+      label: "Attributes",
+      href: `${base}/attributes`,
+      isSubCategory: true,
+      parentGroupId: "products",
+      icon: (
+        <MenuIcon d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4l2 2h4a2 2 0 012 2v3M7 21h8a2 2 0 002-2v-5M7 21v-4m12-1l-2.5-2.5M16.5 13.5L19 11m0 0l2.5 2.5M19 11v6" />
       ),
     },
     {
@@ -117,10 +137,18 @@ export function getAdminMenuItems(locale: string): AdminMenuItem[] {
     },
     {
       id: "hero",
-      label: "Hero",
+      label: "Hero / Banner",
       href: `${base}/hero`,
       icon: (
         <MenuIcon d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      ),
+    },
+    {
+      id: "reels",
+      label: "Reels",
+      href: `${base}/reels`,
+      icon: (
+        <MenuIcon d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
       ),
     },
     {

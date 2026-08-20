@@ -212,40 +212,38 @@ async function seed(): Promise<void> {
       },
     });
 
-  await db
-    .insert(schema.heroSlides)
-    .values({
-      id: seedIds.heroHome,
-      translations: {
-        hy: {
-          title: "White Shop",
-          subtitle: "New collection",
-          buttonLabel: "Browse",
-          buttonUrl: "/hy/products",
+  const heroSlotSeed = [
+    { id: seedIds.heroHome, title: "Left, top", sortOrder: 0 },
+    { id: seedIds.heroHomeBottom, title: "Left, bottom", sortOrder: 1 },
+    { id: seedIds.heroHomeRight, title: "Right column", sortOrder: 2 },
+  ] as const;
+
+  for (const slot of heroSlotSeed) {
+    const copy = {
+      title: slot.title,
+      buttonUrl: "/hy/products",
+    };
+    await db
+      .insert(schema.heroSlides)
+      .values({
+        id: slot.id,
+        translations: {
+          hy: { ...copy, buttonLabel: "Browse", buttonUrl: "/hy/products" },
+          en: { ...copy, title: slot.title, buttonLabel: "Shop now", buttonUrl: "/en/products" },
+          ru: { ...copy, buttonLabel: "Browse", buttonUrl: "/ru/products" },
         },
-        en: {
-          title: "White Shop",
-          subtitle: "New collection",
-          buttonLabel: "Shop now",
-          buttonUrl: "/en/products",
-        },
-        ru: {
-          title: "White Shop",
-          subtitle: "New collection",
-          buttonLabel: "Browse",
-          buttonUrl: "/ru/products",
-        },
-      },
-      sortOrder: 1,
-      isActive: true,
-    })
-    .onConflictDoUpdate({
-      target: schema.heroSlides.id,
-      set: {
+        sortOrder: slot.sortOrder,
         isActive: true,
-        updatedAt: now,
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: schema.heroSlides.id,
+        set: {
+          isActive: true,
+          sortOrder: slot.sortOrder,
+          updatedAt: now,
+        },
+      });
+  }
 
   await db
     .insert(schema.promotions)

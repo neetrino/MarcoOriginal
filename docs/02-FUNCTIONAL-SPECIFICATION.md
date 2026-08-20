@@ -58,7 +58,7 @@
 | CAT-004 | Active filter chips-ը յուրաքանչյուր filter-ի removal control ունեն։ |
 | CAT-005 | Pagination-ը server-side է, stable sort/tie-breaker-ով; page size-ը allowlist-ից է։ |
 | CAT-006 | Grid-ը wide desktop-ում 4, laptop-ում 3, mobile-ում 2 readable card է, առանց horizontal overflow-ի։ |
-| CAT-007 | Product card-ը ցույց է տալիս media, badge, title, category, price, compare-at, computed discount %, wishlist և stock state։ |
+| CAT-007 | Product card-ը ցույց է տալիս media, tags/badge, title, category, price, compare-at, computed discount %, wishlist, stock state և warranty next to availability։ |
 | CAT-008 | Transparent PNG/WebP asset-ի container-ը theme-aware/transparent է և պարտադիր սպիտակ background չի ավելացնում։ |
 | CAT-009 | Card click-ը տանում է `/{locale}/products/{slug}`; wishlist interaction-ը չի trigger անում card navigation-ը։ |
 | CAT-010 | Unpublished/archived product-ը public catalog-ում չի ցուցադրվում։ |
@@ -68,7 +68,7 @@
 | ID | Պահանջ / acceptance criteria |
 |---|---|
 | PDP-001 | Gallery-ն ունի primary image, sorted thumbnails, responsive sizing և accessible selection; optional lightbox progressive enhancement է։ |
-| PDP-002 | Detail-ը ցույց է տալիս translated title/description, categories, price, compare-at, discount badge, SKU և stock status։ |
+| PDP-002 | Detail-ը ցույց է տալիս translated title (title section), formatted short text under the price, specifications table, categories, price, compare-at, discount badge, SKU, stock status և warranty (when set)։ |
 | PDP-003 | Quantity control-ը min 1 է և չի անցնում server-confirmed purchasable stock-ը։ |
 | PDP-004 | Add to Cart-ը server-side վերահաստատում է product status/stock/price և վերադարձնում է actionable conflict error։ |
 | PDP-005 | Related products-ը նույն category-ից active products են, current product-ը բացառված է։ |
@@ -183,7 +183,7 @@
 
 ### 9.1 Shell
 
-- Responsive left sidebar՝ Home, Dashboard, Home Hero, Orders, Products, Categories, Coupons, Discounts, Users, Messages, Analytics, Delivery, Blog, Settings։
+- Responsive left sidebar՝ Home, Dashboard, Home Hero, Orders, Products, Categories, Brand, Coupons, Discounts, Users, Messages, Analytics, Delivery, Blog, Settings։
 - Home-ը locale-aware storefront home link է։
 - Desktop sidebar-ը collapsible է, mobile-ը focus-managed drawer։
 
@@ -242,7 +242,7 @@
 
 | ID | Պահանջ / acceptance criteria |
 |---|---|
-| APROD-001 | Fields՝ title/description/SEO + generated/editable slug **ընտրված locale-ի համար** (մեկ դաշտերի հավաքածու + locale selector, `DEC-017`), SKU, media, primary/sort, categories, price, compare-at, stock, threshold, status, featured/upcoming, badge style/position։ Locale-ից անկախ fields-ը (SKU, price, stock, …) մեկ անգամ են։ |
+| APROD-001 | Fields՝ title/description/SEO + generated/editable slug **ընտրված locale-ի համար** (մեկ դաշտերի հավաքածու + locale selector, `DEC-017`), SKU, media, primary/sort, categories, price, compare-at, stock, threshold, status, featured/upcoming, sales class (retail/wholesale), warranty years, product tags (text/percent + color), badge style/position։ Locale-ից անկախ fields-ը (SKU, price, stock, …) մեկ անգամ են։ |
 | APROD-002 | SKU unique է; `(locale, slug)` unique է և server-side ստուգվում է constraint-ով՝ յուրաքանչյուր լրացված locale-ի համար։ |
 | APROD-003 | Price/compare-at/stock/threshold constraints-ը server + DB checks ունեն։ |
 | APROD-004 | Multiple images-ի primary uniqueness և sort order-ը պահպանվում են transaction-safe։ |

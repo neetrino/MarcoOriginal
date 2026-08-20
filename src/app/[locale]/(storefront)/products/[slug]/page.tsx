@@ -6,11 +6,12 @@ import { getEnv } from "@/config/env";
 import { getProductDetailBySlug } from "@/features/products/queries";
 import { ProductDetailView } from "@/features/products/ui/ProductDetailView";
 import { ProductRelatedSection } from "@/features/products/ui/ProductRelatedSection";
-import { ProductReviewsIsland } from "@/features/products/ui/ProductReviewsIsland";
+import { getCompareProductIds } from "@/features/compare/queries";
 import { isProductInWishlist } from "@/features/wishlist/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { htmlToPlainText } from "@/lib/sanitize/html";
 import {
   createDisplayPriceFormatter,
   getSelectedCurrency,
@@ -76,8 +77,11 @@ export async function generateMetadata({
   }
 
   const title = product.translation.seoTitle ?? product.translation.title;
-  const description =
+  const rawDescription =
     product.translation.seoDescription ?? product.translation.description;
+  const description = rawDescription
+    ? htmlToPlainText(rawDescription)
+    : undefined;
   const canonicalPath = `/${rawLocale}/products/${product.translation.slug}`;
 
   return {
@@ -107,10 +111,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const [user, currency, inWishlist] = await Promise.all([
+  const [user, currency, inWishlist, compareIds] = await Promise.all([
     getCurrentUser(),
     getSelectedCurrency(),
     isProductInWishlist(product.id),
+    getCompareProductIds(),
   ]);
   const formatPrice = await createDisplayPriceFormatter(locale, currency);
   const price = formatPrice(product.priceAmount);
@@ -123,7 +128,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     locale,
     slug: product.translation.slug,
     title: product.translation.title,
-    description: product.translation.description,
+    description: product.translation.description
+      ? htmlToPlainText(product.translation.description)
+      : undefined,
     sku: product.sku,
     priceAmount: product.priceAmount,
     imageUrl: product.images[0]?.url ?? product.imageUrl,
@@ -140,6 +147,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       compareAtFormatted={compareAt?.formatted ?? null}
       isSignedIn={isSignedIn}
       inWishlist={inWishlist}
+      inCompare={compareIds.has(product.id)}
       dictionary={dictionary}
       jsonLd={jsonLd}
       relatedSlot={
@@ -148,18 +156,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
             locale={locale}
             productId={product.id}
             currency={currency}
-            isSignedIn={isSignedIn}
-            dictionary={dictionary}
-          />
-        </Suspense>
-      }
-      reviewsSlot={
-        <Suspense fallback={<SectionFallback />}>
-          <ProductReviewsIsland
-            locale={locale}
-            productId={product.id}
-            productSlug={product.translation.slug}
-            userId={user?.id}
             isSignedIn={isSignedIn}
             dictionary={dictionary}
           />

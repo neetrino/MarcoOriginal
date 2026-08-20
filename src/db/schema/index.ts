@@ -1,9 +1,19 @@
 export { appMeta } from "@/db/schema/app-meta";
 export {
+  ATTRIBUTE_VALUE_KINDS,
+  attributes,
+  attributeValues,
+  brands,
   categories,
   productCategories,
   products,
+  PRODUCT_TAG_TYPES,
+  PRODUCT_WARRANTY_YEARS,
+  type AttributeValueKind,
   type LocaleTranslation,
+  type ProductTag,
+  type ProductTagType,
+  type ProductWarrantyYears,
   type TranslationsJson,
 } from "@/db/schema/catalog";
 export { stockMovements } from "@/db/schema/inventory";
@@ -15,10 +25,13 @@ export {
 export {
   blogPosts,
   heroSlides,
+  reels,
   type BlogTranslation,
   type BlogTranslationsJson,
   type HeroTranslation,
   type HeroTranslationsJson,
+  type ReelTranslation,
+  type ReelTranslationsJson,
 } from "@/db/schema/content";
 export {
   cartItems,

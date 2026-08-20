@@ -19,9 +19,10 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
+      "media-src 'self' blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https:",
-      "frame-src 'self' https://www.google.com https://maps.google.com",
+      "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -38,6 +39,11 @@ function buildImageRemotePatterns(): NonNullable<
     {
       protocol: "https",
       hostname: "images.pexels.com",
+    },
+    {
+      protocol: "https",
+      hostname: "img.youtube.com",
+      pathname: "/vi/**",
     },
     {
       protocol: "https",
@@ -69,6 +75,11 @@ function buildImageRemotePatterns(): NonNullable<
 const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
   },
   images: {
     remotePatterns: buildImageRemotePatterns(),

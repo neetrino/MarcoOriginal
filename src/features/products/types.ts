@@ -1,7 +1,10 @@
+import type { ProductTag } from "@/db/schema";
+
 type LocaleTranslation = {
   title: string;
   slug: string;
   description?: string;
+  specifications?: Array<{ title: string; value: string }>;
   seoTitle?: string;
   seoDescription?: string;
 };
@@ -18,6 +21,8 @@ export type CatalogProduct = {
   stockOnHand: number;
   translation: LocaleTranslation;
   imageUrl: string | null;
+  warrantyYears: number;
+  tags: ProductTag[];
 };
 
 export type ProductGalleryImage = {

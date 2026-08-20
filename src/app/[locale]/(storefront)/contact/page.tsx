@@ -1,8 +1,13 @@
 import { notFound } from "next/navigation";
 
+import { buildContactLocations } from "@/features/contact/content/contact-locations";
 import { ContactForm } from "@/features/contact/ui/ContactForm";
 import { ContactInfo } from "@/features/contact/ui/ContactInfo";
 import { ContactMap } from "@/features/contact/ui/ContactMap";
+import {
+  CONTACT_PAGE_SHELL_CLASS,
+  CONTACT_SECTION_INNER_CLASS,
+} from "@/features/contact/ui/contact-section-classes";
 import { isLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 
@@ -18,26 +23,20 @@ export default async function ContactPage({ params }: ContactPageProps) {
   }
 
   const dictionary = getDictionary(rawLocale);
+  const locations = buildContactLocations(dictionary.contact.locations);
 
   return (
-    <div className="-mx-4 -my-10 bg-white sm:-mx-6 lg:-mx-8">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-          <ContactInfo copy={dictionary.contact} />
-          <ContactForm
-            copy={{
-              name: dictionary.contact.name,
-              email: dictionary.contact.email,
-              phone: dictionary.contact.phone,
-              message: dictionary.contact.message,
-              submit: dictionary.contact.submit,
-              success: dictionary.contact.success,
-              error: dictionary.contact.error,
-            }}
-          />
+    <div className={CONTACT_PAGE_SHELL_CLASS}>
+      <div className={CONTACT_SECTION_INNER_CLASS}>
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-start md:gap-12 lg:gap-16">
+          <ContactInfo copy={dictionary.contact} locations={locations} />
+          <ContactForm copy={dictionary.contact.form} />
         </div>
       </div>
-      <ContactMap title={dictionary.contact.mapTitle} />
+      <ContactMap
+        locations={locations}
+        sectionTitle={dictionary.contact.mapSectionTitle}
+      />
     </div>
   );
 }

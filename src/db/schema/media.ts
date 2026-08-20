@@ -11,8 +11,13 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { blogPosts, heroSlides } from "@/db/schema/content";
-import { categories, products } from "@/db/schema/catalog";
+import { blogPosts, heroSlides, reels } from "@/db/schema/content";
+import {
+  attributeValues,
+  brands,
+  categories,
+  products,
+} from "@/db/schema/catalog";
 import {
   createdAtColumn,
   idColumn,
@@ -46,12 +51,22 @@ export const mediaAssets = pgTable(
     categoryId: uuid("category_id").references(() => categories.id, {
       onDelete: "restrict",
     }),
+    brandId: uuid("brand_id").references(() => brands.id, {
+      onDelete: "restrict",
+    }),
     heroSlideId: uuid("hero_slide_id").references(() => heroSlides.id, {
       onDelete: "restrict",
     }),
     blogPostId: uuid("blog_post_id").references(() => blogPosts.id, {
       onDelete: "restrict",
     }),
+    reelId: uuid("reel_id").references(() => reels.id, {
+      onDelete: "restrict",
+    }),
+    attributeValueId: uuid("attribute_value_id").references(
+      () => attributeValues.id,
+      { onDelete: "restrict" },
+    ),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),
   },
@@ -59,11 +74,17 @@ export const mediaAssets = pgTable(
     uniqueIndex("media_assets_object_key_uidx").on(table.objectKey),
     index("media_assets_product_idx").on(table.productId),
     index("media_assets_category_idx").on(table.categoryId),
+    index("media_assets_brand_idx").on(table.brandId),
     index("media_assets_hero_idx").on(table.heroSlideId),
     index("media_assets_blog_idx").on(table.blogPostId),
+    index("media_assets_reel_idx").on(table.reelId),
+    index("media_assets_attribute_value_idx").on(table.attributeValueId),
     uniqueIndex("media_assets_product_primary_uidx")
       .on(table.productId)
       .where(sql`${table.productId} IS NOT NULL AND ${table.isPrimary} = true`),
+    uniqueIndex("media_assets_brand_primary_uidx")
+      .on(table.brandId)
+      .where(sql`${table.brandId} IS NOT NULL AND ${table.isPrimary} = true`),
     uniqueIndex("media_assets_hero_desktop_uidx")
       .on(table.heroSlideId)
       .where(
@@ -79,20 +100,34 @@ export const mediaAssets = pgTable(
       .where(
         sql`${table.blogPostId} IS NOT NULL AND ${table.role} = 'COVER'`,
       ),
+    uniqueIndex("media_assets_reel_video_uidx")
+      .on(table.reelId)
+      .where(
+        sql`${table.reelId} IS NOT NULL AND ${table.role} = 'REEL_VIDEO'`,
+      ),
+    uniqueIndex("media_assets_attribute_value_uidx")
+      .on(table.attributeValueId)
+      .where(sql`${table.attributeValueId} IS NOT NULL`),
     check(
       "media_assets_owner_chk",
       sql`(
         (${table.uploadStatus} = 'PENDING'
           AND ${table.productId} IS NULL
           AND ${table.categoryId} IS NULL
+          AND ${table.brandId} IS NULL
           AND ${table.heroSlideId} IS NULL
-          AND ${table.blogPostId} IS NULL)
+          AND ${table.blogPostId} IS NULL
+          AND ${table.reelId} IS NULL
+          AND ${table.attributeValueId} IS NULL)
         OR (${table.role} = 'BRANDING' AND ${table.purpose} IS NOT NULL)
         OR (
           (${table.productId} IS NOT NULL)::int
           + (${table.categoryId} IS NOT NULL)::int
+          + (${table.brandId} IS NOT NULL)::int
           + (${table.heroSlideId} IS NOT NULL)::int
           + (${table.blogPostId} IS NOT NULL)::int
+          + (${table.reelId} IS NOT NULL)::int
+          + (${table.attributeValueId} IS NOT NULL)::int
         ) = 1
       )`,
     ),

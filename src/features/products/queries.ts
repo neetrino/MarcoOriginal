@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
@@ -11,6 +11,8 @@ import {
   productCategories,
   products,
 } from "@/db/schema";
+import { parseProductTags } from "@/features/products/domain/product-presentation";
+import { parseProductSpecs } from "@/features/products/domain/product-specs";
 import { resolveProductPrices } from "@/features/promotions/application/resolve-product-prices";
 import type {
   CatalogProduct,
@@ -34,6 +36,7 @@ export type {
 
 const RELATED_PRODUCTS_LIMIT = 4;
 export const CATALOG_PAGE_SIZE = 24;
+export const HOME_NEW_PRODUCTS_LIMIT = 8;
 
 function toCatalogProduct(
   product: typeof products.$inferSelect,
@@ -52,8 +55,15 @@ function toCatalogProduct(
     id: product.id,
     sku: product.sku,
     stockOnHand: product.stockOnHand,
-    translation,
+    translation: {
+      ...translation,
+      specifications: parseProductSpecs(translation.specifications).map(
+        (row) => ({ title: row.title, value: row.value }),
+      ),
+    },
     imageUrl,
+    warrantyYears: product.warrantyYears,
+    tags: parseProductTags(product.tags),
   };
 }
 
@@ -135,6 +145,46 @@ const activeCatalogWhere = and(
   isNull(products.deletedAt),
 );
 
+export type CatalogListFilter = {
+  categoryIds?: readonly string[];
+  minPriceAmd?: number;
+  maxPriceAmd?: number;
+};
+
+function catalogListWhere(filter?: CatalogListFilter) {
+  const conditions = [activeCatalogWhere];
+  if (filter?.categoryIds && filter.categoryIds.length > 0) {
+    conditions.push(
+      inArray(
+        products.id,
+        getDb()
+          .select({ id: productCategories.productId })
+          .from(productCategories)
+          .where(
+            inArray(productCategories.categoryId, [...filter.categoryIds]),
+          ),
+      ),
+    );
+  }
+  if (filter?.minPriceAmd != null) {
+    conditions.push(gte(products.priceAmount, filter.minPriceAmd));
+  }
+  if (filter?.maxPriceAmd != null) {
+    conditions.push(lte(products.priceAmount, filter.maxPriceAmd));
+  }
+  return and(...conditions);
+}
+
+function catalogFilterCacheKey(filter?: CatalogListFilter): string {
+  if (!filter) return "";
+  const categoryKey = [...(filter.categoryIds ?? [])].sort().join(",");
+  return [
+    categoryKey,
+    filter.minPriceAmd ?? "",
+    filter.maxPriceAmd ?? "",
+  ].join(":");
+}
+
 /** Active products by id — used by wishlist (not shared-cache; IDs are user-specific). */
 export async function getActiveProductsByIds(
   locale: Locale,
@@ -155,18 +205,20 @@ export async function getActiveProductsByIds(
 async function loadActiveProductsPage(
   locale: Locale,
   page: number,
+  filter?: CatalogListFilter,
 ): Promise<{ products: CatalogProduct[]; total: number; pageSize: number }> {
   const offset = (page - 1) * CATALOG_PAGE_SIZE;
+  const where = catalogListWhere(filter);
 
   const [[countRow], rows] = await Promise.all([
     getDb()
       .select({ count: sql<number>`count(*)::int` })
       .from(products)
-      .where(activeCatalogWhere),
+      .where(where),
     getDb()
       .select()
       .from(products)
-      .where(activeCatalogWhere)
+      .where(where)
       .orderBy(desc(products.createdAt))
       .limit(CATALOG_PAGE_SIZE)
       .offset(offset),
@@ -185,12 +237,18 @@ async function loadActiveProductsPage(
 export async function getActiveProductsPage(
   locale: Locale,
   page: number,
+  filter?: CatalogListFilter,
 ): Promise<{ products: CatalogProduct[]; total: number; pageSize: number }> {
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
 
   return unstable_cache(
-    async () => loadActiveProductsPage(locale, safePage),
-    ["active-products-page", locale, String(safePage)],
+    async () => loadActiveProductsPage(locale, safePage, filter),
+    [
+      "active-products-page",
+      locale,
+      String(safePage),
+      catalogFilterCacheKey(filter),
+    ],
     {
       tags: [CACHE_TAGS.products],
       revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,
@@ -235,6 +293,31 @@ export async function getFeaturedProducts(
   return unstable_cache(
     async () => loadFeaturedProducts(locale),
     ["featured-products", locale],
+    {
+      tags: [CACHE_TAGS.products],
+      revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,
+    },
+  )();
+}
+
+async function loadNewestProducts(locale: Locale): Promise<CatalogProduct[]> {
+  const rows = await getDb()
+    .select()
+    .from(products)
+    .where(activeCatalogWhere)
+    .orderBy(desc(products.createdAt))
+    .limit(HOME_NEW_PRODUCTS_LIMIT);
+
+  return withProductImages(rows, locale);
+}
+
+/** Most recently created active products for the home new-arrivals grid. */
+export async function getNewestProducts(
+  locale: Locale,
+): Promise<CatalogProduct[]> {
+  return unstable_cache(
+    async () => loadNewestProducts(locale),
+    ["newest-products", locale],
     {
       tags: [CACHE_TAGS.products],
       revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,

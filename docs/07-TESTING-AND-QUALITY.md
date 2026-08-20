@@ -192,7 +192,7 @@ Failure-ը `continue-on-error`, ignored exit code կամ disabled rule-ով չի
 - [ ] Relevant unit/component/integration tests pass
 - [ ] Critical flow E2E pass երբ feature slice-ը end-to-end հասանելի է
 - [ ] Fresh migration/seed pass database փոփոխության դեպքում
-- [ ] Canonical schema inventory check-ը հաստատում է ճիշտ 25 application table
+- [ ] Canonical schema inventory check-ը հաստատում է ճիշտ 29 application table
 - [ ] Security/accessibility/responsive checks ըստ risk-ի
 - [ ] No hidden/skipped failure առանց linked approved issue-ի
 - [ ] Docs/route/schema/decision records updated

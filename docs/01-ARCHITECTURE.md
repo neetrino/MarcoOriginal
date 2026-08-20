@@ -67,6 +67,7 @@ src/
       (storefront)/
         page.tsx
         products/
+        brand/
         about/
         contact/
         blog/
@@ -95,6 +96,8 @@ src/
     users/
     products/
     categories/
+    brands/
+    attributes/
     inventory/
     cart/
     checkout/

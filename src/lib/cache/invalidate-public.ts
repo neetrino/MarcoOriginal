@@ -47,6 +47,16 @@ export function invalidateProductsCache(input?: {
   }
 }
 
+/** Invalidates homepage reel caches. */
+export function invalidateReelsCache(): void {
+  updateTag(CACHE_TAGS.reels);
+}
+
+/** Invalidates storefront brand directory caches. */
+export function invalidateBrandsCache(): void {
+  updateTag(CACHE_TAGS.brands);
+}
+
 /** Invalidates blog list caches and optional per-post / per-slug detail caches. */
 export function invalidateBlogCache(input?: {
   postId?: string;

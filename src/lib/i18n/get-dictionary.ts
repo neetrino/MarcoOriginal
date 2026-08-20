@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/i18n/config";
 
 import enAbout from "@/locales/en/about.json";
+import enAdmin from "@/locales/en/admin.json";
 import enAuth from "@/locales/en/auth.json";
 import enBlog from "@/locales/en/blog.json";
 import enCart from "@/locales/en/cart.json";
@@ -11,9 +12,11 @@ import enContact from "@/locales/en/contact.json";
 import enHome from "@/locales/en/home.json";
 import enProduct from "@/locales/en/product.json";
 import enProfile from "@/locales/en/profile.json";
+import enCompare from "@/locales/en/compare.json";
 import enWishlist from "@/locales/en/wishlist.json";
 
 import hyAbout from "@/locales/hy/about.json";
+import hyAdmin from "@/locales/hy/admin.json";
 import hyAuth from "@/locales/hy/auth.json";
 import hyBlog from "@/locales/hy/blog.json";
 import hyCart from "@/locales/hy/cart.json";
@@ -24,9 +27,11 @@ import hyContact from "@/locales/hy/contact.json";
 import hyHome from "@/locales/hy/home.json";
 import hyProduct from "@/locales/hy/product.json";
 import hyProfile from "@/locales/hy/profile.json";
+import hyCompare from "@/locales/hy/compare.json";
 import hyWishlist from "@/locales/hy/wishlist.json";
 
 import ruAbout from "@/locales/ru/about.json";
+import ruAdmin from "@/locales/ru/admin.json";
 import ruAuth from "@/locales/ru/auth.json";
 import ruBlog from "@/locales/ru/blog.json";
 import ruCart from "@/locales/ru/cart.json";
@@ -37,6 +42,7 @@ import ruContact from "@/locales/ru/contact.json";
 import ruHome from "@/locales/ru/home.json";
 import ruProduct from "@/locales/ru/product.json";
 import ruProfile from "@/locales/ru/profile.json";
+import ruCompare from "@/locales/ru/compare.json";
 import ruWishlist from "@/locales/ru/wishlist.json";
 
 type LocaleNamespaces = {
@@ -44,6 +50,7 @@ type LocaleNamespaces = {
   home: typeof hyHome;
   contact: typeof hyContact;
   about: typeof hyAbout;
+  admin: typeof hyAdmin;
   auth: typeof hyAuth;
   profile: typeof hyProfile;
   checkout: typeof hyCheckout;
@@ -52,6 +59,7 @@ type LocaleNamespaces = {
   blog: typeof hyBlog;
   catalog: typeof hyCatalog;
   wishlist: typeof hyWishlist;
+  compare: typeof hyCompare;
 };
 
 function buildDictionary(namespaces: LocaleNamespaces) {
@@ -63,6 +71,7 @@ function buildDictionary(namespaces: LocaleNamespaces) {
     home: namespaces.home,
     contact: namespaces.contact,
     about: namespaces.about,
+    admin: namespaces.admin,
     auth: namespaces.auth,
     profile: namespaces.profile,
     checkout: namespaces.checkout,
@@ -71,6 +80,7 @@ function buildDictionary(namespaces: LocaleNamespaces) {
     blog: namespaces.blog,
     catalog: namespaces.catalog,
     wishlist: namespaces.wishlist,
+    compare: namespaces.compare,
   } as const;
 }
 
@@ -80,6 +90,7 @@ const dictionaries = {
     home: hyHome,
     contact: hyContact,
     about: hyAbout,
+    admin: hyAdmin,
     auth: hyAuth,
     profile: hyProfile,
     checkout: hyCheckout,
@@ -88,12 +99,14 @@ const dictionaries = {
     blog: hyBlog,
     catalog: hyCatalog,
     wishlist: hyWishlist,
+    compare: hyCompare,
   }),
   en: buildDictionary({
     common: enCommon,
     home: enHome,
     contact: enContact,
     about: enAbout,
+    admin: enAdmin,
     auth: enAuth,
     profile: enProfile,
     checkout: enCheckout,
@@ -102,12 +115,14 @@ const dictionaries = {
     blog: enBlog,
     catalog: enCatalog,
     wishlist: enWishlist,
+    compare: enCompare,
   }),
   ru: buildDictionary({
     common: ruCommon,
     home: ruHome,
     contact: ruContact,
     about: ruAbout,
+    admin: ruAdmin,
     auth: ruAuth,
     profile: ruProfile,
     checkout: ruCheckout,
@@ -116,6 +131,7 @@ const dictionaries = {
     blog: ruBlog,
     catalog: ruCatalog,
     wishlist: ruWishlist,
+    compare: ruCompare,
   }),
 } as const;
 

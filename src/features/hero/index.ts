@@ -1,4 +1,8 @@
 export {
+  createHeroSlideFromImageAction,
+  saveHeroSlideImageAction,
+} from "@/features/hero/application/manage-hero-image";
+export {
   createHeroSlideAction,
   deleteHeroSlideAction,
   reorderHeroSlideAction,

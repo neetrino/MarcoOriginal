@@ -9,6 +9,10 @@ import {
   productIdsSchema,
   type ProductIdsInput,
 } from "@/features/products/schemas/admin-list";
+import {
+  DEFAULT_PRODUCT_STOCK,
+  PRODUCT_RESTOCK_AT,
+} from "@/features/products/domain/product-stock";
 import { requireAdmin } from "@/lib/auth/policies";
 import { invalidateProductsCache } from "@/lib/cache/invalidate-public";
 import { createId } from "@/lib/id";
@@ -188,11 +192,14 @@ export async function duplicateProductAction(
     translations: withCopySuffix(existing.translations),
     priceAmount: existing.priceAmount,
     compareAtAmount: existing.compareAtAmount,
-    stockOnHand: 0,
-    lowStockThreshold: existing.lowStockThreshold,
+    stockOnHand: DEFAULT_PRODUCT_STOCK,
+    lowStockThreshold: PRODUCT_RESTOCK_AT,
     status: "DRAFT",
     isFeatured: false,
     isUpcoming: existing.isUpcoming,
+    salesClass: existing.salesClass,
+    warrantyYears: existing.warrantyYears,
+    tags: existing.tags,
     badgeTranslations: existing.badgeTranslations,
     badgeStyle: existing.badgeStyle,
     badgePosition: existing.badgePosition,

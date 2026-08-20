@@ -1,5 +1,5 @@
 {
-  "brand": "White-Shop",
+  "brand": "MARCO",
   "nav": {
     "home": "Главная",
     "products": "Товары",
@@ -9,10 +9,13 @@
     "about": "О нас",
     "contact": "Контакты",
     "wishlist": "Избранное",
+    "compare": "Сравнение",
     "openMenu": "Открыть меню",
     "closeMenu": "Закрыть меню",
     "navigation": "Навигация",
-    "shopNow": "В магазин"
+    "shopNow": "В магазин",
+    "categories": "Категории",
+    "brand": "Бренд"
   },
   "header": {
     "language": "Язык",
@@ -21,16 +24,30 @@
     "logout": "Выход",
     "profile": "Профиль",
     "admin": "Админ",
-    "createAccount": "Создать аккаунт"
+    "createAccount": "Создать аккаунт",
+    "logoHome": "MARCO GROUP — главная",
+    "socialLinks": "Социальные сети",
+    "searchPlaceholder": "Искать товары",
+    "searchSubmit": "Поиск"
   },
   "footer": {
     "shop": "Магазин",
-    "description": "Профессиональный интернет-магазин для повседневных покупок.",
+    "description": "Ведущая онлайн-платформа Армении для премиальной электроники и бытовой техники.",
+    "brandDescription": "Ведущая онлайн-платформа\nАрмении для премиальной электроники и\nбытовой техники с\n2010 года. Качество,\nкоторому можно доверять.",
     "quickLinks": "Быстрые ссылки",
     "legal": "Правовая информация",
     "privacyPolicy": "Политика конфиденциальности",
     "terms": "Условия",
     "contactInfo": "Контактная информация",
-    "copyright": "Copyright © {year} Neetrino IT Company. All Rights Reserved."
+    "company": "Навигация",
+    "support": "Поддержка",
+    "contacts": "Контакты",
+    "copyright": "Copyright © {year} | Все права защищены | Создано Neetrino IT Company",
+    "copyrightBefore": "Copyright © {year} | Все права защищены | Создано ",
+    "copyrightAfter": "",
+    "creditStudio": "Neetrino IT Company",
+    "paymentMethods": "Способы оплаты",
+    "secondaryEmail": "marcogrouparmenia@mail.ru",
+    "phones": ["+374 93 52 04 06", "+374 98 19 04 06", "+374 41 34 04 06"]
   }
 }

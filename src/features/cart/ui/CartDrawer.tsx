@@ -286,18 +286,16 @@ export function CartDrawer({
           onClick={openDrawer}
           onPointerEnter={prefetchDrawerView}
           onFocus={prefetchDrawerView}
-          className="inline-flex h-11 items-center gap-1 rounded-lg px-1 text-gray-700 transition-colors hover:text-gray-900"
+          className="relative inline-flex h-10 min-w-[7.75rem] shrink-0 items-center justify-center gap-2.5 rounded-[68px] bg-marco-yellow px-3.5 pl-4 text-xs font-bold text-marco-slate transition-[filter] hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-slate/25"
           aria-label={dictionary.nav.cart}
           aria-expanded={open}
           data-cart-fly-target
         >
-          <span className="relative inline-flex h-11 w-11 items-center justify-center">
+          <span className="relative inline-flex items-center justify-center">
             <ShoppingCart className="h-5 w-5" aria-hidden="true" />
-            {badgeCount > 0 ? (
-              <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] font-semibold text-white">
-                {badgeCount > 99 ? "99+" : badgeCount}
-              </span>
-            ) : null}
+          </span>
+          <span className="tabular-nums">
+            {badgeCount > 99 ? "99+" : badgeCount}
           </span>
         </button>
       )}

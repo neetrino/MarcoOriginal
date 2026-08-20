@@ -30,6 +30,7 @@ type MobileNavDrawerProps = {
   locale: Locale;
   dictionary: Dictionary;
   navItems: readonly NavItem[];
+  triggerClassName?: string;
 };
 
 function isNavItemActive(pathname: string, href: string, locale: Locale): boolean {
@@ -47,6 +48,7 @@ export function MobileNavDrawer({
   locale,
   dictionary,
   navItems,
+  triggerClassName,
 }: MobileNavDrawerProps) {
   const menuId = useId();
   const pathname = usePathname() ?? "";
@@ -181,7 +183,10 @@ export function MobileNavDrawer({
       <button
         type="button"
         onClick={toggleMenu}
-        className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-white transition-opacity hover:opacity-80 touch-manipulation sm:h-10 sm:w-10"
+        className={
+          triggerClassName ??
+          "relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-white transition-opacity hover:opacity-80 touch-manipulation sm:h-10 sm:w-10"
+        }
         aria-label={open ? dictionary.nav.closeMenu : dictionary.nav.openMenu}
         aria-expanded={open}
         aria-controls={menuId}
@@ -210,7 +215,7 @@ export function MobileNavDrawer({
 
       {mounted && rendered
         ? createPortal(
-            <div className="md:hidden">
+            <div className="min-[1180px]:hidden">
               <button
                 type="button"
                 aria-label={dictionary.nav.closeMenu}
@@ -273,7 +278,7 @@ export function MobileNavDrawer({
                     <AppLink
                       href={shopHref}
                       prefetchPolicy="intent"
-                      className="flex w-full items-center justify-center rounded-full bg-gray-900 px-6 py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                      className="flex w-full items-center justify-center rounded-full bg-marco-yellow px-6 py-3.5 text-sm font-semibold text-marco-slate transition-[filter] hover:brightness-95"
                       onClick={() => setOpen(false)}
                     >
                       {dictionary.nav.shopNow}

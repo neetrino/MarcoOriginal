@@ -1,4 +1,6 @@
-import { ProductCard } from "@/features/products/ui/ProductCard";
+import { mapProductCards } from "@/features/products/map-product-cards";
+import { ProductRelatedRail } from "@/features/products/ui/ProductRelatedRail";
+import { getCompareProductIds } from "@/features/compare/queries";
 import { getRelatedProducts } from "@/features/products/queries";
 import { getWishlistProductIds } from "@/features/wishlist/queries";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
@@ -27,44 +29,31 @@ export async function ProductRelatedSection({
     return null;
   }
 
-  const [wishlistIds, formatPrice] = await Promise.all([
+  const [wishlistIds, compareIds, formatPrice] = await Promise.all([
     getWishlistProductIds(related.map((item) => item.id)),
+    getCompareProductIds(),
     createDisplayPriceFormatter(locale, currency),
   ]);
-
-  const labels = dictionary.product;
+  const cards = mapProductCards(
+    related,
+    locale,
+    formatPrice,
+    dictionary.product,
+    wishlistIds,
+    compareIds,
+  );
 
   return (
-    <section className="flex flex-col gap-6">
-      <h2 className="text-2xl font-semibold text-gray-900">{labels.related}</h2>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {related.map((item) => {
-          const price = formatPrice(item.priceAmount);
-          const compareAt =
-            item.compareAtAmount != null
-              ? formatPrice(item.compareAtAmount)
-              : null;
-
-          return (
-            <ProductCard
-              key={item.id}
-              href={`/${locale}/products/${item.translation.slug}`}
-              title={item.translation.title}
-              priceFormatted={price.formatted}
-              compareAtFormatted={compareAt?.formatted ?? null}
-              discountPercent={item.discountPercent}
-              imageUrl={item.imageUrl}
-              inStock={item.stockOnHand > 0}
-              locale={locale}
-              productId={item.id}
-              inWishlist={wishlistIds.has(item.id)}
-              isSignedIn={isSignedIn}
-              wishlistLabel={dictionary.nav.wishlist}
-              addToCartLabel={labels.addToCart}
-            />
-          );
-        })}
-      </div>
-    </section>
+    <ProductRelatedRail
+      locale={locale}
+      title={dictionary.product.related}
+      previousPageLabel={dictionary.catalog.previousPage}
+      nextPageLabel={dictionary.catalog.nextPage}
+      wishlistLabel={dictionary.nav.wishlist}
+      compareLabel={dictionary.nav.compare}
+      addToCartLabel={dictionary.product.addToCart}
+      isSignedIn={isSignedIn}
+      products={cards}
+    />
   );
 }

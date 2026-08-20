@@ -1,13 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
-  --muted: #4b5563;
+  --background: #ffffff;
+  --foreground: #181111;
+  --muted: #3f5466;
   --border: #e5e7eb;
-  --accent: #111827;
-  --accent-foreground: #f9fafb;
+  --accent: #181111;
+  --accent-foreground: #ffffff;
   --radius: 15px;
+  --marco-yellow: #ffca03;
+  --marco-slate: #3f5466;
+  --marco-gray: #f4f4f4;
+  --marco-footer: #f2f2f2;
+  --marco-ink: #181111;
+  --marco-card: #f6f6f6;
 }
 
 @theme inline {
@@ -17,6 +23,13 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-marco-yellow: var(--marco-yellow);
+  --color-marco-slate: var(--marco-slate);
+  --color-marco-gray: var(--marco-gray);
+  --color-marco-black: var(--marco-slate);
+  --color-marco-footer: var(--marco-footer);
+  --color-marco-ink: var(--marco-ink);
+  --color-marco-card: var(--marco-card);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --radius-sm: 15px;

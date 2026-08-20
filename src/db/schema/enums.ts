@@ -14,6 +14,11 @@ export const productStatusEnum = pgEnum("product_status", [
   "ARCHIVED",
 ]);
 
+export const productSalesClassEnum = pgEnum("product_sales_class", [
+  "RETAIL",
+  "WHOLESALE",
+]);
+
 export const categoryStatusEnum = pgEnum("category_status", [
   "ACTIVE",
   "ARCHIVED",
@@ -32,6 +37,7 @@ export const mediaRoleEnum = pgEnum("media_role", [
   "HERO_DESKTOP",
   "HERO_MOBILE",
   "BRANDING",
+  "REEL_VIDEO",
 ]);
 
 export const stockMovementReasonEnum = pgEnum("stock_movement_reason", [

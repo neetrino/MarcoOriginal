@@ -38,6 +38,7 @@ import {
   evaluateCouponDiscount,
 } from "@/features/promotions/domain/evaluate-coupon";
 import { normalizePromotionCode } from "@/features/promotions/domain/promotion-rules";
+import { restockIfAtThreshold } from "@/features/products/domain/product-stock";
 import { resolveProductPrices } from "@/features/promotions/application/resolve-product-prices";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheckoutRateSnapshot } from "@/lib/fx/service";
@@ -181,6 +182,7 @@ export async function createOrderAction(
         compareAtAmount: number | null;
         lineDiscountAmount: number;
         lineTotal: number;
+        soldStock: number;
         nextStock: number;
       }> = [];
 
@@ -247,7 +249,8 @@ export async function createOrderAction(
           compareAtAmount,
           lineDiscountAmount,
           lineTotal,
-          nextStock: locked.stockOnHand - quantity,
+          soldStock: locked.stockOnHand - quantity,
+          nextStock: restockIfAtThreshold(locked.stockOnHand - quantity),
         });
       }
 
@@ -387,9 +390,21 @@ export async function createOrderAction(
           delta: -line.quantity,
           reason: "ORDER",
           orderId,
-          resultingBalance: line.nextStock,
+          resultingBalance: line.soldStock,
           correlationId: number,
         });
+
+        if (line.nextStock !== line.soldStock) {
+          await tx.insert(stockMovements).values({
+            id: createId(),
+            productId: line.productId,
+            delta: line.nextStock - line.soldStock,
+            reason: "ADMIN_ADJUSTMENT",
+            orderId,
+            resultingBalance: line.nextStock,
+            correlationId: number,
+          });
+        }
       }
 
       const payment = await getProviders().payment.createPayment({

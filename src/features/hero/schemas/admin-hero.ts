@@ -7,10 +7,12 @@ const localeCopySchema = z.object({
   buttonUrl: z.string().trim().max(500).optional(),
 });
 
-/** Modal create/edit payload — title, subtitle, and optional image handled separately. */
+/** Modal create/edit payload — images are handled separately as files. */
 export const upsertHeroSlideSchema = z.object({
   title: z.string().trim().min(1).max(120),
   subtitle: z.string().trim().max(240).optional(),
+  buttonLabel: z.string().trim().max(80).optional(),
+  buttonUrl: z.string().trim().max(500).optional(),
 });
 
 export type UpsertHeroSlideInput = z.infer<typeof upsertHeroSlideSchema>;

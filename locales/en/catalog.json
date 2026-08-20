@@ -2,5 +2,18 @@
   "paginationLabel": "Catalog pages",
   "previousPage": "Previous",
   "nextPage": "Next",
-  "pageStatus": "Page {page} of {total}"
+  "firstPage": "First",
+  "lastPage": "Last",
+  "pageStatus": "Page {page} of {total}",
+  "brandsEmpty": "No brands yet.",
+  "filtersLabel": "Filters",
+  "categories": "Categories",
+  "price": "Price",
+  "brands": "Brands",
+  "colors": "Colors",
+  "expandCategory": "Show subcategories",
+  "collapseCategory": "Hide subcategories",
+  "minPrice": "Minimum price",
+  "maxPrice": "Maximum price",
+  "empty": "No products found."
 }

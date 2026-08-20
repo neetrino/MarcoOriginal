@@ -5,6 +5,7 @@ import { CONTACT_STATUSES } from "@/features/contact/domain/contact-rules";
 export const submitContactSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().email().max(254),
+  subject: z.string().trim().min(1).max(160),
   phone: z.string().trim().max(40).optional(),
   message: z.string().trim().min(10).max(5000),
   /** Honeypot — must stay empty for humans. */

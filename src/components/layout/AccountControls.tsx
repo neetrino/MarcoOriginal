@@ -22,10 +22,10 @@ const menuItemClassName =
 
 function iconButtonClassName(active = false): string {
   const base =
-    "inline-flex h-11 w-11 items-center justify-center rounded-lg transition-colors duration-150";
+    "inline-flex h-10 w-10 items-center justify-center rounded-full bg-marco-gray text-marco-slate transition-colors duration-200 hover:bg-marco-yellow";
   return active
-    ? `${base} bg-gray-100 text-gray-900 ring-1 ring-gray-200/90`
-    : `${base} text-gray-700 hover:text-gray-900`;
+    ? `${base} bg-marco-yellow`
+    : base;
 }
 
 export function AccountControls({

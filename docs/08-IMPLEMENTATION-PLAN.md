@@ -59,7 +59,7 @@
 ### Exit criteria
 
 - Fresh + incremental migrations pass։
-- Schema inventory assertion-ը հաստատում է ճիշտ 25 application table։
+- Schema inventory assertion-ը հաստատում է ճիշտ 29 application table։
 - Constraints/concurrency integration tests pass։
 - Seed-ը կրկնակի run-ից հետո duplicate չի ստեղծում։
 

@@ -2,19 +2,17 @@
   "title": "White Shop",
   "subtitle": "Multilingual storefront is live.",
   "cta": "Browse products",
-  "featuredTitle": "Featured Products",
+  "featuredTitle": "Special offers",
+  "newArrivalsTitle": "New arrivals",
+  "emptyNewArrivals": "No new products yet.",
+  "brandsTitle": "Brands",
+  "brandsPaginationLabel": "Brand pages",
+  "productsPaginationLabel": "Product pages",
+  "reelsPaginationLabel": "Reels pages",
+  "reelsTitle": "Reels",
+  "untitledReel": "Untitled",
+  "playReel": "Play reel",
+  "closeReel": "Close",
   "viewAll": "View more",
-  "emptyFeatured": "No featured products yet.",
-  "aboutEyebrow": "About us",
-  "aboutTitle": "We provide high quality products",
-  "aboutDescription": "Discover a curated selection of products with reliable delivery and customer-first support.",
-  "aboutCta": "Learn more",
-  "features": {
-    "deliveryTitle": "Fast Delivery",
-    "deliveryDescription": "Quick and reliable shipping to your door.",
-    "qualityTitle": "Best Quality",
-    "qualityDescription": "Carefully selected products you can trust.",
-    "returnTitle": "Free Return",
-    "returnDescription": "Easy returns when something is not right."
-  }
+  "emptyFeatured": "No featured products yet."
 }

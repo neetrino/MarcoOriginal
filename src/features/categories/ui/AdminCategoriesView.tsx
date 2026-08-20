@@ -1,44 +1,41 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronRight, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import {
   ConfirmDialog,
   deleteConfirmDescription,
 } from "@/components/ui/ConfirmDialog";
 import {
-  ADMIN_PAGE_TITLE,
-} from "@/features/admin/ui/admin-form-classes";
-import { AdminSearchInput } from "@/features/admin/ui/AdminSearchInput";
-import {
-  ADMIN_TABLE,
-  ADMIN_TABLE_CARD,
-  ADMIN_TABLE_OUTER_SCROLL,
-  ADMIN_TABLE_ROW,
-  ADMIN_TABLE_STATE_INSET,
-  ADMIN_TABLE_TBODY,
-  ADMIN_TABLE_TD,
-  ADMIN_TABLE_TD_CENTER,
-  ADMIN_TABLE_TH,
-  ADMIN_TABLE_TH_CENTER,
-  ADMIN_TABLE_THEAD,
-} from "@/features/admin/ui/admin-table-classes";
-import {
   deleteCategoryAction,
   reorderCategoriesAction,
 } from "@/features/categories/actions";
 import type { AdminCategoryListItem } from "@/features/categories/application/list-admin-categories";
+import {
+  buildCategoryTree,
+  collectExpandableIds,
+  filterCategoryTree,
+} from "@/features/categories/domain/category-tree";
 import { AddCategoryDrawer } from "@/features/categories/ui/AddCategoryDrawer";
+import { AdminCategoriesToolbar } from "@/features/categories/ui/AdminCategoriesToolbar";
+import { AdminCategoryTreeNode } from "@/features/categories/ui/AdminCategoryTreeNode";
 import { useSyncedState } from "@/lib/react/sync-state-from-prop";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
+
+type CategoriesCopy = Dictionary["admin"]["categories"];
 
 type AdminCategoriesViewProps = {
   locale: string;
   categories: AdminCategoryListItem[];
+  copy: CategoriesCopy;
+};
+
+type DrawerState = {
+  category: AdminCategoryListItem | null;
+  requireParent: boolean;
+  parentId: string;
 };
 
 function moveItem<T>(list: T[], fromIndex: number, toIndex: number): T[] {
@@ -69,12 +66,11 @@ function sameOrder(
 export function AdminCategoriesView({
   locale,
   categories,
+  copy,
 }: AdminCategoriesViewProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [editingCategory, setEditingCategory] =
-    useState<AdminCategoryListItem | null>(null);
+  const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [pendingDelete, setPendingDelete] = useState<{
@@ -82,6 +78,7 @@ export function AdminCategoriesView({
     title: string;
   } | null>(null);
   const [ordered, setOrdered] = useSyncedState(categories);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const orderedRef = useRef(ordered);
   const dragOriginRef = useRef<AdminCategoryListItem[] | null>(null);
@@ -93,33 +90,19 @@ export function AdminCategoriesView({
 
   const needle = query.trim().toLowerCase();
   const isFiltering = needle.length > 0;
-
-  const visible = useMemo(() => {
-    if (!isFiltering) return ordered;
-    return ordered.filter((category) =>
-      category.title.toLowerCase().includes(needle),
+  const tree = useMemo(() => {
+    const forest = buildCategoryTree(ordered);
+    if (!isFiltering) return forest;
+    return filterCategoryTree(
+      forest,
+      (node) =>
+        node.title.toLowerCase().includes(needle) ||
+        node.slug.toLowerCase().includes(needle),
     );
   }, [ordered, isFiltering, needle]);
-
-  function requestDelete(categoryId: string, categoryTitle: string): void {
-    setPendingDelete({ id: categoryId, title: categoryTitle });
-  }
-
-  function confirmDelete(): void {
-    if (!pendingDelete) return;
-    const categoryId = pendingDelete.id;
-
-    startTransition(async () => {
-      setError(null);
-      const result = await deleteCategoryAction(locale, categoryId);
-      if (!result.ok) {
-        setError(result.error.message);
-        return;
-      }
-      setPendingDelete(null);
-      router.refresh();
-    });
-  }
+  const visibleExpanded = isFiltering
+    ? collectExpandableIds(tree)
+    : expandedIds;
 
   function persistCurrentOrder(): void {
     if (persistedRef.current) return;
@@ -147,206 +130,143 @@ export function AdminCategoriesView({
   function reorderToward(targetId: string): void {
     if (!draggingId || isFiltering || draggingId === targetId) return;
     setOrdered((current) => {
-      const fromIndex = current.findIndex(
-        (category) => category.id === draggingId,
-      );
-      const toIndex = current.findIndex((category) => category.id === targetId);
-      if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return current;
+      const fromIndex = current.findIndex((item) => item.id === draggingId);
+      const toIndex = current.findIndex((item) => item.id === targetId);
+      const from = current[fromIndex];
+      const to = current[toIndex];
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        !from ||
+        !to ||
+        from.parentId !== to.parentId
+      ) {
+        return current;
+      }
       const next = moveItem(current, fromIndex, toIndex);
       orderedRef.current = next;
       return next;
     });
   }
 
+  function confirmDelete(): void {
+    if (!pendingDelete) return;
+    const categoryId = pendingDelete.id;
+    startTransition(async () => {
+      setError(null);
+      const result = await deleteCategoryAction(locale, categoryId);
+      if (!result.ok) {
+        setError(result.error.message);
+        return;
+      }
+      setPendingDelete(null);
+      router.refresh();
+    });
+  }
+
   return (
     <section>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className={ADMIN_PAGE_TITLE}>Categories</h1>
-        <Button
-          type="button"
-          size="sm"
-          onClick={() => {
-            setEditingCategory(null);
-            setDrawerOpen(true);
-          }}
-          className="inline-flex items-center gap-1.5"
-        >
-          <Plus className="h-4 w-4" aria-hidden />
-          Add Category
-        </Button>
-      </div>
-
-      <AdminSearchInput
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Enter category title"
-        wrapperClassName="mb-4"
-        aria-label="Search categories"
+      <AdminCategoriesToolbar
+        copy={copy}
+        query={query}
+        onQueryChange={setQuery}
+        onAddCategory={() =>
+          setDrawer({ category: null, requireParent: false, parentId: "" })
+        }
+        onAddSubcategory={() =>
+          setDrawer({ category: null, requireParent: true, parentId: "" })
+        }
       />
 
       {isFiltering ? (
-        <p className="mb-3 text-xs text-gray-500">
-          Clear search to reorder categories.
-        </p>
+        <p className="mb-3 text-xs text-gray-500">{copy.reorderHint}</p>
       ) : null}
-
       {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
 
-      <Card className={ADMIN_TABLE_CARD}>
-        {visible.length === 0 ? (
-          <p className={`${ADMIN_TABLE_STATE_INSET} text-sm text-gray-600`}>
-            {categories.length === 0
-              ? "No categories yet."
-              : "No categories match this search."}
+      <Card className="p-4">
+        {tree.length === 0 ? (
+          <p className="text-sm text-gray-600">
+            {categories.length === 0 ? copy.empty : copy.noMatch}
           </p>
         ) : (
-          <div className={ADMIN_TABLE_OUTER_SCROLL}>
-            <table className={ADMIN_TABLE}>
-              <thead className={ADMIN_TABLE_THEAD}>
-                <tr>
-                  <th className={`${ADMIN_TABLE_TH} w-8`} aria-label="Reorder" />
-                  <th className={ADMIN_TABLE_TH}>Image</th>
-                  <th className={ADMIN_TABLE_TH}>Category Title</th>
-                  <th className={ADMIN_TABLE_TH}>Category</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Actions</th>
-                </tr>
-              </thead>
-              <tbody className={ADMIN_TABLE_TBODY}>
-                {visible.map((category) => {
-                  const isDragging = draggingId === category.id;
-
-                  return (
-                    <tr
-                      key={category.id}
-                      className={`${ADMIN_TABLE_ROW} ${
-                        isDragging ? "bg-gray-50 opacity-50 shadow-sm" : ""
-                      }`}
-                      onDragOver={(event) => {
-                        if (isFiltering || !draggingId) return;
-                        event.preventDefault();
-                        event.dataTransfer.dropEffect = "move";
-                        reorderToward(category.id);
-                      }}
-                      onDrop={(event) => {
-                        event.preventDefault();
-                        persistCurrentOrder();
-                        setDraggingId(null);
-                      }}
-                    >
-                      <td className={ADMIN_TABLE_TD}>
-                        <button
-                          type="button"
-                          draggable={!isFiltering && !isPending}
-                          disabled={isFiltering || isPending}
-                          onDragStart={(event) => {
-                            if (isFiltering) {
-                              event.preventDefault();
-                              return;
-                            }
-                            event.dataTransfer.effectAllowed = "move";
-                            event.dataTransfer.setData(
-                              "text/plain",
-                              category.id,
-                            );
-                            dragOriginRef.current = orderedRef.current;
-                            persistedRef.current = false;
-                            setDraggingId(category.id);
-                          }}
-                          onDragEnd={() => {
-                            persistCurrentOrder();
-                            setDraggingId(null);
-                          }}
-                          className="inline-flex cursor-grab touch-none text-gray-400 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40"
-                          aria-label={`Reorder ${category.title}`}
-                        >
-                          <GripVertical className="h-4 w-4" />
-                        </button>
-                      </td>
-                      <td className={ADMIN_TABLE_TD}>
-                        <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded border border-dashed border-gray-300 bg-gray-50">
-                          {category.imageUrl ? (
-                            <Image
-                              src={category.imageUrl}
-                              alt=""
-                              fill
-                              sizes="40px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <span className="text-gray-400">—</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className={ADMIN_TABLE_TD}>
-                        <p className="font-medium text-gray-900">
-                          {category.title}
-                        </p>
-                      </td>
-                      <td className={ADMIN_TABLE_TD}>
-                        <span className="text-sm text-gray-500">
-                          {category.parentTitle ?? "None (Root Category)"}
-                        </span>
-                      </td>
-                      <td className={ADMIN_TABLE_TD_CENTER}>
-                        <div className="inline-flex items-center justify-center gap-1">
-                          <button
-                            type="button"
-                            className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                            aria-label={`Edit ${category.title}`}
-                            onClick={() => {
-                              setEditingCategory(category);
-                              setDrawerOpen(true);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={isPending}
-                            onClick={() =>
-                              requestDelete(category.id, category.title)
-                            }
-                            className="rounded p-1.5 text-red-600 hover:bg-red-50"
-                            aria-label={`Delete ${category.title}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                          {category.childCount > 0 ? (
-                            <span
-                              className="ml-1 text-gray-400"
-                              aria-label={`${category.childCount} subcategories`}
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            <div className="hidden grid-cols-[auto_auto_minmax(0,1fr)_auto_auto] items-center gap-3 px-3 text-[11px] font-semibold tracking-wide text-gray-500 uppercase sm:grid">
+              <span className="w-4" />
+              <span>{copy.columnImage}</span>
+              <span>{copy.columnTitle}</span>
+              <span className="text-center">{copy.columnChildren}</span>
+              <span className="text-center">{copy.columnActions}</span>
+            </div>
+            {tree.map((node) => (
+              <AdminCategoryTreeNode
+                key={node.id}
+                node={node}
+                handlers={{
+                  copy,
+                  expandedIds: visibleExpanded,
+                  draggingId,
+                  isFiltering,
+                  isPending,
+                  onToggle: (id) =>
+                    setExpandedIds((current) => {
+                      const next = new Set(current);
+                      if (next.has(id)) next.delete(id);
+                      else next.add(id);
+                      return next;
+                    }),
+                  onDragStart: (id) => {
+                    dragOriginRef.current = orderedRef.current;
+                    persistedRef.current = false;
+                    setDraggingId(id);
+                  },
+                  onDragOver: reorderToward,
+                  onDrop: () => {
+                    persistCurrentOrder();
+                    setDraggingId(null);
+                  },
+                  onDragEnd: () => {
+                    persistCurrentOrder();
+                    setDraggingId(null);
+                  },
+                  onEdit: (item) =>
+                    setDrawer({
+                      category: item,
+                      requireParent: false,
+                      parentId: item.parentId ?? "",
+                    }),
+                  onAddChild: (parentId) => {
+                    setExpandedIds((current) => new Set(current).add(parentId));
+                    setDrawer({
+                      category: null,
+                      requireParent: true,
+                      parentId,
+                    });
+                  },
+                  onDelete: (id, title) => setPendingDelete({ id, title }),
+                }}
+              />
+            ))}
           </div>
         )}
       </Card>
 
       <AddCategoryDrawer
         locale={locale}
-        open={drawerOpen}
-        onClose={() => {
-          setDrawerOpen(false);
-          setEditingCategory(null);
-        }}
+        open={drawer !== null}
+        onClose={() => setDrawer(null)}
         categories={categories}
-        category={editingCategory}
+        copy={copy}
+        category={drawer?.category ?? null}
+        requireParent={drawer?.requireParent ?? false}
+        defaultParentId={drawer?.parentId ?? ""}
       />
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="Delete"
+        title={copy.deleteTitle}
         description={
           pendingDelete
-            ? deleteConfirmDescription("category", pendingDelete.title)
+            ? deleteConfirmDescription(copy.entity, pendingDelete.title)
             : ""
         }
         isPending={isPending}

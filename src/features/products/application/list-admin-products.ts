@@ -23,8 +23,20 @@ import {
   productCategories,
   products,
   type LocaleTranslation,
+  type ProductTag,
+  type ProductWarrantyYears,
 } from "@/db/schema";
 import { loadProductImagesForAdmin } from "@/features/products/application/persist-product-media";
+import {
+  isProductSalesClass,
+  isProductWarrantyYears,
+  parseProductTags,
+  type ProductSalesClass,
+} from "@/features/products/domain/product-presentation";
+import {
+  parseProductSpecs,
+  type ProductSpecification,
+} from "@/features/products/domain/product-specs";
 import type { AdminProductsFilter } from "@/features/products/schemas/admin-list";
 import type { Locale } from "@/lib/i18n/config";
 import { mediaPublicUrl } from "@/lib/media/public-url";
@@ -45,10 +57,14 @@ export type AdminProductListItem = {
   compareAtAmount: number | null;
   stockOnHand: number;
   isFeatured: boolean;
+  salesClass: ProductSalesClass;
+  warrantyYears: ProductWarrantyYears;
+  tags: ProductTag[];
   createdAt: Date;
   title: string;
   slug: string;
   description: string;
+  specifications: ProductSpecification[];
   imageUrl: string | null;
   categoryIds: string[];
   categoryLabels: string[];
@@ -231,10 +247,18 @@ export async function listAdminProducts(
         compareAtAmount: product.compareAtAmount,
         stockOnHand: product.stockOnHand,
         isFeatured: product.isFeatured,
+        salesClass: isProductSalesClass(product.salesClass)
+          ? product.salesClass
+          : "RETAIL",
+        warrantyYears: isProductWarrantyYears(product.warrantyYears)
+          ? product.warrantyYears
+          : 0,
+        tags: parseProductTags(product.tags),
         createdAt: product.createdAt,
         title: translation?.title ?? product.sku,
         slug: translation?.slug ?? "",
         description: translation?.description ?? "",
+        specifications: parseProductSpecs(translation?.specifications),
         imageUrl: primaryImages.get(product.id) ?? null,
         categoryIds: categoryMeta?.ids ?? [],
         categoryLabels: categoryMeta?.labels ?? [],

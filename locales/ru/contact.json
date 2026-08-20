@@ -1,29 +1,30 @@
 {
-  "title": "Контакты",
-  "subtitle": "Отправьте сообщение — мы ответим вам.",
-  "name": "Имя",
-  "email": "Email",
-  "phone": "Телефон (необязательно)",
-  "subject": "Тема",
-  "message": "Сообщение",
-  "submit": "Отправить",
-  "success": "Спасибо — сообщение отправлено.",
-  "error": "Не удалось отправить сообщение.",
-  "storePhone": "+374 XX XXX XXX",
-  "storeEmail": "info@shop.am",
-  "storeAddress": "Ереван, Абовян 10",
+  "title": "СВЯЖИТЕСЬ С НАМИ",
+  "writeToUsTitle": "Напишите нам",
+  "mapSectionTitle": "Наши адреса на карте",
+  "storePhone": "060 500 406",
+  "storeEmail": "marcofurniture@mail.ru",
+  "storeAddress": "Ереван, Алек Манукян 23",
   "social": {
-    "instagram": "https://instagram.com",
-    "facebook": "https://facebook.com",
-    "linkedin": "https://linkedin.com"
+    "instagram": "https://www.instagram.com/marco_electronics",
+    "facebook": "https://www.facebook.com/marcoelectronicss",
+    "linkedin": "",
+    "telegram": "https://t.me/+37460500406"
   },
-  "callTitle": "Позвоните нам:",
-  "callDescription": "Мы на связи 24/7, 7 дней в неделю.",
-  "writeTitle": "Напишите нам:",
-  "writeDescription": "Заполните форму, и мы свяжемся с вами в течение 24 часов.",
-  "emailLabel": "Email:",
-  "hqTitle": "Главный офис:",
-  "hoursWeekdays": "Понедельник - Пятница: 9:00-20:00",
-  "hoursSaturday": "Суббота: 11:00 - 15:00",
-  "mapTitle": "Расположение магазина"
+  "locations": {
+    "yerevan": "г. Ереван, Алек Манукян 23",
+    "avan": "г. Ереван, Аван, ул. Ачарян, 39/7",
+    "argavand": "Аргаванд, Аэропорт 1"
+  },
+  "form": {
+    "title": "Отправьте нам сообщение",
+    "name": "Имя *",
+    "email": "E-mail *",
+    "subject": "Тема *",
+    "message": "Сообщение",
+    "submit": "Отправить",
+    "submitting": "Отправка...",
+    "success": "Ваше сообщение успешно отправлено",
+    "error": "Ошибка: Не удалось отправить сообщение"
+  }
 }

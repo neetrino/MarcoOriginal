@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ProductCard } from "@/features/products/ui/ProductCard";
+import { mapProductCards } from "@/features/products/map-product-cards";
+import { CatalogProductGrid } from "@/features/products/ui/CatalogProductGrid";
+import { getCompareProductIds } from "@/features/compare/queries";
 import { listWishlistProducts } from "@/features/wishlist/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isLocale } from "@/lib/i18n/config";
@@ -32,13 +34,13 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   if (!user) {
     return (
       <section className="flex flex-col gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+        <h1 className="text-3xl font-semibold tracking-tight text-marco-ink">
           {dictionary.nav.wishlist}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-marco-slate">
           <Link
             href={`/${rawLocale}/login?next=${encodeURIComponent(`/${rawLocale}/wishlist`)}`}
-            className="font-medium text-gray-900 underline underline-offset-2"
+            className="font-medium text-marco-ink underline underline-offset-2"
           >
             {dictionary.header.login}
           </Link>{" "}
@@ -49,53 +51,30 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   }
 
   const formatPrice = await createDisplayPriceFormatter(rawLocale, currency);
-  const priced = products.map((product) => {
-    const price = formatPrice(product.priceAmount);
-    const compareAt =
-      product.compareAtAmount != null
-        ? formatPrice(product.compareAtAmount)
-        : null;
-
-    return {
-      product,
-      priceFormatted: price.formatted,
-      compareAtFormatted: compareAt?.formatted ?? null,
-    };
-  });
+  const compareIds = await getCompareProductIds();
+  const cards = mapProductCards(
+    products,
+    rawLocale,
+    formatPrice,
+    dictionary.product,
+    new Set(products.map((product) => product.id)),
+    compareIds,
+  );
 
   return (
     <section className="flex flex-col gap-8">
-      <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+      <h1 className="text-3xl font-semibold tracking-tight text-marco-ink">
         {dictionary.nav.wishlist}
       </h1>
-
-      {priced.length === 0 ? (
-        <p className="text-gray-600">{dictionary.wishlist.empty}</p>
-      ) : (
-        <div className="grid grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
-          {priced.map(
-            ({ product, priceFormatted, compareAtFormatted }, index) => (
-              <ProductCard
-                key={product.id}
-                href={`/${rawLocale}/products/${product.translation.slug}`}
-                title={product.translation.title}
-                priceFormatted={priceFormatted}
-                compareAtFormatted={compareAtFormatted}
-                discountPercent={product.discountPercent}
-                imageUrl={product.imageUrl}
-                inStock={product.stockOnHand > 0}
-                priority={index < 4}
-                locale={rawLocale}
-                productId={product.id}
-                inWishlist
-                isSignedIn
-                wishlistLabel={dictionary.nav.wishlist}
-                addToCartLabel={dictionary.product.addToCart}
-              />
-            ),
-          )}
-        </div>
-      )}
+      <CatalogProductGrid
+        locale={rawLocale}
+        emptyLabel={dictionary.wishlist.empty}
+        wishlistLabel={dictionary.nav.wishlist}
+        compareLabel={dictionary.nav.compare}
+        addToCartLabel={dictionary.product.addToCart}
+        isSignedIn
+        products={cards}
+      />
     </section>
   );
 }

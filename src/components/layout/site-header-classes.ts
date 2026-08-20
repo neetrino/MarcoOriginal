@@ -1,11 +1,35 @@
-/**
- * Shared rail for top-bar currency control + main-nav action icons
- * (profile, wishlist, cart) so they share the same right-edge column.
- * Width = 2×w-11 + cart (w-11 + px-1×2) + 2×gap-2.
- */
-export const SITE_HEADER_ACTIONS_RAIL =
-  "flex w-[calc(2.75rem*2+3.25rem+0.5rem*2)] shrink-0 items-center";
-
-/** Match horizontal padding between top bar and main header. */
+/** Shared header width + padding — matches storefront `max-w-7xl`. */
 export const SITE_HEADER_INNER =
-  "mx-auto max-w-7xl px-2 sm:px-4 md:px-6 lg:px-8";
+  "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
+
+export const HEADER_SOCIAL_CIRCLE_CLASS =
+  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marco-yellow text-marco-slate transition-[filter] hover:brightness-95 active:brightness-90";
+
+export const HEADER_MOBILE_ROUND_CONTROL_CLASS =
+  "relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-marco-slate text-white shadow-sm transition-[opacity,filter] hover:opacity-95 active:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-slate/25";
+
+export const HEADER_CATEGORIES_PILL_CLASS =
+  "hidden h-10 shrink-0 items-center justify-center rounded-[89px] bg-marco-yellow px-4 text-xs font-medium text-marco-slate transition-[filter] hover:brightness-95 active:brightness-90 sm:inline-flex sm:w-[9rem] min-[1180px]:w-[11.5rem]";
+
+export const HEADER_SEARCH_SUBMIT_CLASS =
+  "flex h-10 w-[7.375rem] shrink-0 items-center justify-center rounded-[89px] bg-marco-yellow px-3 text-xs font-semibold text-marco-slate transition-[filter] hover:brightness-95 active:brightness-90";
+
+/**
+ * Desktop primary nav — active page is a yellow pill; hover grows an underline.
+ */
+export function headerPrimaryNavClass(active: boolean): string {
+  const shell =
+    "relative z-0 inline-flex h-10 shrink-0 items-center whitespace-nowrap text-xs font-bold capitalize leading-[18px] transition-colors duration-200 " +
+    "before:pointer-events-none before:absolute before:left-1/2 before:top-1/2 before:z-[-1] " +
+    "before:h-9 before:w-[calc(100%+20px)] before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full " +
+    "before:bg-marco-yellow before:content-[''] before:transition-opacity before:duration-200 " +
+    "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-2 after:block after:h-1 after:origin-left " +
+    "after:scale-x-0 after:bg-marco-yellow after:content-[''] after:transition-transform after:duration-300 after:ease-out " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-slate/25";
+
+  if (active) {
+    return `${shell} before:opacity-100 after:scale-x-0 text-marco-slate`;
+  }
+
+  return `${shell} before:opacity-0 hover:after:scale-x-100 text-marco-slate`;
+}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   convertAmount,
+  convertQuoteToBase,
   divRoundHalfUp,
   parseRateToFixed,
 } from "@/lib/money/convert";
@@ -53,6 +54,29 @@ describe("convertAmount", () => {
     expect(convertAmount(1, "0.0026", "AMD", "USD").amount).toBe(0n);
     // 2 AMD * 0.0026 = 0.0052 USD → 0.52 cents → rounds to 1
     expect(convertAmount(2, "0.0026", "AMD", "USD").amount).toBe(1n);
+  });
+});
+
+describe("convertQuoteToBase", () => {
+  it("keeps identity conversion", () => {
+    expect(convertQuoteToBase(12_500, "1", "AMD", "AMD")).toEqual({
+      amount: 12_500n,
+      currency: "AMD",
+    });
+  });
+
+  it("inverts AMD to USD conversion", () => {
+    expect(convertQuoteToBase(2600, "0.0026", "AMD", "USD")).toEqual({
+      amount: 10_000n,
+      currency: "AMD",
+    });
+  });
+
+  it("inverts AMD to RUB conversion", () => {
+    expect(convertQuoteToBase(24_000, "0.24", "AMD", "RUB")).toEqual({
+      amount: 1_000n,
+      currency: "AMD",
+    });
   });
 });
 

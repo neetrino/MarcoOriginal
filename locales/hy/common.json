@@ -1,5 +1,5 @@
 {
-  "brand": "White-Shop",
+  "brand": "MARCO",
   "nav": {
     "home": "Գլխավոր",
     "products": "Ապրանքներ",
@@ -9,10 +9,13 @@
     "about": "Մեր մասին",
     "contact": "Կապ",
     "wishlist": "Ցանկեր",
+    "compare": "Համեմատել",
     "openMenu": "Բացել մենյուն",
     "closeMenu": "Փակել մենյուն",
     "navigation": "Նավիգացիա",
-    "shopNow": "Գնել հիմա"
+    "shopNow": "Գնել հիմա",
+    "categories": "Կատեգորիաներ",
+    "brand": "Բրենդ"
   },
   "header": {
     "language": "Լեզու",
@@ -21,16 +24,30 @@
     "logout": "Ելք",
     "profile": "Պրոֆիլ",
     "admin": "Ադմին",
-    "createAccount": "Գրանցվել"
+    "createAccount": "Գրանցվել",
+    "logoHome": "MARCO GROUP գլխավոր էջ",
+    "socialLinks": "Սոցիալական ցանցեր",
+    "searchPlaceholder": "Որոնել ապրանքներ",
+    "searchSubmit": "Որոնել"
   },
   "footer": {
     "shop": "Խանութ",
-    "description": "Պրոֆեսիոնալ առցանց խանութ ամենօրյա գնումների համար։",
+    "description": "Հայաստանի առաջատար առցանց հարթակը պրեմիում էլեկտրոնիկայի և կենցաղային տեխնիկայի համար։",
+    "brandDescription": "Հայաստանի առաջատար առցանց\nհարթակը պրեմիում էլեկտրոնիկայի և\nկենցաղային տեխնիկայի համար սկսած\n2010 թվականից: Որակ, որին կարող եք\nվստահել:",
     "quickLinks": "Արագ հղումներ",
     "legal": "Իրավական",
     "privacyPolicy": "Գաղտնիության քաղաքականություն",
-    "terms": "Պայմաններ",
+    "terms": "Օգտագործման պայմաններ",
     "contactInfo": "Կապի տվյալներ",
-    "copyright": "Copyright © {year} Neetrino IT Company. All Rights Reserved."
+    "company": "Նավիգացիա",
+    "support": "Աջակցություն",
+    "contacts": "Կոնտակտներ",
+    "copyright": "Copyright © {year} | Բոլոր իրավունքները պաշտպանված են | Ստեղծվել է Neetrino IT Company կողմից",
+    "copyrightBefore": "Copyright © {year} | Բոլոր իրավունքները պաշտպանված են | Ստեղծվել է ",
+    "copyrightAfter": " կողմից",
+    "creditStudio": "Neetrino IT Company",
+    "paymentMethods": "Վճարման եղանակներ",
+    "secondaryEmail": "marcogrouparmenia@mail.ru",
+    "phones": ["+374 93 52 04 06", "+374 98 19 04 06", "+374 41 34 04 06"]
   }
 }

@@ -1,5 +1,5 @@
 {
-  "brand": "White-Shop",
+  "brand": "MARCO",
   "nav": {
     "home": "Home",
     "products": "Products",
@@ -9,10 +9,13 @@
     "about": "About",
     "contact": "Contact",
     "wishlist": "Wishlist",
+    "compare": "Compare",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "navigation": "Navigation",
-    "shopNow": "Shop now"
+    "shopNow": "Shop now",
+    "categories": "Categories",
+    "brand": "Brand"
   },
   "header": {
     "language": "Language",
@@ -21,16 +24,30 @@
     "logout": "Logout",
     "profile": "Profile",
     "admin": "Admin",
-    "createAccount": "Create account"
+    "createAccount": "Create account",
+    "logoHome": "MARCO GROUP home",
+    "socialLinks": "Social links",
+    "searchPlaceholder": "Search products",
+    "searchSubmit": "Search"
   },
   "footer": {
     "shop": "Shop",
-    "description": "Professional e-commerce storefront for everyday shopping.",
+    "description": "Armenia's leading online platform for premium electronics and home appliances.",
+    "brandDescription": "Armenia's leading online\nplatform for premium electronics and\nhome appliances since\n2010. Quality you can\ntrust.",
     "quickLinks": "Quick Links",
     "legal": "Legal",
     "privacyPolicy": "Privacy Policy",
     "terms": "Terms",
     "contactInfo": "Contact Information",
-    "copyright": "Copyright © {year} Neetrino IT Company. All Rights Reserved."
+    "company": "Navigation",
+    "support": "Support",
+    "contacts": "Contacts",
+    "copyright": "Copyright © {year} | All rights reserved | Created by Neetrino IT Company",
+    "copyrightBefore": "Copyright © {year} | All rights reserved | Created by ",
+    "copyrightAfter": "",
+    "creditStudio": "Neetrino IT Company",
+    "paymentMethods": "Payment methods",
+    "secondaryEmail": "marcogrouparmenia@mail.ru",
+    "phones": ["+374 93 52 04 06", "+374 98 19 04 06", "+374 41 34 04 06"]
   }
 }

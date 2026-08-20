@@ -72,6 +72,8 @@
 | `/[locale]/admin/products` | Product list/create/edit drawer routes |
 | `/[locale]/admin/products/[id]` | Product editor/deep link |
 | `/[locale]/admin/categories` | Category hierarchy CRUD |
+| `/[locale]/admin/brands` | Brand CRUD |
+| `/[locale]/admin/attributes` | Catalog attribute/swatch CRUD |
 | `/[locale]/admin/coupons` | Coupon CRUD |
 | `/[locale]/admin/discounts` | Category/product discount management |
 | `/[locale]/admin/users` | User/role/status management |

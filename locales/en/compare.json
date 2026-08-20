@@ -1,0 +1,14 @@
+{
+  "title": "Compare",
+  "empty": "No products to compare yet.",
+  "image": "Image",
+  "name": "Name",
+  "brand": "Brand",
+  "price": "Price",
+  "status": "Status",
+  "actions": "Actions",
+  "available": "Available",
+  "unavailable": "Unavailable",
+  "addToCart": "Add to cart",
+  "remove": "Remove from comparison"
+}
