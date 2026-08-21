@@ -20,13 +20,13 @@ import { getDb } from "@/db/client";
 import {
   categories,
   mediaAssets,
-  productBrands,
   productCategories,
   products,
   type LocaleTranslation,
   type ProductTag,
   type ProductWarrantyYears,
 } from "@/db/schema";
+import { loadProductBrandIds } from "@/features/products/application/load-product-brand-logos";
 import { loadProductImagesForAdmin } from "@/features/products/application/persist-product-media";
 import {
   isProductSalesClass,
@@ -217,29 +217,6 @@ async function loadCategoryMeta(
   return map;
 }
 
-async function loadBrandIds(
-  productIds: string[],
-): Promise<Map<string, string[]>> {
-  const map = new Map<string, string[]>();
-  if (productIds.length === 0) return map;
-
-  const rows = await getDb()
-    .select({
-      productId: productBrands.productId,
-      brandId: productBrands.brandId,
-    })
-    .from(productBrands)
-    .where(inArray(productBrands.productId, productIds))
-    .orderBy(asc(productBrands.sortOrder));
-
-  for (const row of rows) {
-    const ids = map.get(row.productId) ?? [];
-    ids.push(row.brandId);
-    map.set(row.productId, ids);
-  }
-  return map;
-}
-
 /** Lists products for the admin catalog table with filters and sort. */
 export async function listAdminProducts(
   locale: Locale,
@@ -269,7 +246,7 @@ export async function listAdminProducts(
     await Promise.all([
       loadPrimaryImages(ids),
       loadCategoryMeta(ids, locale),
-      loadBrandIds(ids),
+      loadProductBrandIds(ids),
       loadProductImagesForAdmin(ids),
     ]);
 
