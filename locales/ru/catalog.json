@@ -15,5 +15,18 @@
   "collapseCategory": "Скрыть подкатегории",
   "minPrice": "Минимальная цена",
   "maxPrice": "Максимальная цена",
-  "empty": "Товары не найдены."
+  "empty": "Товары не найдены.",
+  "sortLabel": "Сорт",
+  "sortDefault": "По умолчанию",
+  "sortPriceAsc": "Цена: по возрастанию",
+  "sortPriceDesc": "Цена: по убыванию",
+  "sortNameAsc": "Название: А-Я",
+  "sortNameDesc": "Название: Я-А",
+  "sortProducts": "Сортировать товары",
+  "withPrice": "С ценой",
+  "withoutPrice": "Без цены",
+  "pricePresenceAria": "Переключить товары с ценой и без цены",
+  "viewList": "Список",
+  "viewGrid": "Сетка",
+  "viewDense": "Плотная сетка"
 }

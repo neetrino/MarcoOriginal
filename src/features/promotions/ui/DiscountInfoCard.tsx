@@ -1,44 +1,51 @@
 import Link from "next/link";
 import { Info } from "lucide-react";
 
+import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
+import {
+  DISCOUNT_ICON_SKY,
+  DISCOUNT_INFO_CARD,
+} from "@/features/promotions/ui/discount-admin.classes";
+
 type DiscountInfoCardProps = {
   locale: string;
 };
 
-const INFO_POINTS = [
-  "Global discount applies to every product unless a stronger product rule exists.",
-  "Category discount applies to products in that category.",
-  "Product discount overrides category and global percentage for that item.",
-  "Clear removes the rule; Save persists the current percentage.",
-] as const;
-
 export function DiscountInfoCard({ locale }: DiscountInfoCardProps) {
+  const copy = getAdminCopy(locale).discounts;
+  const infoPoints = [copy.info1, copy.info2, copy.info3, copy.info4] as const;
+
   return (
-    <article className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
-          <Info className="h-5 w-5" aria-hidden />
+    <article className={`flex h-full flex-col ${DISCOUNT_INFO_CARD}`}>
+      <div className="mb-4 flex items-center gap-3">
+        <span className={DISCOUNT_ICON_SKY}>
+          <Info className="h-4 w-4" aria-hidden />
         </span>
         <div>
-          <h2 className="text-base font-semibold text-gray-900">
-            Useful Information
+          <h2 className="text-base font-semibold tracking-tight text-marco-ink">
+            {copy.infoTitle}
           </h2>
-          <p className="text-sm text-gray-500">About Discounts</p>
+          <p className="text-xs text-gray-500">{copy.infoSubtitle}</p>
         </div>
       </div>
 
-      <ul className="flex-1 list-disc space-y-2 pl-5 text-sm text-gray-700">
-        {INFO_POINTS.map((point) => (
-          <li key={point}>{point}</li>
+      <ul className="flex-1 space-y-2 rounded-lg border border-sky-100/80 bg-white/80 p-3 text-sm text-gray-600">
+        {infoPoints.map((point) => (
+          <li key={point} className="flex items-start gap-2">
+            <span className="mt-0.5 font-semibold text-sky-600" aria-hidden>
+              •
+            </span>
+            <span>{point}</span>
+          </li>
         ))}
       </ul>
 
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 border-t border-sky-100 pt-4">
         <Link
           href={`/${locale}/admin/settings`}
-          className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+          className="flex w-full items-center justify-center rounded-xl border border-sky-100 bg-white px-3 py-2 text-sm font-medium text-marco-slate transition-colors hover:bg-sky-50"
         >
-          More Settings →
+          {copy.moreSettings}
         </Link>
       </div>
     </article>

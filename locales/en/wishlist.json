@@ -1,4 +1,8 @@
 {
-  "empty": "Your wishlist is empty.",
+  "title": "My Wishlist",
+  "empty": "Your wishlist is empty",
+  "emptyDescription": "Start adding products to your wishlist to save them for later.",
+  "totalCount": "Total items in wishlist",
+  "browseProducts": "Browse Products",
   "signInPrompt": "Sign in to save products to your wishlist."
 }

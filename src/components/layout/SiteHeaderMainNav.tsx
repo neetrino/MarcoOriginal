@@ -16,6 +16,7 @@ type SiteHeaderMainNavProps = {
   dictionary: Dictionary;
   user: SessionUser | null;
   cartItemCount: number;
+  cartTotalFormatted: string;
   wishlistCount: number;
   compareCount: number;
 };
@@ -26,6 +27,7 @@ export function SiteHeaderMainNav({
   dictionary,
   user,
   cartItemCount,
+  cartTotalFormatted,
   wishlistCount,
   compareCount,
 }: SiteHeaderMainNavProps) {
@@ -70,6 +72,7 @@ export function SiteHeaderMainNav({
               currency={currency}
               dictionary={dictionary}
               itemCount={cartItemCount}
+              cartTotalFormatted={cartTotalFormatted}
             />
           </div>
         </div>

@@ -11,21 +11,21 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   primary:
-    "bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-900",
+    "bg-marco-slate text-white hover:brightness-95 focus:ring-marco-slate",
   secondary:
-    "border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 focus:ring-gray-500",
+    "border border-gray-300 bg-white text-marco-slate hover:bg-marco-gray focus:ring-marco-slate/40",
   outline:
-    "border border-gray-300 bg-transparent text-gray-900 hover:bg-gray-50 focus:ring-gray-500",
+    "border border-gray-300 bg-transparent text-marco-slate hover:bg-marco-gray focus:ring-marco-slate/40",
   ghost:
-    "bg-transparent text-gray-900 hover:bg-gray-100 focus:ring-gray-500",
+    "bg-transparent text-marco-slate hover:bg-marco-gray focus:ring-marco-slate/40",
   danger:
     "bg-red-600 text-white hover:bg-red-700 focus:ring-red-600",
 };
 
 const SIZE_STYLES: Record<ButtonSize, string> = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-base",
-  lg: "px-6 py-3 text-lg",
+  sm: "px-4 py-2 text-sm",
+  md: "px-5 py-2.5 text-sm",
+  lg: "px-6 py-3 text-base",
 };
 
 export function Button({
@@ -39,7 +39,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`cursor-pointer rounded-xl font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${VARIANT_STYLES[variant]} ${SIZE_STYLES[size]} ${className}`}
+      className={`cursor-pointer rounded-full font-medium transition-[color,background-color,filter] focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${VARIANT_STYLES[variant]} ${SIZE_STYLES[size]} ${className}`}
       {...props}
     >
       {children}

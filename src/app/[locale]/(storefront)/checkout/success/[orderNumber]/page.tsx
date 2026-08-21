@@ -50,7 +50,7 @@ export default async function CheckoutSuccessPage({
 
   return (
     <section className="mx-auto flex max-w-lg flex-col gap-4 px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-semibold text-gray-900">{copy.title}</h1>
+      <h1 className="text-3xl font-semibold text-marco-slate">{copy.title}</h1>
       <p className="text-gray-600">
         {copy.body.replace("{orderNumber}", order.orderNumber)}
       </p>

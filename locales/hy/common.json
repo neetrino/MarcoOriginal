@@ -15,7 +15,12 @@
     "navigation": "Նավիգացիա",
     "shopNow": "Գնել հիմա",
     "categories": "Կատեգորիաներ",
-    "brand": "Բրենդ"
+    "brand": "Բրենդներ",
+    "stores": "Խանութներ",
+    "reels": "Ռիլլեր",
+    "addresses": "Հասցեներ",
+    "openInMaps": "Տեսնել քարտեզում",
+    "menuCopyright": "© {year} MARCO GROUP"
   },
   "header": {
     "language": "Լեզու",
@@ -28,7 +33,11 @@
     "logoHome": "MARCO GROUP գլխավոր էջ",
     "socialLinks": "Սոցիալական ցանցեր",
     "searchPlaceholder": "Որոնել ապրանքներ",
-    "searchSubmit": "Որոնել"
+    "searchSubmit": "Որոնել",
+    "choosePhone": "Ընտրեք զանգահարելու համարը",
+    "chooseAddress": "Ընտրեք խանութի հասցեն կամ բացեք քարտեզը",
+    "whatsapp": "WhatsApp",
+    "viber": "Viber"
   },
   "footer": {
     "shop": "Խանութ",

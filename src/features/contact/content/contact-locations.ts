@@ -61,7 +61,48 @@ export function mapsEmbedUrlForLocation(location: ContactLocation): string {
   return `https://www.google.com/maps?q=${lat},${lng}&z=${z}&output=embed`;
 }
 
+export function mapsDirectionsUrlForLocation(location: ContactLocation): string {
+  const { lat, lng } = location.map;
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+export const DELIVERY_PHONES = ["+374 41 35 04 06"] as const;
+
+export type ContactPhoneSectionId = ContactLocationId | "delivery";
+
+export type ContactPhoneSection = {
+  id: ContactPhoneSectionId;
+  label: string;
+  phones: readonly string[];
+};
+
 export function parseContactLocationHash(hash: string): ContactLocationId | null {
   const match = LOCATION_HASH_RE.exec(hash);
   return match ? (match[1] as ContactLocationId) : null;
+}
+
+/** Header phone picker — store branches plus delivery. */
+export function buildContactPhoneSections(
+  locations: readonly ContactLocation[],
+  deliveryLabel: string,
+): ContactPhoneSection[] {
+  return [
+    ...locations.map((location) => ({
+      id: location.id,
+      label: location.address,
+      phones: location.phones,
+    })),
+    {
+      id: "delivery",
+      label: deliveryLabel,
+      phones: DELIVERY_PHONES,
+    },
+  ];
+}
+
+export function contactLocationMapHref(
+  locale: string,
+  id: ContactLocationId,
+): string {
+  return `/${locale}/contact#loc-${id}`;
 }

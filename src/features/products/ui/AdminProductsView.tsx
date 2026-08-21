@@ -1,46 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 
 import type {
   AdminCategoryOption,
   AdminProductListItem,
 } from "@/features/products/application/list-admin-products";
+import type { AdminProductsQueryState } from "@/features/products/domain/admin-products-query";
+import { AdminProductsFilters } from "@/features/products/ui/AdminProductsFilters";
 import { AdminProductsTable } from "@/features/products/ui/AdminProductsTable";
+import {
+  ADMIN_PRODUCTS_ADD_BUTTON,
+  ADMIN_PRODUCTS_TITLE,
+} from "@/features/products/ui/admin-products.classes";
 import { ProductDrawer } from "@/features/products/ui/ProductDrawer";
-
-type AdminProductsSortLinks = {
-  title: string;
-  stock: string;
-  price: string;
-  created: string;
-};
+import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 
 type AdminProductsViewProps = {
   locale: string;
   products: AdminProductListItem[];
-  sortLinks: AdminProductsSortLinks;
   categories: AdminCategoryOption[];
+  filters: AdminProductsQueryState;
+  total: number;
+  totalPages: number;
 };
 
 export function AdminProductsView({
   locale,
   products,
-  sortLinks,
   categories,
+  filters,
+  total,
+  totalPages,
 }: AdminProductsViewProps) {
+  const copy = getAdminCopy(locale).products;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingProduct, setEditingProduct] =
     useState<AdminProductListItem | null>(null);
 
   function openCreate(): void {
     setEditingProduct(null);
-    setDrawerOpen(true);
-  }
-
-  function openEdit(product: AdminProductListItem): void {
-    setEditingProduct(product);
     setDrawerOpen(true);
   }
 
@@ -51,20 +50,49 @@ export function AdminProductsView({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openCreate}
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-      >
-        <Plus className="h-4 w-4" aria-hidden />
-        Add New Product
-      </button>
+      <header className="mb-5 sm:mb-7">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <h1 className={ADMIN_PRODUCTS_TITLE}>{copy.title}</h1>
+          <button
+            type="button"
+            onClick={openCreate}
+            className={ADMIN_PRODUCTS_ADD_BUTTON}
+          >
+            <svg
+              className="h-4 w-4 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            {copy.addNew}
+          </button>
+        </div>
+      </header>
+
+      <AdminProductsFilters
+        locale={locale}
+        filters={filters}
+        categories={categories}
+      />
 
       <AdminProductsTable
         locale={locale}
         products={products}
-        sortLinks={sortLinks}
-        onEdit={openEdit}
+        filters={filters}
+        total={total}
+        totalPages={totalPages}
+        onEdit={(product) => {
+          setEditingProduct(product);
+          setDrawerOpen(true);
+        }}
       />
 
       <ProductDrawer

@@ -15,5 +15,18 @@
   "collapseCategory": "Hide subcategories",
   "minPrice": "Minimum price",
   "maxPrice": "Maximum price",
-  "empty": "No products found."
+  "empty": "No products found.",
+  "sortLabel": "Sort",
+  "sortDefault": "Default",
+  "sortPriceAsc": "Price: low to high",
+  "sortPriceDesc": "Price: high to low",
+  "sortNameAsc": "Name: A-Z",
+  "sortNameDesc": "Name: Z-A",
+  "sortProducts": "Sort products",
+  "withPrice": "With price",
+  "withoutPrice": "Without price",
+  "pricePresenceAria": "Toggle between priced and unpriced products",
+  "viewList": "List view",
+  "viewGrid": "Grid view",
+  "viewDense": "Dense grid view"
 }

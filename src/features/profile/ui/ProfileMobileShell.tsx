@@ -10,6 +10,10 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { ProfileMobileHub } from "@/features/profile/ui/ProfileMobileHub";
 import { ProfileMobileTabSheet } from "@/features/profile/ui/ProfileMobileTabSheet";
+import {
+  buildProfileNavItems,
+  getProfileSectionTitle,
+} from "@/features/profile/ui/profile-nav-items";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 import type { Locale } from "@/lib/i18n/config";
 import type { SessionUser } from "@/lib/auth/session";
@@ -18,6 +22,7 @@ type ProfileMobileShellProps = {
   locale: Locale;
   user: SessionUser;
   dictionary: Dictionary["profile"];
+  homeLabel: string;
   children: ReactNode;
 };
 
@@ -27,30 +32,33 @@ function isProfileHubPath(pathname: string, locale: Locale): boolean {
 }
 
 /**
- * Mobile profile shell (MaMarie): hub always visible; section content in a bottom sheet.
- * Desktop content column is unchanged (`lg+`). Renders `children` once (matchMedia).
+ * Mobile profile shell: hub always visible; section content in a bottom sheet.
+ * Desktop content column is unchanged (`lg+`).
  */
 export function ProfileMobileShell({
   locale,
   user,
   dictionary,
+  homeLabel,
   children,
 }: ProfileMobileShellProps) {
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const isHub = isProfileHubPath(pathname, locale);
-  const [hubSheetOpen, setHubSheetOpen] = useState(false);
-  /** Keeps sub-route content mounted while the close keyframe plays. */
   const [closingToHub, setClosingToHub] = useState(false);
   const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
   const [prevIsHub, setPrevIsHub] = useState(isHub);
   const [prevPathname, setPrevPathname] = useState(pathname);
+  const sheetTitle = getProfileSectionTitle(
+    pathname,
+    buildProfileNavItems(locale, dictionary),
+    dictionary.title,
+  );
 
   if (isHub !== prevIsHub || pathname !== prevPathname) {
     setPrevIsHub(isHub);
     setPrevPathname(pathname);
     if (isHub) {
-      setHubSheetOpen(false);
       setClosingToHub(false);
     }
   }
@@ -68,41 +76,26 @@ export function ProfileMobileShell({
     };
   }, []);
 
-  const sheetOpen = (!isHub || hubSheetOpen) && !closingToHub;
+  const sheetOpen = !isHub && !closingToHub;
 
   const closeSheet = useCallback(() => {
-    if (isHub) {
-      setHubSheetOpen(false);
-      return;
-    }
     setClosingToHub(true);
-  }, [isHub]);
+  }, []);
 
   const handleSheetExited = useCallback(() => {
     if (!closingToHub) return;
-    // Keep `closingToHub` true until the hub route mounts — otherwise
-    // `sheetOpen` flips back on and the sheet re-opens with a jerk.
     router.push(`/${locale}/profile`);
   }, [closingToHub, locale, router]);
-
-  const openHubDashboard = useCallback(() => {
-    setHubSheetOpen(true);
-  }, []);
 
   const hub = (
     <ProfileMobileHub
       locale={locale}
       user={user}
       dictionary={dictionary}
-      onOpenDashboard={openHubDashboard}
+      homeLabel={homeLabel}
     />
   );
 
-  const desktopColumn = (
-    <div className="min-w-0 flex-1">{children}</div>
-  );
-
-  // SSR / pre-hydration: hub on mobile via CSS; content only from lg up.
   if (isDesktop === null) {
     return (
       <>
@@ -113,7 +106,7 @@ export function ProfileMobileShell({
   }
 
   if (isDesktop) {
-    return desktopColumn;
+    return <div className="min-w-0 flex-1">{children}</div>;
   }
 
   return (
@@ -123,7 +116,9 @@ export function ProfileMobileShell({
         open={sheetOpen}
         onClose={closeSheet}
         onExited={handleSheetExited}
-        ariaLabel={dictionary.title}
+        ariaLabel={sheetTitle}
+        title={sheetTitle}
+        closeLabel={dictionary.closeSheet}
       >
         {children}
       </ProfileMobileTabSheet>

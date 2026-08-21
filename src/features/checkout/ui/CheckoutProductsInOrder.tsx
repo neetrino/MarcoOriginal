@@ -88,13 +88,13 @@ export function CheckoutProductsInOrder({
 
   return (
     <section
-      className="mb-6 rounded-[15px] border border-gray-200 bg-white px-5 py-4 sm:px-6 sm:py-5"
+      className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
       aria-labelledby="checkout-order-items-preview-title"
     >
       <div className="flex items-start justify-between gap-4">
         <h2
           id="checkout-order-items-preview-title"
-          className="text-sm font-bold tracking-wide text-gray-900"
+          className="text-xl font-semibold text-marco-slate"
         >
           {title}
         </h2>
@@ -110,10 +110,10 @@ export function CheckoutProductsInOrder({
         {products.map((product) => (
           <li
             key={product.id}
-            className="w-max max-w-[320px] min-w-[200px] shrink-0 rounded-[20px] border border-gray-200 bg-white p-3 shadow-sm"
+            className="relative w-max max-w-[320px] min-w-[200px] shrink-0 rounded-xl border border-gray-200/80 bg-white p-3"
           >
             <div className="flex items-stretch gap-3">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-gray-50">
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-marco-gray">
                 {product.imageUrl ? (
                   <Image
                     src={product.imageUrl}
@@ -140,7 +140,7 @@ export function CheckoutProductsInOrder({
                     type="button"
                     onClick={() => onRemove(product.id)}
                     disabled={pending}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:opacity-60"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-red-300 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
                     aria-label={removeItemLabel}
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />

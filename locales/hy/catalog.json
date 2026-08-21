@@ -15,5 +15,18 @@
   "collapseCategory": "Թաքցնել ենթակատեգորիաները",
   "minPrice": "Նվազագույն գին",
   "maxPrice": "Առավելագույն գին",
-  "empty": "Ապրանքներ չեն գտնվել։"
+  "empty": "Ապրանքներ չեն գտնվել։",
+  "sortLabel": "Սորտ",
+  "sortDefault": "Դասավորել ըստ",
+  "sortPriceAsc": "Գին: ցածրից բարձր",
+  "sortPriceDesc": "Գին: բարձրից ցածր",
+  "sortNameAsc": "Անվանում: Ա-ից Զ",
+  "sortNameDesc": "Անվանում: Զ-ից Ա",
+  "sortProducts": "Դասավորել ապրանքները",
+  "withPrice": "Գնով",
+  "withoutPrice": "Առանց Գին",
+  "pricePresenceAria": "Փոխել գնով և առանց գնի ապրանքների միջև",
+  "viewList": "Ցուցակի տեսք",
+  "viewGrid": "Ցանցի տեսք",
+  "viewDense": "Խիտ ցանցի տեսք"
 }

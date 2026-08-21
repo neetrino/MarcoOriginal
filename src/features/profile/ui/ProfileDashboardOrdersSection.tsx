@@ -32,6 +32,7 @@ type ProfileDashboardOrdersSectionProps = {
     placedOn: string;
     item: string;
     items: string;
+    status: string;
   };
 };
 
@@ -69,22 +70,21 @@ export function ProfileDashboardOrdersSection({
 
   return (
     <>
-      <div className={`p-5 sm:p-7 ${PROFILE_CARD_CLASS}`}>
+      <div className={PROFILE_CARD_CLASS}>
         <div className="mb-6 flex items-center justify-between gap-4">
           <h2 className={PROFILE_SECTION_TITLE_CLASS}>{labels.recentOrders}</h2>
           <AppLink
             href={`/${locale}/profile/orders`}
             prefetchPolicy="intent"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-gray-900 transition-opacity hover:opacity-80"
+            className="text-sm font-medium text-marco-slate transition-colors hover:text-marco-slate/80"
           >
             {labels.viewAllOrders}
-            <span aria-hidden>→</span>
           </AppLink>
         </div>
 
         {orders.length === 0 ? (
           <div className="flex flex-col items-center gap-5 py-12">
-            <p className="max-w-sm text-center text-sm text-gray-600">
+            <p className="max-w-sm text-center text-sm text-marco-slate/70">
               {labels.noOrders}
             </p>
             <AppLink
@@ -96,7 +96,7 @@ export function ProfileDashboardOrdersSection({
             </AppLink>
           </div>
         ) : (
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <ul className="space-y-4">
             {orders.map((order) => {
               const itemWord =
                 order.itemsCount === 1 ? labels.item : labels.items;
@@ -110,6 +110,7 @@ export function ProfileDashboardOrdersSection({
                     placedOnLine={`${labels.placedOn} ${formatShortDate(order.placedAt, locale)}`}
                     orderNumberLabel={labels.orderNumber}
                     viewDetailsLabel={labels.viewDetails}
+                    statusLabel={labels.status}
                     onViewDetails={() => openOrder(order.orderNumber)}
                   />
                 </li>

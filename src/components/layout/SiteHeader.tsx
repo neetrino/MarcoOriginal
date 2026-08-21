@@ -9,7 +9,7 @@ import {
   HEADER_MOBILE_ROUND_CONTROL_CLASS,
   SITE_HEADER_INNER,
 } from "@/components/layout/site-header-classes";
-import { getCartItemCount } from "@/features/cart/cart";
+import { getCartHeaderSummary } from "@/features/cart/get-cart-drawer-view";
 import { getCompareCount } from "@/features/compare/queries";
 import { getWishlistCount } from "@/features/wishlist/queries";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -41,9 +41,9 @@ async function SiteHeaderMainNavAsync({
   currency,
   dictionary,
 }: SiteHeaderProps) {
-  const [user, cartItemCount, wishlistCount, compareCount] = await Promise.all([
+  const [user, cartSummary, wishlistCount, compareCount] = await Promise.all([
     getCurrentUser(),
-    getCartItemCount(),
+    getCartHeaderSummary(locale, currency),
     getWishlistCount(),
     getCompareCount(),
   ]);
@@ -54,7 +54,8 @@ async function SiteHeaderMainNavAsync({
       currency={currency}
       dictionary={dictionary}
       user={user}
-      cartItemCount={cartItemCount}
+      cartItemCount={cartSummary.itemCount}
+      cartTotalFormatted={cartSummary.totalFormatted}
       wishlistCount={wishlistCount}
       compareCount={compareCount}
     />
@@ -66,9 +67,9 @@ function buildNavItems(locale: Locale, dictionary: Dictionary) {
     { href: `/${locale}`, label: dictionary.nav.home },
     { href: `/${locale}/products`, label: dictionary.nav.shop },
     { href: `/${locale}/brand`, label: dictionary.nav.brand },
-    { href: `/${locale}/blog`, label: dictionary.nav.blog },
     { href: `/${locale}/about`, label: dictionary.nav.about },
     { href: `/${locale}/contact`, label: dictionary.nav.contact },
+    { href: `/${locale}/reels`, label: dictionary.nav.reels },
   ] as const;
 }
 
@@ -92,7 +93,6 @@ export function SiteHeader({ locale, currency, dictionary }: SiteHeaderProps) {
             <MobileNavDrawer
               locale={locale}
               dictionary={dictionary}
-              navItems={navItems}
               triggerClassName={HEADER_MOBILE_ROUND_CONTROL_CLASS}
             />
           </div>
@@ -103,6 +103,7 @@ export function SiteHeader({ locale, currency, dictionary }: SiteHeaderProps) {
               currency={currency}
               currencyLabel={dictionary.header.currency}
               languageLabel={dictionary.header.language}
+              variant="compact"
             />
           </div>
         </div>

@@ -1,0 +1,19 @@
+{
+  "title": "Our Stores",
+  "subtitle": "Visit any of our branches. Our friendly staff are ready to help you find the right product.",
+  "directions": "Get directions",
+  "directionsAria": "Get directions to {name}",
+  "ctaTitle": "Can't find what you're looking for?",
+  "ctaBody": "Get in touch, and we'll help you find the right product.",
+  "ctaButton": "Contact us",
+  "names": {
+    "yerevan": "Alec Manoogian",
+    "argavand": "Argavand Airport 1",
+    "avan": "Avan"
+  },
+  "hours": {
+    "yerevan": "Mon–Sat 10:00–19:00\nSun 10:00–18:00",
+    "argavand": "Mon–Sat 9:00–19:00\nSun 10:00–18:00",
+    "avan": "Mon–Sun 10:00–19:00"
+  }
+}

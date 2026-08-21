@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
@@ -12,6 +12,10 @@ import {
   products,
 } from "@/db/schema";
 import { parseProductTags } from "@/features/products/domain/product-presentation";
+import type {
+  CatalogPricePresence,
+  CatalogSort,
+} from "@/features/products/domain/catalog-sort";
 import { parseProductSpecs } from "@/features/products/domain/product-specs";
 import { resolveProductPrices } from "@/features/promotions/application/resolve-product-prices";
 import type {
@@ -149,7 +153,30 @@ export type CatalogListFilter = {
   categoryIds?: readonly string[];
   minPriceAmd?: number;
   maxPriceAmd?: number;
+  sort?: CatalogSort;
+  pricePresence?: CatalogPricePresence;
 };
+
+function catalogTitleOrderExpr(locale: Locale) {
+  if (locale === "en") return sql`${products.translations}->'en'->>'title'`;
+  if (locale === "ru") return sql`${products.translations}->'ru'->>'title'`;
+  return sql`${products.translations}->'hy'->>'title'`;
+}
+
+function catalogOrderBy(locale: Locale, sort?: CatalogSort) {
+  switch (sort) {
+    case "price-asc":
+      return asc(products.priceAmount);
+    case "price-desc":
+      return desc(products.priceAmount);
+    case "name-asc":
+      return asc(catalogTitleOrderExpr(locale));
+    case "name-desc":
+      return desc(catalogTitleOrderExpr(locale));
+    default:
+      return desc(products.createdAt);
+  }
+}
 
 function catalogListWhere(filter?: CatalogListFilter) {
   const conditions = [activeCatalogWhere];
@@ -172,6 +199,11 @@ function catalogListWhere(filter?: CatalogListFilter) {
   if (filter?.maxPriceAmd != null) {
     conditions.push(lte(products.priceAmount, filter.maxPriceAmd));
   }
+  if (filter?.pricePresence === "without") {
+    conditions.push(eq(products.priceAmount, 0));
+  } else if (filter?.pricePresence === "with") {
+    conditions.push(gt(products.priceAmount, 0));
+  }
   return and(...conditions);
 }
 
@@ -182,6 +214,8 @@ function catalogFilterCacheKey(filter?: CatalogListFilter): string {
     categoryKey,
     filter.minPriceAmd ?? "",
     filter.maxPriceAmd ?? "",
+    filter.sort ?? "",
+    filter.pricePresence ?? "",
   ].join(":");
 }
 
@@ -219,7 +253,7 @@ async function loadActiveProductsPage(
       .select()
       .from(products)
       .where(where)
-      .orderBy(desc(products.createdAt))
+      .orderBy(catalogOrderBy(locale, filter?.sort))
       .limit(CATALOG_PAGE_SIZE)
       .offset(offset),
   ]);

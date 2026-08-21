@@ -89,7 +89,7 @@ export function ReviewForm({
         });
       }}
     >
-      <h3 className="text-xl font-bold text-gray-900 md:text-2xl">
+      <h3 className="text-xl font-bold text-marco-slate md:text-2xl">
         {labels.title}
       </h3>
 

@@ -23,6 +23,10 @@ import {
   ADMIN_TABLE_TH_CENTER,
   ADMIN_TABLE_THEAD,
 } from "@/features/admin/ui/admin-table-classes";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { ADMIN_BADGE } from "@/features/admin/ui/status-badge";
 import { listAdminContactMessages } from "@/features/contact/application/queries";
 import { CONTACT_STATUSES } from "@/features/contact/domain/contact-rules";
@@ -74,13 +78,19 @@ export default async function AdminMessagesPage({
 
   const { rows, total, pageSize } = await listAdminContactMessages(filters);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const copy = getAdminCopy(locale).messages;
+  const common = getAdminCopy(locale).common;
+  const countLabel = formatAdminMessage(
+    total === 1 ? copy.countOne : copy.countMany,
+    { count: total },
+  );
 
   return (
     <section>
       <div className="mb-6">
-        <h1 className={ADMIN_PAGE_TITLE}>Messages</h1>
+        <h1 className={ADMIN_PAGE_TITLE}>{copy.title}</h1>
         <p className={`mt-1 ${ADMIN_PAGE_SUBTITLE}`}>
-          {total} message{total === 1 ? "" : "s"}
+          {countLabel}
           {filters.status ? ` · ${filters.status}` : ""}
         </p>
       </div>
@@ -88,22 +98,22 @@ export default async function AdminMessagesPage({
       <Card className="mb-6 p-4">
         <form method="get" className="flex flex-wrap items-end gap-3">
           <label className="min-w-[180px] flex-1">
-            <span className={ADMIN_LABEL}>Search</span>
+            <span className={ADMIN_LABEL}>{copy.search}</span>
             <AdminSearchInput
               name="q"
               defaultValue={filters.q ?? ""}
-              placeholder="Name, email, subject…"
+              placeholder={copy.searchPlaceholder}
               wrapperClassName="mt-1"
             />
           </label>
           <label className="min-w-[140px]">
-            <span className={ADMIN_LABEL}>Status</span>
+            <span className={ADMIN_LABEL}>{copy.status}</span>
             <select
               name="status"
               defaultValue={filters.status ?? ""}
               className={ADMIN_SELECT}
             >
-              <option value="">All</option>
+              <option value="">{copy.all}</option>
               {CONTACT_STATUSES.map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -112,7 +122,7 @@ export default async function AdminMessagesPage({
             </select>
           </label>
           <Button type="submit" size="sm">
-            Filter
+            {copy.filter}
           </Button>
         </form>
       </Card>
@@ -120,17 +130,17 @@ export default async function AdminMessagesPage({
       <Card className={ADMIN_TABLE_CARD}>
         {rows.length === 0 ? (
           <p className={`${ADMIN_TABLE_STATE_INSET} text-sm text-gray-600`}>
-            No messages match these filters.
+            {copy.empty}
           </p>
         ) : (
           <div className={ADMIN_TABLE_OUTER_SCROLL}>
             <table className={ADMIN_TABLE}>
               <thead className={ADMIN_TABLE_THEAD}>
                 <tr>
-                  <th className={ADMIN_TABLE_TH}>Subject</th>
-                  <th className={ADMIN_TABLE_TH}>From</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Status</th>
-                  <th className={ADMIN_TABLE_TH}>Received</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnSubject}</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnFrom}</th>
+                  <th className={ADMIN_TABLE_TH_CENTER}>{copy.columnStatus}</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnReceived}</th>
                 </tr>
               </thead>
               <tbody className={ADMIN_TABLE_TBODY}>
@@ -156,7 +166,9 @@ export default async function AdminMessagesPage({
                       </span>
                       {message.spamScore !== null ? (
                         <p className="mt-1 text-xs text-gray-500">
-                          spam {message.spamScore}
+                          {formatAdminMessage(copy.spam, {
+                            score: message.spamScore,
+                          })}
                         </p>
                       ) : null}
                     </td>
@@ -166,7 +178,7 @@ export default async function AdminMessagesPage({
                           .toISOString()
                           .slice(0, 16)
                           .replace("T", " ")}{" "}
-                        UTC
+                        {common.utc}
                       </span>
                     </td>
                   </tr>
@@ -178,9 +190,12 @@ export default async function AdminMessagesPage({
       </Card>
 
       {totalPages > 1 ? (
-        <nav className="mt-4 flex items-center gap-3 text-sm text-gray-700">
+        <nav className="mt-4 flex items-center gap-3 text-sm text-marco-slate">
           <span>
-            Page {filters.page} / {totalPages}
+            {formatAdminMessage(common.pageOf, {
+              page: filters.page,
+              total: totalPages,
+            })}
           </span>
         </nav>
       ) : null}

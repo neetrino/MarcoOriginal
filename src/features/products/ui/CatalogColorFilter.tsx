@@ -9,6 +9,40 @@ type CatalogColorFilterProps = {
   onToggle: (hex: string) => void;
 };
 
+function isLightHex(hex: string): boolean {
+  const raw = hex.replace("#", "").trim();
+  const full = raw.length === 3 ? raw.split("").map((char) => char + char).join("") : raw;
+  if (full.length !== 6) return false;
+  const value = Number.parseInt(full, 16);
+  if (Number.isNaN(value)) return false;
+  const red = (value >> 16) & 255;
+  const green = (value >> 8) & 255;
+  const blue = value & 255;
+  return (0.299 * red + 0.587 * green + 0.114 * blue) / 255 > 0.62;
+}
+
+function CatalogColorSwatchCheck({ light }: { light: boolean }) {
+  return (
+    <span className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden>
+      <svg
+        width="14"
+        height="12"
+        viewBox="0 0 12 10"
+        fill="none"
+        className={light ? "text-marco-ink" : "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]"}
+      >
+        <path
+          d="M1 5l3.5 3.5L11 1"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 export function CatalogColorFilter({
   colors,
   selectedHexes,
@@ -18,7 +52,7 @@ export function CatalogColorFilter({
   if (colors.length === 0) return null;
 
   return (
-    <ul className="grid grid-cols-6 gap-2" aria-label={label}>
+    <ul className="flex flex-wrap justify-center gap-x-[22px] gap-y-3" aria-label={label}>
       {colors.map((color) => {
         const selected = selectedHexes.has(color.hex);
         return (
@@ -28,11 +62,15 @@ export function CatalogColorFilter({
               aria-pressed={selected}
               aria-label={`#${color.hex}`}
               onClick={() => onToggle(color.hex)}
-              className={`h-7 w-7 rounded-full border border-gray-200 ${
-                selected ? "ring-2 ring-gray-900 ring-offset-1" : ""
+              className={`relative size-8 overflow-hidden rounded-full ${
+                selected
+                  ? "ring-2 ring-marco-ink ring-offset-2"
+                  : "ring-1 ring-[#e2e8f0] hover:ring-[#cad5e2]"
               }`}
               style={{ backgroundColor: `#${color.hex}` }}
-            />
+            >
+              {selected ? <CatalogColorSwatchCheck light={isLightHex(color.hex)} /> : null}
+            </button>
           </li>
         );
       })}

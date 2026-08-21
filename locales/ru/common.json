@@ -15,7 +15,12 @@
     "navigation": "Навигация",
     "shopNow": "В магазин",
     "categories": "Категории",
-    "brand": "Бренд"
+    "brand": "Бренды",
+    "stores": "Магазины",
+    "reels": "Рилсы",
+    "addresses": "Адреса",
+    "openInMaps": "На карте",
+    "menuCopyright": "© {year} MARCO GROUP"
   },
   "header": {
     "language": "Язык",
@@ -28,7 +33,11 @@
     "logoHome": "MARCO GROUP — главная",
     "socialLinks": "Социальные сети",
     "searchPlaceholder": "Искать товары",
-    "searchSubmit": "Поиск"
+    "searchSubmit": "Поиск",
+    "choosePhone": "Выберите номер для звонка",
+    "chooseAddress": "Выберите адрес магазина или откройте карту",
+    "whatsapp": "WhatsApp",
+    "viber": "Viber"
   },
   "footer": {
     "shop": "Магазин",

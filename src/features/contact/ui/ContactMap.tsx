@@ -26,7 +26,7 @@ function ContactMapAddressStrip({
   return (
     <div className="border-b border-border bg-white px-4 py-5 sm:px-6">
       <div className="mx-auto max-w-7xl">
-        <p className="mb-3 text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
+        <p className="mb-3 text-[11px] font-bold tracking-[0.08em] text-marco-slate uppercase">
           {sectionTitle}
         </p>
         <div
@@ -45,8 +45,8 @@ function ContactMapAddressStrip({
                 onClick={() => onSelect(location.id)}
                 className={`flex min-h-[3.25rem] items-start gap-2.5 rounded-2xl border px-4 py-3 text-left text-sm leading-snug font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marco-yellow/80 sm:text-[15px] ${
                   active
-                    ? "border-marco-yellow bg-marco-yellow/12 text-foreground shadow-sm ring-1 ring-marco-yellow/35"
-                    : "border-border bg-marco-gray/80 text-foreground hover:border-marco-yellow/45 hover:bg-marco-yellow/[0.06] hover:shadow-sm"
+                    ? "border-marco-yellow bg-marco-yellow/12 text-marco-slate shadow-sm ring-1 ring-marco-yellow/35"
+                    : "border-border bg-marco-gray/80 text-marco-slate hover:border-marco-yellow/45 hover:bg-marco-yellow/[0.06] hover:shadow-sm"
                 }`}
               >
                 <MapPin

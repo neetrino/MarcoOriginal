@@ -36,6 +36,7 @@ export default async function PersonalInformationPage({
           phone: dictionary.auth.phone,
           cancel: dictionary.profile.cancel,
           save: dictionary.profile.save,
+          saveShort: dictionary.profile.saveShort,
           saving: dictionary.profile.saving,
           firstNamePlaceholder: dictionary.auth.firstName,
           lastNamePlaceholder: dictionary.auth.lastName,

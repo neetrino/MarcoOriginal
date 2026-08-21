@@ -10,6 +10,10 @@ import {
   ADMIN_LABEL,
   ADMIN_SECTION_TITLE,
 } from "@/features/admin/ui/admin-form-classes";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { upsertStoreSettingAction } from "@/features/settings/application/upsert-settings";
 import type {
   StoreFxRates,
@@ -28,6 +32,7 @@ export function StoreSettingsForms({
   fxRates,
 }: StoreSettingsFormsProps) {
   const router = useRouter();
+  const copy = getAdminCopy(locale).settings;
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -59,14 +64,14 @@ export function StoreSettingsForms({
                 setError(result.error.message);
                 return;
               }
-              setMessage(`Saved ${result.value.key}.`);
+              setMessage(formatAdminMessage(copy.saved, { key: result.value.key }));
               router.refresh();
             });
           }}
         >
-          <h2 className={ADMIN_SECTION_TITLE}>Store identity</h2>
+          <h2 className={ADMIN_SECTION_TITLE}>{copy.identityTitle}</h2>
           <label>
-            <span className={ADMIN_LABEL}>Name</span>
+            <span className={ADMIN_LABEL}>{copy.name}</span>
             <input
               name="name"
               defaultValue={identity.name}
@@ -75,7 +80,7 @@ export function StoreSettingsForms({
             />
           </label>
           <label>
-            <span className={ADMIN_LABEL}>Support email</span>
+            <span className={ADMIN_LABEL}>{copy.supportEmail}</span>
             <input
               name="supportEmail"
               type="email"
@@ -85,7 +90,7 @@ export function StoreSettingsForms({
             />
           </label>
           <label>
-            <span className={ADMIN_LABEL}>Phone</span>
+            <span className={ADMIN_LABEL}>{copy.phone}</span>
             <input
               name="phone"
               defaultValue={identity.phone ?? ""}
@@ -95,7 +100,7 @@ export function StoreSettingsForms({
           </label>
           <div className="mt-auto pt-2">
             <Button type="submit" size="sm" disabled={isPending}>
-              Save identity
+              {copy.saveIdentity}
             </Button>
           </div>
         </form>
@@ -121,19 +126,17 @@ export function StoreSettingsForms({
                 setError(result.error.message);
                 return;
               }
-              setMessage(`Saved ${result.value.key}.`);
+              setMessage(formatAdminMessage(copy.saved, { key: result.value.key }));
               router.refresh();
             });
           }}
         >
-          <h2 className={ADMIN_SECTION_TITLE}>Exchange rates</h2>
+          <h2 className={ADMIN_SECTION_TITLE}>{copy.fxTitle}</h2>
           <p className="text-sm text-[color:var(--color-muted-foreground)]">
-            Catalog prices stay in AMD. Enter how many USD / RUB equal{" "}
-            <strong>1 AMD</strong> (dot or comma decimals, e.g. 0.2137 or
-            0,2137). Storefront display currency uses these rates.
+            {copy.fxHint}
           </p>
           <label>
-            <span className={ADMIN_LABEL}>USD per 1 AMD</span>
+            <span className={ADMIN_LABEL}>{copy.usdLabel}</span>
             <input
               name="usd"
               type="text"
@@ -146,7 +149,7 @@ export function StoreSettingsForms({
             />
           </label>
           <label>
-            <span className={ADMIN_LABEL}>RUB per 1 AMD</span>
+            <span className={ADMIN_LABEL}>{copy.rubLabel}</span>
             <input
               name="rub"
               type="text"
@@ -160,7 +163,7 @@ export function StoreSettingsForms({
           </label>
           <div className="mt-auto pt-2">
             <Button type="submit" size="sm" disabled={isPending}>
-              Save exchange rates
+              {copy.saveRates}
             </Button>
           </div>
         </form>

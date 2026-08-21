@@ -6,14 +6,16 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import {
-  ConfirmDialog,
-  deleteConfirmDescription,
-} from "@/components/ui/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   ADMIN_PAGE_TITLE,
 } from "@/features/admin/ui/admin-form-classes";
 import { AdminSearchInput } from "@/features/admin/ui/AdminSearchInput";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+  type AdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { ADMIN_BADGE } from "@/features/admin/ui/status-badge";
 import { deleteBlogPostAction } from "@/features/blog/application/manage-blog";
 import type { AdminBlogListItem } from "@/features/blog/application/queries";
@@ -32,16 +34,18 @@ function statusBadgeClass(status: string): string {
   return "bg-gray-100 text-gray-800";
 }
 
-function statusLabel(status: string): string {
+function statusLabel(status: string, copy: AdminCopy["blogAdmin"]): string {
   const normalized = status.toUpperCase();
-  if (normalized === "PUBLISHED") return "Published";
-  if (normalized === "DRAFT") return "Draft";
-  if (normalized === "ARCHIVED") return "Archived";
+  if (normalized === "PUBLISHED") return copy.statusPublished;
+  if (normalized === "DRAFT") return copy.statusDraft;
+  if (normalized === "ARCHIVED") return copy.statusArchived;
   return status;
 }
 
 export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
   const router = useRouter();
+  const copy = getAdminCopy(locale).blogAdmin;
+  const common = getAdminCopy(locale).common;
   const [query, setQuery] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<AdminBlogListItem | null>(
@@ -101,7 +105,7 @@ export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className={ADMIN_PAGE_TITLE}>Blog</h1>
+        <h1 className={ADMIN_PAGE_TITLE}>{copy.title}</h1>
         <Button
           type="button"
           size="sm"
@@ -109,16 +113,16 @@ export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
           className="inline-flex items-center gap-1.5"
         >
           <Plus className="h-4 w-4" aria-hidden />
-          Add Post
+          {copy.add}
         </Button>
       </div>
 
       <AdminSearchInput
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search by title or slug"
+        placeholder={copy.searchPlaceholder}
         wrapperClassName="mb-4"
-        aria-label="Search blog posts"
+        aria-label={copy.searchAria}
       />
 
       {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
@@ -127,9 +131,7 @@ export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
         {filtered.length === 0 ? (
           <Card className="rounded-xl p-8">
             <p className="text-center text-sm text-gray-600">
-              {posts.length === 0
-                ? "No blog posts yet."
-                : "No posts match this search."}
+              {posts.length === 0 ? copy.empty : copy.noMatch}
             </p>
           </Card>
         ) : (
@@ -150,7 +152,7 @@ export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-700 to-slate-900 text-xs font-medium text-white/70">
-                        Blog
+                        {copy.placeholder}
                       </div>
                     )}
                   </div>
@@ -174,14 +176,16 @@ export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
                   <span
                     className={`${ADMIN_BADGE} ${statusBadgeClass(post.status)}`}
                   >
-                    {statusLabel(post.status)}
+                    {statusLabel(post.status, copy)}
                   </span>
                   <button
                     type="button"
                     disabled={isPending}
                     onClick={() => openEdit(post)}
                     className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50"
-                    aria-label={`Edit ${post.title}`}
+                    aria-label={formatAdminMessage(common.editAria, {
+                      name: post.title,
+                    })}
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
@@ -190,7 +194,9 @@ export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
                     disabled={isPending}
                     onClick={() => requestDelete(post.id, post.title)}
                     className="rounded p-1.5 text-red-600 hover:bg-red-50 disabled:opacity-50"
-                    aria-label={`Delete ${post.title}`}
+                    aria-label={formatAdminMessage(common.deleteAria, {
+                      name: post.title,
+                    })}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -213,10 +219,15 @@ export function AdminBlogView({ locale, posts }: AdminBlogViewProps) {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="Delete"
+        title={common.delete}
+        confirmLabel={common.delete}
+        cancelLabel={common.cancel}
         description={
           pendingDelete
-            ? deleteConfirmDescription("post", pendingDelete.title)
+            ? formatAdminMessage(common.deleteConfirm, {
+                entity: copy.entity,
+                name: pendingDelete.title,
+              })
             : ""
         }
         isPending={isPending}

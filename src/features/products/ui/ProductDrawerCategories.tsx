@@ -90,7 +90,7 @@ export function ProductDrawerCategories({
         return;
       }
 
-      const created = { id: result.value.id, title };
+      const created = { id: result.value.id, title, parentId: null };
       onCategoriesChange([...categories, created]);
       onSelectedChange([...selectedIds, created.id]);
       setNewTitle("");
@@ -230,7 +230,7 @@ export function ProductDrawerCategories({
               type="button"
               disabled={disabled || isPending || !newTitle.trim()}
               onClick={createCategory}
-              className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+              className="rounded-full bg-marco-slate px-4 py-2 text-sm font-medium text-white transition-[filter] hover:brightness-95 disabled:opacity-50"
             >
               {isPending ? copy.adding : copy.addSubmit}
             </button>

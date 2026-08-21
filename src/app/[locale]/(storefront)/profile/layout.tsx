@@ -25,12 +25,13 @@ export default async function ProfileLayout({
   const dictionary = getDictionary(rawLocale);
 
   return (
-    <div className="profile-desktop-page flex flex-col gap-6 pb-10 lg:flex-row lg:items-start lg:gap-8 lg:pb-0">
-      <div className="hidden w-[280px] shrink-0 lg:sticky lg:top-6 lg:block lg:self-start">
+    <div className="profile-desktop-page flex w-full flex-col gap-2 lg:flex-row lg:items-start lg:gap-12 lg:pb-0">
+      <div className="hidden w-full shrink-0 lg:sticky lg:top-6 lg:block lg:w-[27rem] lg:self-start">
         <ProfileSidebar
           locale={rawLocale}
           user={user}
           dictionary={dictionary.profile}
+          homeLabel={dictionary.nav.home}
         />
       </div>
 
@@ -38,6 +39,7 @@ export default async function ProfileLayout({
         locale={rawLocale}
         user={user}
         dictionary={dictionary.profile}
+        homeLabel={dictionary.nav.home}
       >
         {children}
       </ProfileMobileShell>

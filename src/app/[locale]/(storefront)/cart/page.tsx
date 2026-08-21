@@ -31,7 +31,7 @@ export default async function CartPage({ params }: CartPageProps) {
 
   return (
     <section className="flex max-w-2xl flex-col gap-4">
-      <h1 className="text-3xl font-semibold">Cart</h1>
+      <h1 className="text-3xl font-semibold text-marco-slate">Cart</h1>
       {items.map(({ item, product }) => {
         const unit =
           prices.get(product.id)?.unitAmount ?? product.priceAmount;

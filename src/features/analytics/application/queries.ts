@@ -19,7 +19,9 @@ import {
   type AnalyticsTopCategory,
   type AnalyticsTopProduct,
 } from "@/features/analytics/application/top-rankings";
+import { ANALYTICS_SALES_POOL_LIMIT } from "@/features/analytics/domain/analytics-display";
 import type { AnalyticsCsvRow } from "@/features/analytics/domain/csv";
+import { pickBestAndLeastSelling } from "@/features/analytics/domain/pick-product-sales";
 import type { OrderStatus } from "@/features/orders/domain/order-status";
 import { getStoreRevenue } from "@/features/settings/application/queries";
 import type { Locale } from "@/lib/i18n/config";
@@ -48,6 +50,7 @@ export type AnalyticsSummary = {
   previousAverageOrderValue: number;
   dailyRows: AnalyticsCsvRow[];
   topProducts: AnalyticsTopProduct[];
+  leastSellingProducts: AnalyticsTopProduct[];
   topCategories: AnalyticsTopCategory[];
 };
 
@@ -86,7 +89,7 @@ function averageOrderValue(revenue: number, orderCount: number): number {
 }
 
 function cacheKey(from: string, to: string, locale: Locale): string {
-  return `analytics:${locale}:${from}:${to}`;
+  return `analytics:v2:${locale}:${from}:${to}`;
 }
 
 async function queryPeriodMetrics(input: {
@@ -164,7 +167,7 @@ async function computeAnalyticsSummary(input: {
   const revenueStatuses = revenue.statuses as OrderStatus[];
   const bounds = periodBounds(input.from, input.to);
 
-  const [current, previous, dailyRows, [usersRow], topProducts, topCategories] =
+  const [current, previous, dailyRows, [usersRow], salesPool, topCategories] =
     await Promise.all([
       queryPeriodMetrics({
         start: bounds.start,
@@ -186,6 +189,7 @@ async function computeAnalyticsSummary(input: {
         start: bounds.start,
         end: bounds.end,
         revenueStatuses,
+        limit: ANALYTICS_SALES_POOL_LIMIT,
       }),
       queryTopCategories({
         start: bounds.start,
@@ -194,6 +198,8 @@ async function computeAnalyticsSummary(input: {
         locale: input.locale,
       }),
     ]);
+
+  const ranked = pickBestAndLeastSelling(salesPool);
 
   return {
     from: input.from,
@@ -214,7 +220,8 @@ async function computeAnalyticsSummary(input: {
       previous.orderCount,
     ),
     dailyRows,
-    topProducts,
+    topProducts: ranked.bestSelling,
+    leastSellingProducts: ranked.leastSelling,
     topCategories,
   };
 }

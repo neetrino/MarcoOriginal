@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-
+import { AdminBrandMark } from "@/features/admin/ui/AdminBrandMark";
 import { useAdminSidebarCollapse } from "@/features/admin/ui/AdminSidebarCollapseContext";
+import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 
 type AdminSidebarBrandProps = {
   locale: string;
@@ -10,38 +10,25 @@ type AdminSidebarBrandProps = {
 
 export function AdminSidebarBrand({ locale }: AdminSidebarBrandProps) {
   const { collapsed, toggleCollapsed } = useAdminSidebarCollapse();
+  const nav = getAdminCopy(locale).nav;
+  const collapseLabel = collapsed ? nav.expandSidebar : nav.collapseSidebar;
 
   return (
     <div
-      className={`flex shrink-0 border-b border-gray-200 pb-3 pt-2 ${
+      className={`flex shrink-0 border-b border-gray-200 pb-3 pt-3 ${
         collapsed
           ? "flex-col items-center gap-2 px-1"
           : "items-center gap-1 px-2"
       }`}
     >
-      {collapsed ? (
-        <Link
-          href={`/${locale}`}
-          className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-gray-900 hover:bg-gray-50"
-          title="White Shop home"
-        >
-          W
-        </Link>
-      ) : (
-        <Link
-          href={`/${locale}`}
-          className="min-w-0 flex-1 rounded-md px-2 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-        >
-          White Shop
-        </Link>
-      )}
+      <AdminBrandMark locale={locale} compact={collapsed} />
       <button
         type="button"
         onClick={toggleCollapsed}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gray-200 text-marco-slate/70 transition-colors hover:border-gray-300 hover:bg-marco-gray hover:text-marco-ink"
         aria-expanded={!collapsed}
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        aria-label={collapseLabel}
+        title={collapseLabel}
       >
         {collapsed ? (
           <svg

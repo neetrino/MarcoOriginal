@@ -2,9 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
-import { ChevronDown } from "lucide-react";
 
 import { DROPDOWN_ANIMATION_MS } from "@/components/ui/SelectDropdown";
+import {
+  LocaleSwitcherTrigger,
+  type LocaleCurrencySwitcherVariant,
+} from "@/components/layout/LocaleCurrencyTrigger";
 import { setCurrencyAction } from "@/features/preferences/set-currency-action";
 import type { Locale } from "@/lib/i18n/config";
 import { localeLabels, locales } from "@/lib/i18n/config";
@@ -14,7 +17,7 @@ import { useLatestRef } from "@/lib/react/use-latest-ref";
 
 const HOVER_CLOSE_DELAY_MS = 140;
 
-/** Short codes for the navbar trigger (MaMarie-style `AMD / HY`). */
+/** Short codes for dropdown aria; pill uses native script (ՀԱՅ / ENG / РУС). */
 const localeShortLabels: Record<Locale, string> = {
   hy: "HY",
   en: "EN",
@@ -26,6 +29,7 @@ type LocaleCurrencySwitcherProps = {
   currency: Currency;
   currencyLabel: string;
   languageLabel: string;
+  variant?: LocaleCurrencySwitcherVariant;
 };
 
 function replaceLocaleInPath(pathname: string, nextLocale: Locale): string {
@@ -44,14 +48,14 @@ function optionClassName(selected: boolean): string {
 }
 
 /**
- * Combined currency + language control matching MaMarie navbar:
- * pill trigger `AMD / HY`, two-column dropdown.
+ * Combined language + currency control — globe / native label / banknote pill.
  */
 export function LocaleCurrencySwitcher({
   locale,
   currency,
   currencyLabel,
   languageLabel,
+  variant = "toolbar",
 }: LocaleCurrencySwitcherProps) {
   const router = useRouter();
   const pathname = usePathname() ?? `/${locale}`;
@@ -170,27 +174,14 @@ export function LocaleCurrencySwitcher({
       onMouseEnter={openMenu}
       onMouseLeave={scheduleClose}
     >
-      <button
-        type="button"
-        className="flex h-10 min-w-[8rem] shrink-0 items-center rounded-[80px] border border-transparent bg-marco-gray py-0 pr-3 pl-3 text-marco-slate transition-colors hover:bg-marco-yellow"
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        aria-controls={menuId}
-        aria-label={`${currency} / ${localeShortLabels[locale]}`}
-        onClick={() => (open ? closeMenu() : openMenu())}
-      >
-        <span className="flex min-w-0 flex-1 items-center justify-center whitespace-nowrap text-[15px] font-bold leading-none tabular-nums">
-          <span>{currency}</span>
-          <span className="inline-block w-[2px]" aria-hidden />
-          <span>/</span>
-          <span className="inline-block w-[2px]" aria-hidden />
-          <span>{localeShortLabels[locale]}</span>
-        </span>
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-marco-slate transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "rotate-180" : ""}`}
-          aria-hidden
-        />
-      </button>
+      <LocaleSwitcherTrigger
+        locale={locale}
+        currency={currency}
+        open={open}
+        menuId={menuId}
+        variant={variant}
+        onToggle={() => (open ? closeMenu() : openMenu())}
+      />
 
       {rendered ? (
         <div

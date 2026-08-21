@@ -1,10 +1,11 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { MobileBottomNavIsland } from "@/components/layout/MobileBottomNavIsland";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
+import { shouldHideSiteHeader } from "@/components/layout/site-header-visibility";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import {
@@ -33,14 +34,18 @@ export default async function StorefrontLayout({
   const currency = parseCurrencyCookie(
     cookieStore.get(CURRENCY_COOKIE_NAME)?.value,
   );
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  const hideHeader = shouldHideSiteHeader(pathname);
 
   return (
     <div className="storefront-shell flex min-h-dvh flex-1 flex-col bg-white">
-      <SiteHeader
-        locale={locale}
-        currency={currency}
-        dictionary={dictionary}
-      />
+      {hideHeader ? null : (
+        <SiteHeader
+          locale={locale}
+          currency={currency}
+          dictionary={dictionary}
+        />
+      )}
       <main className="storefront-main mx-auto w-full max-w-7xl flex-1 px-4 py-10 pb-24 sm:px-6 md:pb-10 lg:px-8">
         <MaintenanceGate>{children}</MaintenanceGate>
       </main>

@@ -25,10 +25,12 @@ type SideSheetProps = {
   panelClassName?: string;
   side?: "left" | "right";
   zIndexClassName?: string;
-  /** External circle (default) or MaMarie-style edge tab. */
-  closeVariant?: "circle" | "edge-tab";
+  /** External circle (default), MaMarie-style edge tab, or none when the panel owns close. */
+  closeVariant?: "circle" | "edge-tab" | "none";
   /** Soften backdrop (cart-style). */
   backdropBlur?: boolean;
+  /** Replaces the default white rounded panel surface. */
+  surfaceClassName?: string;
 };
 
 /**
@@ -45,6 +47,7 @@ export function SideSheet({
   zIndexClassName = "z-[200]",
   closeVariant = "circle",
   backdropBlur = false,
+  surfaceClassName,
 }: SideSheetProps) {
   const mounted = useIsClient();
   const { rendered, exiting, finishExit } = useExitPresence(
@@ -127,8 +130,10 @@ export function SideSheet({
     >
       <button
         type="button"
-        className={`absolute inset-0 bg-black/40 ${
-          backdropBlur ? "backdrop-blur-sm" : ""
+        className={`absolute inset-0 ${
+          backdropBlur
+            ? "bg-black/50 backdrop-blur-[1px]"
+            : "bg-black/40"
         } ${backdropClass}`}
         aria-label="Close"
         onClick={onClose}
@@ -137,7 +142,7 @@ export function SideSheet({
         className={`fixed inset-y-0 ${edgeClass} z-[1] flex h-dvh max-h-dvh ${panelMotionClass} ${panelClassName}`}
         onAnimationEnd={handlePanelAnimationEnd}
       >
-        {closeVariant === "edge-tab" ? (
+        {closeVariant === "none" ? null : closeVariant === "edge-tab" ? (
           <button
             type="button"
             onClick={onClose}
@@ -165,7 +170,9 @@ export function SideSheet({
           </button>
         )}
         <div
-          className={`flex h-full min-h-0 w-full flex-col overflow-hidden bg-white shadow-2xl ${panelRadius}`}
+          className={`flex h-full min-h-0 w-full flex-col overflow-hidden ${
+            surfaceClassName ?? `bg-white shadow-2xl ${panelRadius}`
+          }`}
           onClick={(event) => event.stopPropagation()}
         >
           {displayChildren}

@@ -1,6 +1,7 @@
 /** Home section visual tokens — aligned with marco.am / Figma storefront. */
 
-export const HOME_TITLE_FONT_SIZE_CLAMP = "clamp(22px, 3.6vw, 40px)";
+export const HOME_HERO_MOBILE_AUTO_ROTATE_MS = 4000;
+export const HOME_HERO_MOBILE_USER_PAUSE_MS = 8000;
 export const HOME_TITLE_LINE_HEIGHT = "1.02";
 export const HOME_TITLE_LETTER_SPACING_PX = -0.6;
 export const HOME_TITLE_TEXT_TO_BAR_GAP_PX = 8;

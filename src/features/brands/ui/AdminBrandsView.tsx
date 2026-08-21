@@ -7,12 +7,13 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import {
-  ConfirmDialog,
-  deleteConfirmDescription,
-} from "@/components/ui/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ADMIN_PAGE_TITLE } from "@/features/admin/ui/admin-form-classes";
 import { AdminSearchInput } from "@/features/admin/ui/AdminSearchInput";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import {
   ADMIN_TABLE,
   ADMIN_TABLE_CARD,
@@ -36,6 +37,8 @@ type AdminBrandsViewProps = {
 };
 
 export function AdminBrandsView({ locale, brands }: AdminBrandsViewProps) {
+  const copy = getAdminCopy(locale).brands;
+  const common = getAdminCopy(locale).common;
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -78,7 +81,7 @@ export function AdminBrandsView({ locale, brands }: AdminBrandsViewProps) {
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className={ADMIN_PAGE_TITLE}>Brands</h1>
+        <h1 className={ADMIN_PAGE_TITLE}>{copy.title}</h1>
         <Button
           type="button"
           size="sm"
@@ -89,16 +92,16 @@ export function AdminBrandsView({ locale, brands }: AdminBrandsViewProps) {
           className="inline-flex items-center gap-1.5"
         >
           <Plus className="h-4 w-4" aria-hidden />
-          Add new brand
+          {copy.addNew}
         </Button>
       </div>
 
       <AdminSearchInput
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search brands"
+        placeholder={copy.searchPlaceholder}
         wrapperClassName="mb-4"
-        aria-label="Search brands"
+        aria-label={copy.searchAria}
       />
 
       {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
@@ -106,19 +109,17 @@ export function AdminBrandsView({ locale, brands }: AdminBrandsViewProps) {
       <Card className={ADMIN_TABLE_CARD}>
         {visible.length === 0 ? (
           <p className={`${ADMIN_TABLE_STATE_INSET} text-sm text-gray-600`}>
-            {brands.length === 0
-              ? "No brands yet."
-              : "No brands match this search."}
+            {brands.length === 0 ? copy.empty : copy.noMatch}
           </p>
         ) : (
           <div className={ADMIN_TABLE_OUTER_SCROLL}>
             <table className={ADMIN_TABLE}>
               <thead className={ADMIN_TABLE_THEAD}>
                 <tr>
-                  <th className={ADMIN_TABLE_TH}>Image</th>
-                  <th className={ADMIN_TABLE_TH}>Brand</th>
-                  <th className={ADMIN_TABLE_TH}>SKU</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Actions</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnImage}</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnBrand}</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnSku}</th>
+                  <th className={ADMIN_TABLE_TH_CENTER}>{common.actions}</th>
                 </tr>
               </thead>
               <tbody className={ADMIN_TABLE_TBODY}>
@@ -150,7 +151,9 @@ export function AdminBrandsView({ locale, brands }: AdminBrandsViewProps) {
                         <button
                           type="button"
                           className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                          aria-label={`Edit ${brand.title}`}
+                          aria-label={formatAdminMessage(common.editAria, {
+                            name: brand.title,
+                          })}
                           onClick={() => {
                             setEditingBrand(brand);
                             setDrawerOpen(true);
@@ -168,7 +171,9 @@ export function AdminBrandsView({ locale, brands }: AdminBrandsViewProps) {
                             })
                           }
                           className="rounded p-1.5 text-red-600 hover:bg-red-50"
-                          aria-label={`Delete ${brand.title}`}
+                          aria-label={formatAdminMessage(common.deleteAria, {
+                            name: brand.title,
+                          })}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -194,10 +199,15 @@ export function AdminBrandsView({ locale, brands }: AdminBrandsViewProps) {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="Delete"
+        title={common.delete}
+        confirmLabel={common.delete}
+        cancelLabel={common.cancel}
         description={
           pendingDelete
-            ? deleteConfirmDescription("brand", pendingDelete.title)
+            ? formatAdminMessage(common.deleteConfirm, {
+                entity: copy.entity,
+                name: pendingDelete.title,
+              })
             : ""
         }
         isPending={isPending}

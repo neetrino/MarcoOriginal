@@ -21,7 +21,7 @@ export function MarcoLogo({ locale, ariaLabel }: MarcoLogoProps) {
     <AppLink
       href={`/${locale}`}
       prefetchPolicy="intent"
-      className="flex h-20 shrink-0 items-center md:h-24"
+      className="flex h-20 shrink-0 items-center"
       aria-label={ariaLabel}
     >
       <span className="relative aspect-[83/73] h-full w-auto shrink-0 overflow-hidden">

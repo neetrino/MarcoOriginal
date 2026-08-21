@@ -3,23 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 
 import { formatCatalogFilterPrice } from "@/features/products/domain/catalog-price-bounds";
+import {
+  CATALOG_PRICE_TITLE,
+  CATALOG_PRICE_TRACK,
+  CATALOG_PRICE_VALUE,
+} from "@/features/products/ui/catalog-filter-classes";
 import type { Currency } from "@/lib/money/currency";
 
 const PRICE_DEBOUNCE_MS = 400;
 
 const RANGE_INPUT =
-  "pointer-events-none absolute inset-0 h-6 w-full appearance-none bg-transparent " +
+  "pointer-events-none absolute inset-0 h-2 w-full appearance-none bg-transparent " +
   "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:relative " +
-  "[&::-webkit-slider-thumb]:z-10 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 " +
+  "[&::-webkit-slider-thumb]:z-10 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 " +
   "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full " +
-  "[&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-gray-300 " +
-  "[&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow " +
-  "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-3.5 " +
-  "[&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:rounded-full " +
-  "[&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-gray-300 " +
-  "[&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow";
+  "[&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-[#e2e8f0] " +
+  "[&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-sm " +
+  "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 " +
+  "[&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full " +
+  "[&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-[#e2e8f0] " +
+  "[&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-sm";
 
 type CatalogPriceFilterProps = {
+  title: string;
   minBound: number;
   maxBound: number;
   selectedMin: number;
@@ -31,6 +37,7 @@ type CatalogPriceFilterProps = {
 };
 
 export function CatalogPriceFilter({
+  title,
   minBound,
   maxBound,
   selectedMin,
@@ -63,15 +70,17 @@ export function CatalogPriceFilter({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-marco-slate">
-        {formatCatalogFilterPrice(minValue, currency)}
-        {" - "}
-        {formatCatalogFilterPrice(maxValue, currency)}
-      </p>
-      <div className="relative h-6">
-        <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-gray-200" />
+      <div className="mb-1 flex min-h-6 w-full items-center justify-between gap-2">
+        <h2 className={CATALOG_PRICE_TITLE}>{title}</h2>
+        <p className={CATALOG_PRICE_VALUE}>
+          {formatCatalogFilterPrice(minValue, currency)}
+          {" - "}
+          {formatCatalogFilterPrice(maxValue, currency)}
+        </p>
+      </div>
+      <div className={`${CATALOG_PRICE_TRACK} ${disabled ? "opacity-60" : ""}`}>
         <div
-          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-marco-yellow"
+          className="absolute top-0 h-full rounded-full bg-marco-yellow"
           style={{ left: `${left}%`, right: `${right}%` }}
         />
         <input

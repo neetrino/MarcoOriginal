@@ -1,16 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { Copy, Pencil, Star, Trash2 } from "lucide-react";
 
-import {
-  ADMIN_TABLE_ROW,
-  ADMIN_TABLE_TD,
-  ADMIN_TABLE_TD_CENTER,
-  ADMIN_TABLE_TD_CHECK,
-  ADMIN_TABLE_CHECKBOX,
-} from "@/features/admin/ui/admin-table-classes";
+import { ADMIN_TABLE_CHECKBOX } from "@/features/admin/ui/admin-table-classes";
+import { formatAdminMessage, getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 import type { AdminProductListItem } from "@/features/products/application/list-admin-products";
+import {
+  ADMIN_PRODUCTS_CATEGORY_PILL,
+  ADMIN_PRODUCTS_FEATURED_BUTTON,
+  ADMIN_PRODUCTS_ICON_BUTTON,
+  ADMIN_PRODUCTS_ICON_BUTTON_DANGER,
+  ADMIN_PRODUCTS_ROW,
+  ADMIN_PRODUCTS_TD,
+} from "@/features/products/ui/admin-products.classes";
 import { formatMoneyAmount } from "@/lib/money/format";
 
 type AdminProductRowProps = {
@@ -21,10 +23,12 @@ type AdminProductRowProps = {
   onToggle: () => void;
   onEdit: () => void;
   onFeatured: () => void;
-  onDuplicate: () => void;
   onDelete: () => void;
   onVisibility: () => void;
 };
+
+const STAR_PATH =
+  "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z";
 
 export function AdminProductRow({
   locale,
@@ -34,112 +38,117 @@ export function AdminProductRow({
   onToggle,
   onEdit,
   onFeatured,
-  onDuplicate,
   onDelete,
   onVisibility,
 }: AdminProductRowProps) {
+  const copy = getAdminCopy(locale).products;
+  const common = getAdminCopy(locale).common;
   const isActive = product.status === "ACTIVE";
-  const created = new Date(product.createdAt);
-  const createdLabel = `${created.getDate()}/${created.getMonth() + 1}/${created.getFullYear()}`;
+  const createdLabel = new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  }).format(new Date(product.createdAt));
 
   return (
-    <tr className={ADMIN_TABLE_ROW}>
-      <td className={ADMIN_TABLE_TD_CHECK}>
+    <tr
+      className={ADMIN_PRODUCTS_ROW}
+      tabIndex={0}
+      onClick={onEdit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onEdit();
+        }
+      }}
+    >
+      <td className={ADMIN_PRODUCTS_TD} onClick={(event) => event.stopPropagation()}>
         <input
           type="checkbox"
           className={ADMIN_TABLE_CHECKBOX}
           checked={selected}
           onChange={onToggle}
           disabled={disabled}
-          aria-label={`Select ${product.title}`}
+          aria-label={formatAdminMessage(common.selectAria, { name: product.title })}
         />
       </td>
-      <td className={ADMIN_TABLE_TD}>
-        <div className="flex min-w-[200px] items-center gap-3">
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-gray-100">
-            {product.imageUrl ? (
-              <Image
-                src={product.imageUrl}
-                alt=""
-                fill
-                sizes="40px"
-                className="object-cover"
-              />
-            ) : (
-              <span className="text-[10px] text-gray-400">N/A</span>
-            )}
+      <td className={`max-w-xs ${ADMIN_PRODUCTS_TD}`}>
+        <ProductIdentity locale={locale} product={product} />
+      </td>
+      <td className={`max-w-[11rem] ${ADMIN_PRODUCTS_TD} align-top`}>
+        {product.categoryLabels.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {product.categoryLabels.map((label) => (
+              <span key={label} className={ADMIN_PRODUCTS_CATEGORY_PILL} title={label}>
+                {label}
+              </span>
+            ))}
           </div>
-          <div className="min-w-0">
-            <p className="truncate font-medium text-gray-900">{product.title}</p>
-            <p className="truncate text-xs text-gray-500">{product.slug}</p>
-          </div>
-        </div>
+        ) : (
+          <span className="text-sm text-gray-400">—</span>
+        )}
       </td>
-      <td className={ADMIN_TABLE_TD}>
-        <span className="text-gray-900">{product.stockOnHand} pcs</span>
-      </td>
-      <td className={ADMIN_TABLE_TD}>
-        <div className="flex flex-col">
-          <span className="font-medium text-gray-900">
-            {formatMoneyAmount(product.priceAmount, "AMD", locale)}
-          </span>
-          {product.compareAtAmount != null &&
-          product.compareAtAmount > product.priceAmount ? (
-            <span className="text-xs text-gray-400 line-through">
-              {formatMoneyAmount(product.compareAtAmount, "AMD", locale)}
-            </span>
-          ) : null}
-        </div>
-      </td>
-      <td className={ADMIN_TABLE_TD_CENTER}>
-        <span className="line-clamp-2 max-w-[160px] inline-block text-gray-700">
-          {product.categoryLabels.length > 0
-            ? product.categoryLabels.join(", ")
-            : "—"}
+      <td className={ADMIN_PRODUCTS_TD}>
+        <span className="text-sm font-medium text-marco-slate">
+          {formatAdminMessage(copy.pcs, { count: product.stockOnHand })}
         </span>
       </td>
-      <td className={ADMIN_TABLE_TD_CENTER}>
+      <td className={`whitespace-nowrap ${ADMIN_PRODUCTS_TD}`}>
+        <span className="text-sm font-semibold text-marco-ink">
+          {formatMoneyAmount(product.priceAmount, "AMD", locale)}
+        </span>
+        {product.compareAtAmount != null &&
+        product.compareAtAmount > product.priceAmount ? (
+          <span className="mt-0.5 block text-xs text-gray-500 line-through">
+            {formatMoneyAmount(product.compareAtAmount, "AMD", locale)}
+          </span>
+        ) : null}
+      </td>
+      <td className={`${ADMIN_PRODUCTS_TD} text-center`}>
         <button
           type="button"
           disabled={disabled}
-          onClick={onFeatured}
-          className="inline-flex rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-amber-500"
-          aria-label={
-            product.isFeatured ? "Unfeature product" : "Feature product"
-          }
+          onClick={(event) => {
+            event.stopPropagation();
+            onFeatured();
+          }}
+          className={ADMIN_PRODUCTS_FEATURED_BUTTON}
+          aria-pressed={product.isFeatured}
+          aria-label={product.isFeatured ? copy.unfeature : copy.feature}
         >
-          <Star
-            className={`h-4 w-4 ${product.isFeatured ? "fill-amber-400 text-amber-400" : ""}`}
-          />
+          <svg
+            className={`h-6 w-6 ${
+              product.isFeatured
+                ? "fill-marco-yellow text-marco-yellow drop-shadow-sm"
+                : "fill-none text-gray-400 opacity-50"
+            }`}
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d={STAR_PATH} />
+          </svg>
         </button>
       </td>
-      <td className={ADMIN_TABLE_TD_CENTER}>
-        <div className="inline-flex items-center justify-center gap-1">
+      <td className={`${ADMIN_PRODUCTS_TD} text-center`} onClick={(event) => event.stopPropagation()}>
+        <div className="flex flex-nowrap items-center justify-center gap-2">
           <button
             type="button"
             onClick={onEdit}
-            className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-            aria-label={`Edit ${product.title}`}
+            className={ADMIN_PRODUCTS_ICON_BUTTON}
+            aria-label={formatAdminMessage(common.editAria, { name: product.title })}
           >
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={onDuplicate}
-            className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-            aria-label={`Duplicate ${product.title}`}
-          >
-            <Copy className="h-4 w-4" />
+            <EditIcon />
           </button>
           <button
             type="button"
             disabled={disabled}
             onClick={onDelete}
-            className="rounded p-1.5 text-red-600 hover:bg-red-50"
-            aria-label={`Delete ${product.title}`}
+            className={ADMIN_PRODUCTS_ICON_BUTTON_DANGER}
+            aria-label={formatAdminMessage(common.deleteAria, { name: product.title })}
           >
-            <Trash2 className="h-4 w-4" />
+            <TrashIcon />
           </button>
           <button
             type="button"
@@ -147,22 +156,86 @@ export function AdminProductRow({
             aria-checked={isActive}
             disabled={disabled}
             onClick={onVisibility}
-            className={`relative ml-1 h-5 w-9 rounded-full transition-colors ${
-              isActive ? "bg-green-500" : "bg-gray-300"
+            className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-marco-slate focus-visible:ring-offset-2 ${
+              isActive ? "bg-emerald-500" : "bg-gray-300"
             }`}
-            aria-label={isActive ? "Deactivate product" : "Activate product"}
+            aria-label={isActive ? copy.deactivate : copy.activate}
           >
             <span
-              className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
-                isActive ? "translate-x-4" : "translate-x-0"
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                isActive ? "translate-x-[21px]" : "translate-x-1"
               }`}
             />
           </button>
         </div>
       </td>
-      <td className={ADMIN_TABLE_TD}>
-        <span className="text-xs text-gray-500">{createdLabel}</span>
+      <td className={`whitespace-nowrap ${ADMIN_PRODUCTS_TD} text-sm text-marco-slate`}>
+        {createdLabel}
       </td>
     </tr>
+  );
+}
+
+function ProductIdentity({
+  locale,
+  product,
+}: {
+  locale: string;
+  product: AdminProductListItem;
+}) {
+  const copy = getAdminCopy(locale).products;
+  return (
+    <div className="flex items-center gap-2.5">
+      {product.imageUrl ? (
+        <Image
+          src={product.imageUrl}
+          alt={product.title}
+          width={40}
+          height={40}
+          className="h-10 w-10 shrink-0 rounded-lg border border-gray-200 object-cover shadow-sm"
+        />
+      ) : (
+        <div
+          className="h-10 w-10 shrink-0 rounded-lg border border-gray-200 bg-gray-100 shadow-sm"
+          aria-hidden
+        />
+      )}
+      <div className="min-w-0 flex-1">
+        <span className="text-sm font-semibold break-words text-marco-ink transition-colors group-hover:text-amber-900">
+          {product.title}
+        </span>
+        {product.sku ? (
+          <p className="mt-0.5 truncate text-xs text-gray-500">
+            {formatAdminMessage(copy.skuLabel, { sku: product.sku })}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+      />
+    </svg>
   );
 }

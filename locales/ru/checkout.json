@@ -6,11 +6,11 @@
   "itemsOne": "1 товар",
   "itemsMany": "{count} товаров",
   "removeItem": "Удалить товар",
-  "contactInformation": "Контактные данные",
+  "contactInformation": "Контактная информация",
   "shippingMethod": "Способ доставки",
   "shippingAddress": "Адрес доставки",
   "paymentMethod": "Способ оплаты",
-  "orderSummary": "Итог заказа",
+  "orderSummary": "Итоги заказа",
   "form": {
     "firstName": "Имя",
     "lastName": "Фамилия",
@@ -19,12 +19,15 @@
     "address": "Адрес",
     "city": "Город",
     "deliveryLocation": "Место доставки",
-    "selectLocation": "Выберите место"
+    "selectLocation": "Выберите место",
+    "branchAddress": "Адрес филиала",
+    "notes": "Комментарий к заказу (необязательно)"
   },
   "placeholders": {
     "phone": "+374XXXXXXXX",
     "address": "Улица, квартира, офис и т.д.",
-    "city": "Город"
+    "city": "Город",
+    "notes": "Указания к доставке или другие комментарии"
   },
   "shipping": {
     "storePickup": "Самовывоз",
@@ -33,28 +36,33 @@
     "deliveryDescription": "Доставим заказ по вашему адресу",
     "freePickup": "Бесплатно (Самовывоз)",
     "enterCity": "Укажите город",
-    "selectDeliveryLocation": "Выберите место доставки"
+    "selectDeliveryLocation": "Выберите место доставки",
+    "pickupToggle": "Самовывоз",
+    "deliveryToggle": "Доставка",
+    "selectBranch": "Выберите филиал"
   },
   "payment": {
+    "cash": "Наличные",
+    "cashDescription": "Оплатите наличными при получении заказа",
     "cashOnDelivery": "Наличными при получении",
     "cashShort": "Наличные",
-    "cashOnDeliveryDescription": "Оплатите при получении заказа.",
+    "cashOnDeliveryDescription": "Оплатите наличными при получении заказа",
     "cashChange": {
       "title": "СДАЧА",
       "hint": "Нажмите на купюру, которой будете платить, чтобы мы подготовили сдачу:",
       "none": "Сдача не нужна",
       "courierChange": "Курьеру нужно приготовить сдачу {amount}"
     },
-    "idram": "iDram",
-    "idramDescription": "Оплатите через свой аккаунт iDram.",
-    "card": "Банковская карта",
-    "cardDescription": "Безопасная оплата банковской картой.",
-    "arca": "Банковская карта",
-    "arcaDescription": "Безопасная оплата банковской картой."
+    "idram": "Idram",
+    "idramDescription": "Оплата через кошелёк Idram",
+    "card": "Картой",
+    "cardDescription": "Оплатите картой Visa, Mastercard или ArCa",
+    "arca": "Картой",
+    "arcaDescription": "Оплатите картой Visa, Mastercard или ArCa"
   },
   "coupon": {
-    "title": "Есть промокод?",
-    "placeholder": "Введите промокод",
+    "title": "Промокод",
+    "placeholder": "Введите ваш купон",
     "apply": "Применить",
     "applying": "Применение…"
   },
@@ -68,9 +76,11 @@
   "buttons": {
     "placeOrder": "Оформить заказ",
     "processing": "Обработка…",
-    "continueShopping": "Продолжить покупки"
+    "continueShopping": "Продолжить покупки",
+    "browseProducts": "Просмотреть товары"
   },
   "errors": {
+    "branchRequired": "Пожалуйста, выберите филиал",
     "cartEmpty": "Корзина пуста",
     "cartEmptyDescription": "Добавьте товары, чтобы продолжить",
     "cartEmptyCta": "Продолжить покупки"

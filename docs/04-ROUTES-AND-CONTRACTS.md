@@ -2,7 +2,7 @@
 
 **Կարգավիճակ.** Draft
 **Տարբերակ.** 1.0
-**Վերջին թարմացում.** 2026-07-17
+**Վերջին թարմացում.** 2026-08-21
 
 ## 1. Contract principles
 
@@ -21,9 +21,11 @@
 | `/[locale]/products` | Public | URL-filtered catalog, server pagination |
 | `/[locale]/products/[slug]` | Public | Product detail; locale slug lookup; 404 unpublished/missing |
 | `/[locale]/about` | Public | Locale content |
+| `/[locale]/stores` | Public | Store directory with locations, hours, and maps directions |
+| `/[locale]/reels` | Public | Published reels strip |
 | `/[locale]/contact` | Public | Contact form + rate limit |
-| `/[locale]/blog` | Public | Published posts, pagination |
-| `/[locale]/blog/[slug]` | Public | Published locale post |
+| `/[locale]/blog` | Disabled | Temporarily hidden from storefront; returns 404 |
+| `/[locale]/blog/[slug]` | Disabled | Temporarily hidden from storefront; returns 404 |
 | `/[locale]/policies/terms` | Public | Versioned approved content |
 | `/[locale]/policies/privacy` | Public | Versioned approved content |
 | `/[locale]/policies/shipping` | Public | Approved content |
@@ -47,7 +49,7 @@
 
 ## 4. Customer routes
 
-Բոլոր routes-ը պահանջում են active authenticated Customer/Admin և ownership-scoped data։
+Բոլոր routes-ը պահանջում են active authenticated Customer/Admin և ownership-scoped data։ Storefront `SiteHeader`-ը այս routes-ում չի render լինում։
 
 | Route | Content |
 |---|---|
@@ -61,7 +63,7 @@
 
 ## 5. Admin routes
 
-Բոլոր admin routes-ը server-side պահանջում են `role=ADMIN` և `status=ACTIVE`։
+Բոլոր admin routes-ը server-side պահանջում են `role=ADMIN` և `status=ACTIVE`։ Admin-ը սեփական shell ունի և storefront `SiteHeader` չի ցույց տալիս։
 
 | Route | Capability |
 |---|---|
@@ -75,10 +77,10 @@
 | `/[locale]/admin/brands` | Brand CRUD |
 | `/[locale]/admin/attributes` | Catalog attribute/swatch CRUD |
 | `/[locale]/admin/coupons` | Coupon CRUD |
-| `/[locale]/admin/discounts` | Category/product discount management |
+| `/[locale]/admin/discounts` | Tabbed global, category, and product discount board |
 | `/[locale]/admin/users` | User/role/status management |
 | `/[locale]/admin/messages` | Contact inbox |
-| `/[locale]/admin/analytics` | Metrics + CSV export |
+| `/[locale]/admin/analytics` | Metrics, status/customer/stock widgets + CSV export |
 | `/[locale]/admin/delivery` | Delivery rules |
 | `/[locale]/admin/blog` | Blog CMS |
 | `/[locale]/admin/settings` | Typed store settings |
@@ -107,10 +109,11 @@
 | `minPrice` | integer display/base policy | non-negative; conversion filtering policy must be deterministic |
 | `maxPrice` | integer | `>= minPrice` |
 | `category` | locale slug or repeated slugs | active category only |
-| `inStock` | boolean | `true`/`false` allowlist |
-| `sort` | enum | `newest`, `price_asc`, `price_desc`, `popular` |
+| `brand` | locale slug or repeated slugs | active brand only |
+| `color` | 6-digit hex, repeated | allowlisted hex only |
+| `sort` | enum, default `default` | `default`, `price-asc`, `price-desc`, `name-asc`, `name-desc` |
+| `pricePresence` | enum, default `with` | `with` (price > 0) / `without` (price = 0) |
 | `page` | positive integer, default 1 | bounded |
-| `pageSize` | allowlist, proposed 12/24/48 | max protected |
 
 Price filter-ի canonical semantics-ը պետք է product owner-ը հաստատի multi-currency UI-ի համար։ Առաջարկ՝ URL amounts-ը selected display currency-ով ընդունել, server-side deterministic կերպով base AMD range-ի փոխարկել նույն effective rate-ով և UI-ում նշել currency-ն։ Alternative՝ միշտ AMD params։
 

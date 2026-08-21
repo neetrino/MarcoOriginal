@@ -5,11 +5,23 @@
   "storePhone": "060 500 406",
   "storeEmail": "marcofurniture@mail.ru",
   "storeAddress": "Ереван, Алек Манукян 23",
+  "deliveryPhonesLabel": "Для доставки",
+  "callToUs": {
+    "description": "Мы доступны 7 дней в неделю."
+  },
+  "drawerCall": {
+    "cta": "Позвонить",
+    "chooseBranchTitle": "В какой филиал вы хотите позвонить?",
+    "changeBranch": "Выбрать другой филиал",
+    "cancel": "Назад"
+  },
   "social": {
     "instagram": "https://www.instagram.com/marco_electronics",
     "facebook": "https://www.facebook.com/marcoelectronicss",
     "linkedin": "",
-    "telegram": "https://t.me/+37460500406"
+    "telegram": "https://t.me/+37460500406",
+    "whatsapp": "https://wa.me/37460500406",
+    "viber": "viber://chat?number=37460500406"
   },
   "locations": {
     "yerevan": "г. Ереван, Алек Манукян 23",

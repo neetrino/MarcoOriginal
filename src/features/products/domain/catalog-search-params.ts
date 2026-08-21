@@ -1,3 +1,12 @@
+import {
+  DEFAULT_CATALOG_PRICE_PRESENCE,
+  DEFAULT_CATALOG_SORT,
+  parseCatalogPricePresence,
+  parseCatalogSort,
+  type CatalogPricePresence,
+  type CatalogSort,
+} from "@/features/products/domain/catalog-sort";
+
 export const CATALOG_SLUG_MAX_LENGTH = 120;
 export const CATALOG_MAX_SELECTED_VALUES = 20;
 export const CATALOG_MAX_PRICE_MAJOR = 99_999_999;
@@ -9,6 +18,8 @@ export type CatalogSearchParams = {
   colorHexes: string[];
   minPrice: number | null;
   maxPrice: number | null;
+  sort: CatalogSort;
+  pricePresence: CatalogPricePresence;
 };
 
 export const EMPTY_CATALOG_SEARCH: CatalogSearchParams = {
@@ -18,6 +29,8 @@ export const EMPTY_CATALOG_SEARCH: CatalogSearchParams = {
   colorHexes: [],
   minPrice: null,
   maxPrice: null,
+  sort: DEFAULT_CATALOG_SORT,
+  pricePresence: DEFAULT_CATALOG_PRICE_PRESENCE,
 };
 
 type RawSearchValue = string | string[] | undefined;
@@ -95,5 +108,7 @@ export function parseCatalogSearchParams(
     colorHexes: parseColorHexes(searchParams.color),
     minPrice,
     maxPrice,
+    sort: parseCatalogSort(searchParams.sort),
+    pricePresence: parseCatalogPricePresence(searchParams.pricePresence),
   };
 }

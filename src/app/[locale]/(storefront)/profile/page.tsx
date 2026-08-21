@@ -1,8 +1,9 @@
-import { CheckCircle2, Clock3, Package, Wallet } from "lucide-react";
+import { Clock3, MapPin, Package, Wallet } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { getProfileDashboard } from "@/features/profile/application/dashboard-queries";
 import { ProfileDashboardOrdersSection } from "@/features/profile/ui/ProfileDashboardOrdersSection";
+import { ProfileDashboardQuickActions } from "@/features/profile/ui/ProfileDashboardQuickActions";
 import { ProfileStatCard } from "@/features/profile/ui/ProfileStatCard";
 import { requireUser } from "@/lib/auth/policies";
 import { isLocale } from "@/lib/i18n/config";
@@ -25,36 +26,31 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const copy = dictionary.profile;
 
   return (
-    <section className="profile-sheet-keep-frame space-y-6 lg:space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:hidden">
-          {copy.dashboard}
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 lg:mt-0">
-          {copy.welcome}, {user.firstName}.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+    <section className="profile-sheet-keep-frame space-y-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
         <ProfileStatCard
           label={copy.totalOrders}
           value={String(stats.totalOrders)}
           icon={<Package aria-hidden />}
+          tone="blue"
         />
         <ProfileStatCard
           label={copy.totalSpent}
           value={formatMoneyAmount(stats.totalSpent, "AMD", locale)}
           icon={<Wallet aria-hidden />}
+          tone="green"
         />
         <ProfileStatCard
           label={copy.pendingOrders}
           value={String(stats.pendingOrders)}
           icon={<Clock3 aria-hidden />}
+          tone="yellow"
         />
         <ProfileStatCard
-          label={copy.completedOrders}
-          value={String(stats.completedOrders)}
-          icon={<CheckCircle2 aria-hidden />}
+          label={copy.savedAddresses}
+          value={String(stats.addressesCount)}
+          icon={<MapPin aria-hidden />}
+          tone="purple"
         />
       </div>
 
@@ -63,7 +59,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         orders={recentOrders}
         labels={{
           recentOrders: copy.recentOrders,
-          viewAllOrders: copy.viewAllOrders,
+          viewAllOrders: copy.viewAll,
           noOrders: copy.noOrders,
           startShopping: copy.startShopping,
           orderNumber: copy.orderNumber,
@@ -71,6 +67,17 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           placedOn: copy.placedOn,
           item: copy.item,
           items: copy.items,
+          status: copy.status,
+        }}
+      />
+
+      <ProfileDashboardQuickActions
+        locale={locale}
+        labels={{
+          quickActions: copy.quickActions,
+          viewAllOrders: copy.viewAllOrders,
+          manageAddresses: copy.manageAddresses,
+          continueShopping: copy.continueShopping,
         }}
       />
     </section>

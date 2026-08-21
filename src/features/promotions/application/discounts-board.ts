@@ -12,7 +12,7 @@ import { mediaPublicUrl } from "@/lib/media/public-url";
 export type DiscountBoardCategory = {
   id: string;
   title: string;
-  parentLabel: string;
+  parentId: string | null;
   discountPercent: number | null;
   promotionId: string | null;
 };
@@ -115,7 +115,7 @@ export async function getAdminDiscountsBoard(
       return {
         id: category.id,
         title: category.title,
-        parentLabel: category.parentTitle ?? "Root Category",
+        parentId: category.parentId,
         discountPercent: promo?.discountValue ?? null,
         promotionId: promo?.id ?? null,
       };

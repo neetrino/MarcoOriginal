@@ -2,11 +2,11 @@
 
 import { Pencil, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
 import type { CustomerAddressListItem } from "@/features/profile/application/address-queries";
 import {
   PROFILE_ADDRESS_CARD_CLASS,
   PROFILE_DEFAULT_BADGE_CLASS,
+  PROFILE_OUTLINE_BUTTON_CLASS,
 } from "@/features/profile/ui/profile-surface-classes";
 
 type ProfileAddressCardProps = {
@@ -42,7 +42,7 @@ export function ProfileAddressCard({
           type="button"
           onClick={() => onEdit(address)}
           disabled={disabled}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-marco-slate/60 transition-colors hover:bg-marco-gray hover:text-marco-slate disabled:opacity-50"
           aria-label={labels.edit}
           title={labels.edit}
         >
@@ -52,7 +52,7 @@ export function ProfileAddressCard({
           type="button"
           onClick={() => onDelete(address.id)}
           disabled={disabled}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-marco-slate/60 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
           aria-label={labels.delete}
           title={labels.delete}
         >
@@ -66,26 +66,24 @@ export function ProfileAddressCard({
             {labels.defaultBadge}
           </span>
         ) : null}
-        <p className="text-sm leading-snug font-medium break-words text-gray-900 sm:text-base">
+        <p className="text-sm leading-snug font-medium break-words text-marco-slate sm:text-base">
           {address.line1}
         </p>
-        <p className="text-sm leading-snug break-words text-gray-700 sm:text-base">
+        <p className="text-sm leading-snug break-words text-marco-slate/80 sm:text-base">
           {address.city}
         </p>
       </div>
 
       {!isDefault ? (
         <div className="mt-4">
-          <Button
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
-            className="w-full sm:w-auto"
+            className={`${PROFILE_OUTLINE_BUTTON_CLASS} w-full sm:w-auto`}
             onClick={() => onSetDefault(address.id)}
             disabled={disabled}
           >
             {labels.setDefault}
-          </Button>
+          </button>
         </div>
       ) : null}
     </div>

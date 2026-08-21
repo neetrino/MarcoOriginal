@@ -10,6 +10,7 @@ import {
   ADMIN_PAGE_SUBTITLE,
   ADMIN_PAGE_TITLE,
 } from "@/features/admin/ui/admin-form-classes";
+import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 import { saveHeroSlideImageAction } from "@/features/hero/application/manage-hero-image";
 import {
   pickHeroLayout,
@@ -44,6 +45,8 @@ function roleForTab(tab: HeroBannerPlatformTab): HeroMediaRole {
 
 export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
   const router = useRouter();
+  const copy = getAdminCopy(locale).hero;
+  const common = getAdminCopy(locale).common;
   const layout = pickHeroLayout(slides);
   const [activeTab, setActiveTab] = useState<HeroBannerPlatformTab>("desktop");
   const [uploading, setUploading] = useState<UploadingTarget>(null);
@@ -79,9 +82,7 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
         setError(result.error.message);
         return;
       }
-      setMessage(
-        "Image uploaded to storage and saved. It will show on the storefront shortly.",
-      );
+      setMessage(copy.uploaded);
       router.refresh();
     });
   }
@@ -89,10 +90,8 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
   return (
     <section className="space-y-5">
       <div>
-        <h1 className={ADMIN_PAGE_TITLE}>Hero / Banner</h1>
-        <p className={`mt-1 ${ADMIN_PAGE_SUBTITLE}`}>
-          Manage desktop and mobile images for the homepage hero banner
-        </p>
+        <h1 className={ADMIN_PAGE_TITLE}>{copy.title}</h1>
+        <p className={`mt-1 ${ADMIN_PAGE_SUBTITLE}`}>{copy.subtitle}</p>
       </div>
 
       <HeroBannerPlatformTabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -109,13 +108,15 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
         >
           <Card className="border border-gray-100 bg-white/95 p-4 shadow-sm sm:p-6">
             <div className="mb-4 space-y-1">
-              <h2 className="text-base font-semibold text-gray-900">Home hero</h2>
+              <h2 className="text-base font-semibold text-gray-900">
+                {copy.homeHero}
+              </h2>
             </div>
             <div className={`w-full min-w-0 ${HERO_DESKTOP_PREVIEW_CLASS}`}>
               <div className="grid h-full min-h-0 grid-cols-[minmax(0,1.24fr)_minmax(0,0.96fr)] gap-3 lg:gap-4">
                 <div className="grid min-h-0 grid-rows-2 gap-3 lg:gap-4">
                   <HeroBannerImageField
-                    label="Left, top"
+                    label={copy.leftTop}
                     currentUrl={layout.leftTop?.desktopImageUrl ?? null}
                     uploading={uploading?.slot === "leftTop"}
                     disabled={isBusy || !layout.leftTop}
@@ -125,7 +126,7 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
                     onUpload={(file) => runUpload(layout.leftTop, "leftTop", file)}
                   />
                   <HeroBannerImageField
-                    label="Left, bottom"
+                    label={copy.leftBottom}
                     currentUrl={layout.leftBottom?.desktopImageUrl ?? null}
                     uploading={uploading?.slot === "leftBottom"}
                     disabled={isBusy || !layout.leftBottom}
@@ -138,7 +139,7 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
                   />
                 </div>
                 <HeroBannerImageField
-                  label="Right column"
+                  label={copy.rightColumn}
                   currentUrl={layout.right?.desktopImageUrl ?? null}
                   uploading={uploading?.slot === "right"}
                   disabled={isBusy || !layout.right}
@@ -160,13 +161,13 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
         >
           <Card className="border border-gray-100 bg-white/95 p-4 shadow-sm sm:p-6">
             <div className="mb-4 space-y-1">
-              <h2 className="text-base font-semibold text-gray-900">Home hero</h2>
-              <p className="text-sm text-gray-500">
-                Full-width banner at the top of the mobile home page.
-              </p>
+              <h2 className="text-base font-semibold text-gray-900">
+                {copy.homeHero}
+              </h2>
+              <p className="text-sm text-gray-500">{copy.mobileHint}</p>
             </div>
             <HeroBannerImageField
-              label="Hero banner"
+              label={copy.heroBanner}
               currentUrl={
                 layout.leftTop?.mobileImageUrl ??
                 layout.leftTop?.desktopImageUrl ??
@@ -188,17 +189,17 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
             href={`/${locale}/admin`}
             className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
           >
-            Cancel
+            {common.cancel}
           </Link>
           <Button
             type="button"
             disabled={isBusy}
             onClick={() => {
-              setMessage("Hero banner images saved successfully.");
+              setMessage(copy.saved);
               router.refresh();
             }}
           >
-            Save
+            {common.save}
           </Button>
         </div>
       </div>

@@ -1,56 +1,56 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import {
-  ConfirmDialog,
-  deleteConfirmDescription,
-} from "@/components/ui/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   ADMIN_TABLE,
-  ADMIN_TABLE_CARD,
   ADMIN_TABLE_CHECKBOX,
   ADMIN_TABLE_OUTER_SCROLL,
   ADMIN_TABLE_STATE_INSET,
-  ADMIN_TABLE_TBODY,
-  ADMIN_TABLE_TH,
-  ADMIN_TABLE_TH_CENTER,
-  ADMIN_TABLE_TH_CHECK,
-  ADMIN_TABLE_THEAD,
 } from "@/features/admin/ui/admin-table-classes";
 import {
-  duplicateProductAction,
   softDeleteProductsAction,
   toggleProductFeaturedAction,
   toggleProductVisibilityAction,
 } from "@/features/products/application/admin-product-actions";
-import type { AdminProductListItem } from "@/features/products/application/list-admin-products";
+import {
+  adminProductsSortHref,
+  type AdminProductsQueryState,
+} from "@/features/products/domain/admin-products-query";
 import { AdminProductRow } from "@/features/products/ui/AdminProductRow";
-
-type AdminProductsSortLinks = {
-  title: string;
-  stock: string;
-  price: string;
-  created: string;
-};
+import { AdminProductsBulkBar } from "@/features/products/ui/AdminProductsBulkBar";
+import { AdminProductsPagination } from "@/features/products/ui/AdminProductsPagination";
+import { AdminProductsSortButton } from "@/features/products/ui/AdminProductsSortButton";
+import {
+  ADMIN_PRODUCTS_TABLE_CARD,
+  ADMIN_PRODUCTS_TH,
+  ADMIN_PRODUCTS_TH_CENTER,
+} from "@/features/products/ui/admin-products.classes";
+import type { AdminProductListItem } from "@/features/products/application/list-admin-products";
+import { formatAdminMessage, getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 
 type AdminProductsTableProps = {
   locale: string;
   products: AdminProductListItem[];
-  sortLinks: AdminProductsSortLinks;
+  filters: AdminProductsQueryState;
+  total: number;
+  totalPages: number;
   onEdit: (product: AdminProductListItem) => void;
 };
 
 export function AdminProductsTable({
   locale,
   products,
-  sortLinks,
+  filters,
+  total,
+  totalPages,
   onEdit,
 }: AdminProductsTableProps) {
+  const copy = getAdminCopy(locale).products;
+  const common = getAdminCopy(locale).common;
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -74,10 +74,6 @@ export function AdminProductsTable({
     });
   }
 
-  function toggleAll(): void {
-    setSelected(allSelected ? new Set() : new Set(allIds));
-  }
-
   function runAction(action: () => Promise<void>): void {
     startTransition(async () => {
       setError(null);
@@ -85,21 +81,8 @@ export function AdminProductsTable({
         await action();
         router.refresh();
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Action failed.");
+        setError(caught instanceof Error ? caught.message : common.actionFailed);
       }
-    });
-  }
-
-  function deleteSelected(): void {
-    if (selected.size === 0) return;
-    const count = selected.size;
-    setPendingDelete({
-      kind: "bulk",
-      productIds: [...selected],
-      label:
-        count === 1
-          ? "selected product"
-          : `${count} selected products`,
     });
   }
 
@@ -119,138 +102,165 @@ export function AdminProductsTable({
         setPendingDelete(null);
         router.refresh();
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Action failed.");
+        setError(caught instanceof Error ? caught.message : common.actionFailed);
       }
     });
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
-        <p className="text-sm text-gray-700">
-          Selected {selected.size} product{selected.size === 1 ? "" : "s"}
-        </p>
-        <Button
-          type="button"
-          size="sm"
-          variant="danger"
-          disabled={isPending || selected.size === 0}
-          onClick={deleteSelected}
-        >
-          Delete Selected
-        </Button>
-      </Card>
+      {selected.size > 0 ? (
+        <AdminProductsBulkBar
+          locale={locale}
+          selectedCount={selected.size}
+          disabled={isPending}
+          onDelete={() =>
+            setPendingDelete({
+              kind: "bulk",
+              productIds: [...selected],
+              label:
+                selected.size === 1
+                  ? copy.bulkLabelOne
+                  : formatAdminMessage(copy.bulkLabelMany, { count: selected.size }),
+            })
+          }
+        />
+      ) : null}
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
-      <Card className={ADMIN_TABLE_CARD}>
+      <Card className={ADMIN_PRODUCTS_TABLE_CARD}>
         {products.length === 0 ? (
-          <p className={`${ADMIN_TABLE_STATE_INSET} text-sm text-gray-600`}>
-            No products match these filters.
+          <p className={`${ADMIN_TABLE_STATE_INSET} text-center text-sm text-gray-600`}>
+            {copy.empty}
           </p>
         ) : (
-          <div className={ADMIN_TABLE_OUTER_SCROLL}>
-            <table className={ADMIN_TABLE}>
-              <thead className={ADMIN_TABLE_THEAD}>
-                <tr>
-                  <th className={ADMIN_TABLE_TH_CHECK}>
-                    <input
-                      type="checkbox"
-                      className={ADMIN_TABLE_CHECKBOX}
-                      checked={allSelected}
-                      onChange={toggleAll}
+          <>
+            <div className={ADMIN_TABLE_OUTER_SCROLL}>
+              <table className={`${ADMIN_TABLE} divide-y divide-gray-200`}>
+                <thead className="bg-gray-50/85">
+                  <tr>
+                    <th className="px-3 py-2.5">
+                      <input
+                        type="checkbox"
+                        className={ADMIN_TABLE_CHECKBOX}
+                        checked={allSelected}
+                        onChange={() =>
+                          setSelected(allSelected ? new Set() : new Set(allIds))
+                        }
+                        disabled={isPending}
+                        aria-label={copy.selectAll}
+                      />
+                    </th>
+                    <th className={ADMIN_PRODUCTS_TH}>
+                      <AdminProductsSortButton
+                        href={adminProductsSortHref(locale, filters, "title")}
+                        label={copy.columnProduct}
+                        suffix={`(${total})`}
+                        field="title"
+                        activeSort={filters.sort}
+                        activeDir={filters.dir}
+                      />
+                    </th>
+                    <th className={`max-w-[11rem] ${ADMIN_PRODUCTS_TH}`}>
+                      {copy.columnCategory}
+                    </th>
+                    <th className={ADMIN_PRODUCTS_TH}>
+                      <AdminProductsSortButton
+                        href={adminProductsSortHref(locale, filters, "stock")}
+                        label={copy.columnStock}
+                        field="stock"
+                        activeSort={filters.sort}
+                        activeDir={filters.dir}
+                      />
+                    </th>
+                    <th className={ADMIN_PRODUCTS_TH}>
+                      <AdminProductsSortButton
+                        href={adminProductsSortHref(locale, filters, "price")}
+                        label={copy.columnPrice}
+                        field="price"
+                        activeSort={filters.sort}
+                        activeDir={filters.dir}
+                      />
+                    </th>
+                    <th className={ADMIN_PRODUCTS_TH_CENTER}>{copy.columnFeatured}</th>
+                    <th className={ADMIN_PRODUCTS_TH_CENTER}>{common.actions}</th>
+                    <th className={ADMIN_PRODUCTS_TH}>
+                      <AdminProductsSortButton
+                        href={adminProductsSortHref(locale, filters, "created")}
+                        label={copy.columnCreated}
+                        field="created"
+                        activeSort={filters.sort}
+                        activeDir={filters.dir}
+                      />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {products.map((product) => (
+                    <AdminProductRow
+                      key={product.id}
+                      locale={locale}
+                      product={product}
+                      selected={selected.has(product.id)}
                       disabled={isPending}
-                      aria-label="Select all products"
+                      onToggle={() => toggleOne(product.id)}
+                      onEdit={() => onEdit(product)}
+                      onFeatured={() =>
+                        runAction(async () => {
+                          const result = await toggleProductFeaturedAction(
+                            locale,
+                            product.id,
+                          );
+                          if (!result.ok) throw new Error(result.error.message);
+                        })
+                      }
+                      onDelete={() =>
+                        setPendingDelete({
+                          kind: "single",
+                          productIds: [product.id],
+                          label: product.title,
+                        })
+                      }
+                      onVisibility={() =>
+                        runAction(async () => {
+                          const result = await toggleProductVisibilityAction(
+                            locale,
+                            product.id,
+                          );
+                          if (!result.ok) throw new Error(result.error.message);
+                        })
+                      }
                     />
-                  </th>
-                  <th className={ADMIN_TABLE_TH}>
-                    <Link href={sortLinks.title} className="hover:text-gray-900">
-                      Product
-                    </Link>
-                  </th>
-                  <th className={ADMIN_TABLE_TH}>
-                    <Link href={sortLinks.stock} className="hover:text-gray-900">
-                      Stock
-                    </Link>
-                  </th>
-                  <th className={ADMIN_TABLE_TH}>
-                    <Link href={sortLinks.price} className="hover:text-gray-900">
-                      Price
-                    </Link>
-                  </th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Category</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Featured</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Actions</th>
-                  <th className={ADMIN_TABLE_TH}>
-                    <Link
-                      href={sortLinks.created}
-                      className="hover:text-gray-900"
-                    >
-                      Created
-                    </Link>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className={ADMIN_TABLE_TBODY}>
-                {products.map((product) => (
-                  <AdminProductRow
-                    key={product.id}
-                    locale={locale}
-                    product={product}
-                    selected={selected.has(product.id)}
-                    disabled={isPending}
-                    onToggle={() => toggleOne(product.id)}
-                    onEdit={() => onEdit(product)}
-                    onFeatured={() =>
-                      runAction(async () => {
-                        const result = await toggleProductFeaturedAction(
-                          locale,
-                          product.id,
-                        );
-                        if (!result.ok) throw new Error(result.error.message);
-                      })
-                    }
-                    onDuplicate={() =>
-                      runAction(async () => {
-                        const result = await duplicateProductAction(
-                          locale,
-                          product.id,
-                        );
-                        if (!result.ok) throw new Error(result.error.message);
-                      })
-                    }
-                    onDelete={() =>
-                      setPendingDelete({
-                        kind: "single",
-                        productIds: [product.id],
-                        label: product.title,
-                      })
-                    }
-                    onVisibility={() =>
-                      runAction(async () => {
-                        const result = await toggleProductVisibilityAction(
-                          locale,
-                          product.id,
-                        );
-                        if (!result.ok) throw new Error(result.error.message);
-                      })
-                    }
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <AdminProductsPagination
+              locale={locale}
+              filters={filters}
+              total={total}
+              totalPages={totalPages}
+            />
+          </>
         )}
       </Card>
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="Delete"
+        title={common.delete}
+        confirmLabel={common.delete}
+        cancelLabel={common.cancel}
         description={
           pendingDelete?.kind === "bulk"
-            ? `Are you sure you want to delete ${pendingDelete.label}? This action cannot be undone.`
+            ? formatAdminMessage(common.deleteConfirmBulk, {
+                label: pendingDelete.label,
+              })
             : pendingDelete
-              ? deleteConfirmDescription("product", pendingDelete.label)
+              ? formatAdminMessage(common.deleteConfirm, {
+                  entity: copy.entity,
+                  name: pendingDelete.label,
+                })
               : ""
         }
         isPending={isPending}

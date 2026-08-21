@@ -9,6 +9,8 @@ type WarrantyLabels = {
   warranty2: string;
   warranty3: string;
   warrantyBadge: string;
+  warrantyYearsSuffix: string;
+  sku: string;
 };
 
 /** Maps catalog rows to the shared storefront product card. */
@@ -31,6 +33,7 @@ export function mapProductCards(
       id: product.id,
       href: `/${locale}/products/${product.translation.slug}`,
       title: product.translation.title,
+      skuLine: `${warrantyLabels.sku}: ${product.sku}`,
       priceFormatted: price.formatted,
       compareAtFormatted: compareAt?.formatted ?? null,
       discountPercent: product.discountPercent,
@@ -38,6 +41,8 @@ export function mapProductCards(
       inStock: product.stockOnHand > 0,
       inWishlist: wishlistIds.has(product.id),
       inCompare: compareIds.has(product.id),
+      warrantyYears: product.warrantyYears > 0 ? product.warrantyYears : null,
+      warrantyYearsSuffix: warrantyLabels.warrantyYearsSuffix,
       warrantyYearsLabel: warrantyLabelForYears(
         product.warrantyYears,
         warrantyLabels,

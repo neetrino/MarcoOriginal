@@ -15,7 +15,7 @@ export function AboutHero({ copy }: AboutHeroProps) {
   const playLabel = copy.playVideoAria.replace("{title}", copy.title);
 
   return (
-    <section className="bg-white py-16 md:py-24">
+    <section className="bg-white py-8 md:py-24">
       <div className={ABOUT_SECTION_INNER_CLASS}>
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <AboutHeroVideo
@@ -29,7 +29,7 @@ export function AboutHero({ copy }: AboutHeroProps) {
 
             <p className={ABOUT_EYEBROW_CLASS}>{copy.eyebrow}</p>
 
-            <h1 className="text-4xl leading-tight font-bold text-gray-900 md:text-5xl lg:text-6xl">
+            <h1 className="text-3xl leading-tight font-bold text-marco-slate md:text-5xl lg:text-6xl">
               {copy.title}
             </h1>
 

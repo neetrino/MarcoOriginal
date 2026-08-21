@@ -3,6 +3,7 @@ import Image from "next/image";
 import { AppLink } from "@/components/ui/AppLink";
 import { pickHeroLayout } from "@/features/hero/domain/hero-layout";
 import type { StorefrontHeroSlide } from "@/features/hero/application/queries";
+import { HomeHeroMobileCarousel } from "@/features/home/ui/HomeHeroMobileCarousel";
 
 const HERO_DESKTOP_IMAGE_SIZES =
   "(max-width: 1024px) 50vw, (max-width: 1280px) 38vw, min(40vw, 520px)";
@@ -19,46 +20,20 @@ type HeroTileProps = {
   priority?: boolean;
 };
 
-function isInternalHref(href: string): boolean {
-  return href.startsWith("/");
+function collectMobileHeroImages(slides: StorefrontHeroSlide[]): string[] {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+  for (const slide of slides) {
+    const url = slide.mobileImageUrl ?? slide.desktopImageUrl;
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    urls.push(url);
+  }
+  return urls;
 }
 
-function MobileHeroFill({
-  src,
-  href,
-}: {
-  src: string | null;
-  href: string | null;
-}) {
-  if (!src) {
-    return <div className="absolute inset-0 bg-neutral-800" />;
-  }
-
-  const image = (
-    <Image
-      src={src}
-      alt=""
-      fill
-      priority
-      className="object-cover object-center"
-      sizes="100vw"
-    />
-  );
-
-  if (!href) return image;
-  if (isInternalHref(href)) {
-    return (
-      <AppLink href={href} prefetchPolicy="intent" className="absolute inset-0">
-        {image}
-      </AppLink>
-    );
-  }
-
-  return (
-    <a href={href} className="absolute inset-0">
-      {image}
-    </a>
-  );
+function isInternalHref(href: string): boolean {
+  return href.startsWith("/");
 }
 
 function HeroTile({
@@ -108,10 +83,7 @@ export function HomeHero({ slides }: HomeHeroProps) {
   const leftTop = layout.leftTop?.desktopImageUrl ?? null;
   const leftBottom = layout.leftBottom?.desktopImageUrl ?? null;
   const right = layout.right?.desktopImageUrl ?? null;
-  const mobile =
-    layout.leftTop?.mobileImageUrl ??
-    layout.leftTop?.desktopImageUrl ??
-    null;
+  const mobileImages = collectMobileHeroImages(slides);
 
   return (
     <section
@@ -119,12 +91,7 @@ export function HomeHero({ slides }: HomeHeroProps) {
       className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-11 lg:px-8 lg:pt-10"
     >
       <div className="relative aspect-[399/288] w-full min-w-0 overflow-hidden rounded-[24px] bg-neutral-950 md:aspect-[141/68] md:rounded-[32px] md:bg-transparent">
-        <div className="absolute inset-0 z-0 md:hidden">
-          <MobileHeroFill
-            src={mobile}
-            href={layout.leftTop?.copy.buttonUrl ?? null}
-          />
-        </div>
+        <HomeHeroMobileCarousel images={mobileImages} />
 
         <div className="hidden h-full w-full grid-cols-[minmax(0,1.24fr)_minmax(0,0.96fr)] gap-3 md:grid lg:gap-4">
           <div className="grid h-full min-w-0 grid-rows-2 gap-3 lg:gap-4">

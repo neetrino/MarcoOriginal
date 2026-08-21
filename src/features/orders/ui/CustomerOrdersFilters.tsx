@@ -4,13 +4,11 @@ import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Search } from "lucide-react";
 
-import { Card } from "@/components/ui/Card";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import type { OrderStatus } from "@/features/orders/domain/order-status";
 import type { PaymentStatus } from "@/features/orders/domain/payment-status";
-
 const FILTER_SEARCH =
-  "h-11 w-full min-w-0 shrink-0 rounded-2xl border border-gray-200 bg-white py-0 pr-4 pl-10 text-sm text-gray-900 shadow-sm outline-none transition-colors placeholder:text-gray-400 hover:border-gray-300 focus:border-gray-300 lg:flex-1 lg:shrink";
+  "h-11 w-full min-w-0 shrink-0 rounded-full border border-gray-300 bg-white py-0 pr-4 pl-10 text-sm text-gray-900 outline-none transition-colors placeholder:text-gray-400 hover:border-gray-400 focus:border-gray-900 lg:flex-1 lg:shrink";
 
 const ORDER_STATUS_FILTERS = [
   { label: "Pending", value: "PENDING" },
@@ -53,11 +51,11 @@ export function CustomerOrdersFilters({
   }
 
   return (
-    <Card className="mb-6 overflow-visible">
+    <div className="mb-6 overflow-visible">
       <form
         ref={formRef}
         method="get"
-        className="flex flex-col gap-3 p-4 lg:flex-row lg:flex-nowrap lg:items-center"
+        className="flex flex-col gap-3 lg:flex-row lg:flex-nowrap lg:items-center"
       >
         <SelectDropdown
           name="status"
@@ -91,9 +89,9 @@ export function CustomerOrdersFilters({
           />
         </div>
       </form>
-      <div className="border-t border-gray-200 px-4 py-3">
-        <p className="text-sm text-gray-600">Total orders: {total}</p>
+      <div className="mt-4 border-t border-gray-200 pt-3">
+        <p className="text-sm text-marco-slate/70">Total orders: {total}</p>
       </div>
-    </Card>
+    </div>
   );
 }

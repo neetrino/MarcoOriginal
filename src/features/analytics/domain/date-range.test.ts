@@ -22,6 +22,23 @@ describe("rangeForAnalyticsPeriod", () => {
     const range = rangeForAnalyticsPeriod("last_30_days");
     expect(matchAnalyticsPeriodPreset(range)).toBe("last_30_days");
   });
+
+  it("returns a single-day window for today", () => {
+    const range = rangeForAnalyticsPeriod("today");
+    expect(range.from).toBe(range.to);
+    expect(matchAnalyticsPeriodPreset(range)).toBe("today");
+  });
+
+  it("returns an inclusive last-year window", () => {
+    const range = rangeForAnalyticsPeriod("last_year");
+    const start = new Date(`${range.from}T00:00:00.000Z`);
+    const end = new Date(`${range.to}T00:00:00.000Z`);
+    const days =
+      Math.floor((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+
+    expect(days).toBe(365);
+    expect(matchAnalyticsPeriodPreset(range)).toBe("last_year");
+  });
 });
 
 describe("formatAnalyticsDisplayDate", () => {

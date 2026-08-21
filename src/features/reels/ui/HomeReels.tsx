@@ -188,7 +188,7 @@ function HomeReelTile({
         />
       </div>
       <span
-        className="w-full font-medium text-marco-slate md:whitespace-nowrap"
+        className="hidden w-full font-medium text-marco-slate md:block md:whitespace-nowrap"
         style={{ fontSize: HOME_REELS_LABEL_FONT_SIZE_PX, lineHeight: "21px" }}
       >
         {twoWords ? (

@@ -54,7 +54,7 @@ export function CatalogFilterPanel({
   const selectedMax = filters.maxPrice ?? priceBounds?.maxMajor ?? 0;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col">
       <section className={CATALOG_FILTER_SECTION}>
         <h2 className={CATALOG_FILTER_TITLE}>{copy.categories}</h2>
         <CatalogCategoryFilter
@@ -69,9 +69,9 @@ export function CatalogFilterPanel({
       </section>
       {priceBounds ? (
         <section className={CATALOG_FILTER_SECTION}>
-          <h2 className={CATALOG_FILTER_TITLE}>{copy.price}</h2>
           <CatalogPriceFilter
             key={`${priceBounds.minMajor}-${priceBounds.maxMajor}-${selectedMin}-${selectedMax}`}
+            title={copy.price}
             minBound={priceBounds.minMajor}
             maxBound={priceBounds.maxMajor}
             selectedMin={selectedMin}
@@ -94,7 +94,7 @@ export function CatalogFilterPanel({
           onToggle={(slug) => onFiltersChange(withToggledBrand(filters, slug))}
         />
       </section>
-      <section>
+      <section className={CATALOG_FILTER_SECTION}>
         <h2 className={CATALOG_FILTER_TITLE}>{copy.colors}</h2>
         <CatalogColorFilter
           colors={facets.colors}

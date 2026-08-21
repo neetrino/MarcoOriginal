@@ -5,17 +5,39 @@ import { useState, useTransition, type FormEvent } from "react";
 
 import { Card } from "@/components/ui/Card";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
+import { ADMIN_YELLOW_BUTTON_CLASS } from "@/features/admin/ui/admin-surface-classes";
 import {
-  ADMIN_INPUT,
-  ADMIN_LABEL,
-} from "@/features/admin/ui/admin-form-classes";
+  getAdminCopy,
+  type AdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import {
-  ANALYTICS_PERIOD_PRESETS,
-  analyticsPeriodLabel,
+  ANALYTICS_PERIOD_SELECT_OPTIONS,
   formatAnalyticsDisplayDate,
   rangeForAnalyticsPeriod,
   type AnalyticsPeriodPreset,
 } from "@/features/analytics/domain/date-range";
+
+function isSelectPeriod(
+  value: AnalyticsPeriodPreset,
+): value is (typeof ANALYTICS_PERIOD_SELECT_OPTIONS)[number] {
+  return (ANALYTICS_PERIOD_SELECT_OPTIONS as readonly string[]).includes(value);
+}
+import {
+  ANALYTICS_ACCENT_CLASS,
+  ANALYTICS_DATE_BADGE,
+  ANALYTICS_FIELD,
+  ANALYTICS_PANEL_CLASS,
+} from "@/features/analytics/ui/analytics-card-classes";
+
+const PERIOD_LABEL_KEY = {
+  today: "today",
+  last_7_days: "last7",
+  last_30_days: "last30",
+  last_90_days: "last90",
+  this_month: "thisMonth",
+  last_year: "lastYear",
+  custom: "custom",
+} as const satisfies Record<AnalyticsPeriodPreset, keyof AdminCopy["analytics"]>;
 
 type AnalyticsPeriodCardProps = {
   locale: string;
@@ -35,11 +57,11 @@ export function AnalyticsPeriodCard({
   rangeInvalid,
 }: AnalyticsPeriodCardProps) {
   const router = useRouter();
+  const copy = getAdminCopy(locale).analytics;
   const [pending, startTransition] = useTransition();
   const [forceCustom, setForceCustom] = useState(preset === "custom");
-  const selectedPreset: AnalyticsPeriodPreset = forceCustom
-    ? "custom"
-    : preset;
+  const selectedPreset: AnalyticsPeriodPreset =
+    forceCustom || !isSelectPeriod(preset) ? "custom" : preset;
 
   function navigate(nextFrom: string, nextTo: string): void {
     const params = new URLSearchParams({ from: nextFrom, to: nextTo });
@@ -64,35 +86,38 @@ export function AnalyticsPeriodCard({
     const data = new FormData(event.currentTarget);
     const nextFrom = String(data.get("from") ?? "");
     const nextTo = String(data.get("to") ?? "");
-    if (!nextFrom || !nextTo) {
-      return;
-    }
+    if (!nextFrom || !nextTo) return;
     navigate(nextFrom, nextTo);
   }
 
   return (
-    <Card className="mb-6 rounded-2xl p-5 sm:p-6">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-lg font-semibold text-gray-900">Time Period</h2>
-        <p className="text-sm font-medium text-gray-500">
-          {formatAnalyticsDisplayDate(from)} – {formatAnalyticsDisplayDate(to)}
+    <Card className={ANALYTICS_PANEL_CLASS}>
+      <div className={ANALYTICS_ACCENT_CLASS} />
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-lg font-semibold text-marco-ink">{copy.timePeriod}</h2>
+        <p className={ANALYTICS_DATE_BADGE}>
+          {formatAnalyticsDisplayDate(from, locale)} –{" "}
+          {formatAnalyticsDisplayDate(to, locale)}
         </p>
       </div>
 
-      <div className="max-w-md">
-        <span className={ADMIN_LABEL}>Period</span>
-        <SelectDropdown
-          ariaLabel="Period"
-          value={selectedPreset}
-          options={ANALYTICS_PERIOD_PRESETS.map((option) => ({
-            label: analyticsPeriodLabel(option),
-            value: option,
-          }))}
-          disabled={pending}
-          deferChange={false}
-          className="mt-1"
-          onValueChange={onPeriodChange}
-        />
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="min-w-[200px] flex-1">
+          <span className="mb-2 block text-sm font-medium text-marco-slate/80">
+            {copy.period}
+          </span>
+          <SelectDropdown
+            ariaLabel={copy.periodAria}
+            value={selectedPreset}
+            options={ANALYTICS_PERIOD_SELECT_OPTIONS.map((option) => ({
+              label: copy[PERIOD_LABEL_KEY[option]],
+              value: option,
+            }))}
+            disabled={pending}
+            deferChange={false}
+            onValueChange={onPeriodChange}
+          />
+        </div>
       </div>
 
       {selectedPreset === "custom" ? (
@@ -100,30 +125,20 @@ export function AnalyticsPeriodCard({
           onSubmit={onCustomSubmit}
           className="mt-4 flex flex-wrap items-end gap-3"
         >
-          <label className="min-w-[140px] flex-1">
-            <span className={ADMIN_LABEL}>From</span>
-            <input
-              name="from"
-              type="date"
-              defaultValue={from}
-              className={ADMIN_INPUT}
-            />
+          <label className="min-w-[200px] flex-1">
+            <span className="mb-2 block text-sm font-medium text-marco-slate/80">
+              {copy.from}
+            </span>
+            <input name="from" type="date" defaultValue={from} className={ANALYTICS_FIELD} />
           </label>
-          <label className="min-w-[140px] flex-1">
-            <span className={ADMIN_LABEL}>To</span>
-            <input
-              name="to"
-              type="date"
-              defaultValue={to}
-              className={ADMIN_INPUT}
-            />
+          <label className="min-w-[200px] flex-1">
+            <span className="mb-2 block text-sm font-medium text-marco-slate/80">
+              {copy.to}
+            </span>
+            <input name="to" type="date" defaultValue={to} className={ANALYTICS_FIELD} />
           </label>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
-          >
-            Apply
+          <button type="submit" disabled={pending} className={ADMIN_YELLOW_BUTTON_CLASS}>
+            {copy.apply}
           </button>
         </form>
       ) : null}
@@ -131,14 +146,12 @@ export function AnalyticsPeriodCard({
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <a
           href={`/api/exports/admin/analytics?${exportQuery}`}
-          className="text-sm font-medium text-gray-700 underline-offset-2 hover:underline"
+          className="text-sm font-medium text-marco-slate/80 underline-offset-2 hover:underline"
         >
-          Download CSV export
+          {copy.downloadCsv}
         </a>
         {rangeInvalid ? (
-          <p className="text-sm text-red-700">
-            Invalid date range. Showing defaults.
-          </p>
+          <p className="text-sm text-red-700">{copy.invalidRange}</p>
         ) : null}
       </div>
     </Card>

@@ -48,8 +48,8 @@ export function ProductDetailView({
   const primaryCategory = product.categories[0] ?? null;
 
   return (
-    <article className="-mx-4 -my-10 flex flex-col bg-white px-4 py-12 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]">
+    <article className="-mx-4 -my-10 flex flex-col bg-white px-4 pt-4 pb-24 sm:-mx-6 sm:px-6 sm:pt-8 md:pb-16 lg:-mx-8 lg:px-8 lg:py-12">
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:gap-12">
         <ProductGallery
           images={product.images}
           title={product.translation.title}
@@ -167,7 +167,7 @@ function ProductInfoHeader({
       ) : null}
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold text-marco-ink sm:text-3xl md:text-4xl">
+          <h1 className="text-xl font-bold text-marco-slate sm:text-3xl md:text-4xl">
             {title}
           </h1>
           <p className="mt-2 text-sm text-gray-500">

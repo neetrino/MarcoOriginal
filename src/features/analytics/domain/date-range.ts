@@ -3,10 +3,21 @@ import { z } from "zod";
 const MAX_RANGE_DAYS = 366;
 
 export const ANALYTICS_PERIOD_PRESETS = [
+  "today",
   "last_7_days",
   "last_30_days",
   "last_90_days",
   "this_month",
+  "last_year",
+  "custom",
+] as const;
+
+/** Presets shown in the supersudo-aligned period dropdown. */
+export const ANALYTICS_PERIOD_SELECT_OPTIONS = [
+  "today",
+  "last_7_days",
+  "last_30_days",
+  "last_year",
   "custom",
 ] as const;
 
@@ -37,10 +48,12 @@ export const analyticsDateRangeSchema = z
 export type AnalyticsDateRange = z.infer<typeof analyticsDateRangeSchema>;
 
 const PRESET_LABELS: Record<AnalyticsPeriodPreset, string> = {
+  today: "Today",
   last_7_days: "Last 7 Days",
   last_30_days: "Last 30 Days",
   last_90_days: "Last 90 Days",
   this_month: "This Month",
+  last_year: "Last Year",
   custom: "Custom Range",
 };
 
@@ -67,12 +80,17 @@ export function rangeForAnalyticsPeriod(
   const toDate = utcToday();
   const fromDate = new Date(toDate);
 
+  if (preset === "today") {
+    return { from: toIsoDate(toDate), to: toIsoDate(toDate) };
+  }
   if (preset === "last_7_days") {
     fromDate.setUTCDate(fromDate.getUTCDate() - 6);
   } else if (preset === "last_30_days") {
     fromDate.setUTCDate(fromDate.getUTCDate() - 29);
   } else if (preset === "last_90_days") {
     fromDate.setUTCDate(fromDate.getUTCDate() - 89);
+  } else if (preset === "last_year") {
+    fromDate.setUTCDate(fromDate.getUTCDate() - 364);
   } else {
     fromDate.setUTCDate(1);
   }
@@ -90,10 +108,12 @@ export function matchAnalyticsPeriodPreset(
   range: AnalyticsDateRange,
 ): AnalyticsPeriodPreset {
   for (const preset of [
+    "today",
     "last_7_days",
     "last_30_days",
     "last_90_days",
     "this_month",
+    "last_year",
   ] as const) {
     const expected = rangeForAnalyticsPeriod(preset);
     if (expected.from === range.from && expected.to === range.to) {
@@ -104,8 +124,11 @@ export function matchAnalyticsPeriodPreset(
 }
 
 /** Formats an ISO date for analytics headers (e.g. Jul 12, 2026). */
-export function formatAnalyticsDisplayDate(isoDate: string): string {
-  return new Date(`${isoDate}T00:00:00.000Z`).toLocaleDateString("en-US", {
+export function formatAnalyticsDisplayDate(
+  isoDate: string,
+  locale = "en-US",
+): string {
+  return new Date(`${isoDate}T00:00:00.000Z`).toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -114,8 +137,11 @@ export function formatAnalyticsDisplayDate(isoDate: string): string {
 }
 
 /** Formats a short chart/list date (e.g. Jul 13). */
-export function formatAnalyticsShortDate(isoDate: string): string {
-  return new Date(`${isoDate}T00:00:00.000Z`).toLocaleDateString("en-US", {
+export function formatAnalyticsShortDate(
+  isoDate: string,
+  locale = "en-US",
+): string {
+  return new Date(`${isoDate}T00:00:00.000Z`).toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     timeZone: "UTC",

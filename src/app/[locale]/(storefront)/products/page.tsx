@@ -71,6 +71,19 @@ export default async function ProductsPage({
           collapseCategory: dictionary.catalog.collapseCategory,
           minPrice: dictionary.catalog.minPrice,
           maxPrice: dictionary.catalog.maxPrice,
+          sortLabel: dictionary.catalog.sortLabel,
+          sortDefault: dictionary.catalog.sortDefault,
+          sortPriceAsc: dictionary.catalog.sortPriceAsc,
+          sortPriceDesc: dictionary.catalog.sortPriceDesc,
+          sortNameAsc: dictionary.catalog.sortNameAsc,
+          sortNameDesc: dictionary.catalog.sortNameDesc,
+          sortProducts: dictionary.catalog.sortProducts,
+          withPrice: dictionary.catalog.withPrice,
+          withoutPrice: dictionary.catalog.withoutPrice,
+          pricePresenceAria: dictionary.catalog.pricePresenceAria,
+          viewList: dictionary.catalog.viewList,
+          viewGrid: dictionary.catalog.viewGrid,
+          viewDense: dictionary.catalog.viewDense,
         }}
       >
         <CatalogProductGrid

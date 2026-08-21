@@ -1,6 +1,5 @@
 "use client";
 
-import { SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState, type ReactNode } from "react";
 
@@ -12,11 +11,15 @@ import {
   CatalogFilterPanel,
   type CatalogFilterCopy,
 } from "@/features/products/ui/CatalogFilterPanel";
+import {
+  CatalogListingToolbar,
+  type CatalogListingToolbarCopy,
+} from "@/features/products/ui/CatalogListingToolbar";
 import { CatalogPageTitle } from "@/features/products/ui/CatalogPageTitle";
+import { CatalogViewModeProvider } from "@/features/products/ui/CatalogViewModeProvider";
 import {
   CATALOG_FILTER_ASIDE,
   CATALOG_LAYOUT,
-  CATALOG_MOBILE_FILTER_BUTTON,
 } from "@/features/products/ui/catalog-filter-classes";
 import type { Currency } from "@/lib/money/currency";
 
@@ -27,7 +30,7 @@ type CatalogFilterSidebarProps = {
   facets: CatalogFacets;
   priceBounds: { minMajor: number; maxMajor: number } | null;
   currency: Currency;
-  copy: CatalogFilterCopy & { filtersLabel: string };
+  copy: CatalogFilterCopy & CatalogListingToolbarCopy;
   children: ReactNode;
 };
 
@@ -63,26 +66,24 @@ export function CatalogFilterSidebar({
   );
 
   return (
-    <div className={CATALOG_LAYOUT}>
-      <aside className={CATALOG_FILTER_ASIDE}>
-        <div className="mb-4 lg:mb-5 xl:mb-6">
-          <CatalogPageTitle title={pageTitle} />
-        </div>
-        {panel}
-      </aside>
-      <div className="min-w-0 flex-1">
-        <div className="pb-3 min-[744px]:hidden">
-          <CatalogPageTitle title={pageTitle} />
-        </div>
-        <div className="mb-4 min-[744px]:hidden">
-          <button
-            type="button"
-            className={CATALOG_MOBILE_FILTER_BUTTON}
-            onClick={() => setOpen(true)}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            {copy.filtersLabel}
-          </button>
+    <CatalogViewModeProvider>
+      <div className={CATALOG_LAYOUT}>
+        <aside className={CATALOG_FILTER_ASIDE}>
+          <div className="mb-4 lg:mb-5 xl:mb-6">
+            <CatalogPageTitle title={pageTitle} />
+          </div>
+          {panel}
+        </aside>
+        <div className="min-w-0 flex-1">
+          <div className="pb-3 min-[744px]:hidden">
+            <CatalogPageTitle title={pageTitle} />
+          </div>
+          <CatalogListingToolbar
+            filters={filters}
+            copy={copy}
+            onFiltersChange={onFiltersChange}
+            onOpenFilters={() => setOpen(true)}
+          />
           <SideSheet
             open={open}
             onClose={() => setOpen(false)}
@@ -92,9 +93,9 @@ export function CatalogFilterSidebar({
           >
             <div className="h-full overflow-y-auto px-5 py-6">{panel}</div>
           </SideSheet>
+          {children}
         </div>
-        {children}
       </div>
-    </div>
+    </CatalogViewModeProvider>
   );
 }

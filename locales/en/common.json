@@ -15,7 +15,12 @@
     "navigation": "Navigation",
     "shopNow": "Shop now",
     "categories": "Categories",
-    "brand": "Brand"
+    "brand": "Brands",
+    "stores": "Stores",
+    "reels": "Reels",
+    "addresses": "Addresses",
+    "openInMaps": "View on map",
+    "menuCopyright": "© {year} MARCO GROUP"
   },
   "header": {
     "language": "Language",
@@ -28,7 +33,11 @@
     "logoHome": "MARCO GROUP home",
     "socialLinks": "Social links",
     "searchPlaceholder": "Search products",
-    "searchSubmit": "Search"
+    "searchSubmit": "Search",
+    "choosePhone": "Choose a phone number to call",
+    "chooseAddress": "Choose a store address or open the map",
+    "whatsapp": "WhatsApp",
+    "viber": "Viber"
   },
   "footer": {
     "shop": "Shop",

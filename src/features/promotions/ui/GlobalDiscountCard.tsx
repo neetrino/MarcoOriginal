@@ -2,11 +2,23 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Percent } from "lucide-react";
+import { CircleDollarSign } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
-import { ADMIN_INPUT } from "@/features/admin/ui/admin-form-classes";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { setGlobalDiscountAction } from "@/features/promotions/application/manage-discounts";
+import {
+  DISCOUNT_FIELD,
+  DISCOUNT_GLOBAL_CARD,
+  DISCOUNT_ICON_ROSE,
+  DISCOUNT_PRIMARY_BUTTON,
+  DISCOUNT_QUICK_BUTTON,
+  DISCOUNT_STATUS_ACTIVE,
+  DISCOUNT_STATUS_IDLE,
+} from "@/features/promotions/ui/discount-admin.classes";
+import { parseDiscountPercent } from "@/features/promotions/ui/discount-percent";
 import { useSyncedState } from "@/lib/react/sync-state-from-prop";
 
 const QUICK_PERCENTS = [10, 20, 30, 50] as const;
@@ -20,6 +32,8 @@ export function GlobalDiscountCard({
   locale,
   initialPercent,
 }: GlobalDiscountCardProps) {
+  const copy = getAdminCopy(locale).discounts;
+  const common = getAdminCopy(locale).common;
   const router = useRouter();
   const sourceValue = initialPercent != null ? String(initialPercent) : "";
   const [value, setValue] = useSyncedState(sourceValue);
@@ -27,14 +41,6 @@ export function GlobalDiscountCard({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  function parseInput(): number | null | "invalid" {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-    const next = Number(trimmed);
-    if (!Number.isInteger(next) || next < 1 || next > 100) return "invalid";
-    return next;
-  }
 
   function save(next: number | null): void {
     startTransition(async () => {
@@ -51,32 +57,34 @@ export function GlobalDiscountCard({
       );
       setMessage(
         result.value.percentage == null
-          ? "Global discount cleared."
-          : `Global discount set to ${result.value.percentage}%.`,
+          ? copy.globalCleared
+          : formatAdminMessage(copy.globalSet, {
+              percent: result.value.percentage,
+            }),
       );
       router.refresh();
     });
   }
 
   return (
-    <article className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500 text-white">
-          <Percent className="h-5 w-5" aria-hidden />
+    <article className={DISCOUNT_GLOBAL_CARD}>
+      <div className="mb-4 flex items-center gap-3">
+        <span className={DISCOUNT_ICON_ROSE}>
+          <CircleDollarSign className="h-5 w-5" aria-hidden />
         </span>
         <div>
-          <h2 className="text-base font-semibold text-gray-900">
-            Global Discount
+          <h2 className="text-lg font-semibold tracking-tight text-marco-ink">
+            {copy.globalTitle}
           </h2>
-          <p className="text-sm text-gray-500">For All Products</p>
+          <p className="text-xs text-gray-500">{copy.globalSubtitle}</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="sr-only" htmlFor="global-discount-input">
-          Global discount percentage
-        </label>
-        <div className="relative min-w-[8rem] flex-1">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-rose-100/80 bg-white/90 p-3">
+          <label className="sr-only" htmlFor="global-discount-input">
+            {copy.globalPercentAria}
+          </label>
           <input
             id="global-discount-input"
             type="number"
@@ -87,59 +95,57 @@ export function GlobalDiscountCard({
             value={value}
             disabled={isPending}
             onChange={(event) => setValue(event.target.value)}
-            className={`${ADMIN_INPUT} pr-8`}
+            className={DISCOUNT_FIELD}
           />
-          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-500">
-            %
-          </span>
-        </div>
-        <Button
-          type="button"
-          size="sm"
-          disabled={isPending}
-          onClick={() => {
-            const parsed = parseInput();
-            if (parsed === "invalid") {
-              setError("Enter a whole number from 1 to 100, or leave empty.");
-              return;
-            }
-            save(parsed);
-          }}
-        >
-          {isPending ? "Saving…" : "Save"}
-        </Button>
-      </div>
-
-      <p className="mt-3 text-sm text-gray-500">
-        {saved == null
-          ? "No global discount. Enter percentage (0-100) to discount all products."
-          : `Active global discount: ${saved}%.`}
-      </p>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {QUICK_PERCENTS.map((percent) => (
+          <span className="w-8 text-sm font-semibold text-marco-slate">%</span>
           <button
-            key={percent}
             type="button"
             disabled={isPending}
-            onClick={() => setValue(String(percent))}
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+            onClick={() => {
+              const parsed = parseDiscountPercent(value);
+              if (parsed === "invalid") {
+                setError(copy.globalInvalid);
+                return;
+              }
+              save(parsed);
+            }}
+            className={DISCOUNT_PRIMARY_BUTTON}
           >
-            {percent}%
+            {isPending ? common.saving : common.save}
           </button>
-        ))}
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => {
-            setValue(saved != null ? String(saved) : "");
-            setError(null);
-            setMessage(null);
-          }}
-          className="px-2 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50"
-        >
-          Cancel
-        </button>
+        </div>
+
+        <p className={saved == null ? DISCOUNT_STATUS_IDLE : DISCOUNT_STATUS_ACTIVE}>
+          {saved == null
+            ? copy.globalEmptyHint
+            : formatAdminMessage(copy.globalActive, { percent: saved })}
+        </p>
+
+        <div className="grid grid-cols-5 gap-2">
+          {QUICK_PERCENTS.map((percent) => (
+            <button
+              key={percent}
+              type="button"
+              disabled={isPending}
+              onClick={() => setValue(String(percent))}
+              className={DISCOUNT_QUICK_BUTTON}
+            >
+              {percent}%
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              setValue("");
+              setError(null);
+              setMessage(null);
+            }}
+            className="w-full rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+          >
+            {common.cancel}
+          </button>
+        </div>
       </div>
 
       {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}

@@ -2,15 +2,18 @@
 
 import { useActionState, useState } from "react";
 
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import {
   updateProfileAction,
   type UpdateProfileActionState,
 } from "@/features/auth/update-profile-action";
-
-const FIELD_CLASS =
-  "h-11 w-full rounded-lg border border-gray-200 px-3 text-gray-900 outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-200";
+import {
+  PROFILE_CARD_CLASS,
+  PROFILE_FIELD_CLASS,
+  PROFILE_LABEL_CLASS,
+  PROFILE_OUTLINE_BUTTON_CLASS,
+  PROFILE_PRIMARY_BUTTON_CLASS,
+  PROFILE_SECTION_TITLE_CLASS,
+} from "@/features/profile/ui/profile-surface-classes";
 
 type PersonalInformationFormProps = {
   locale: string;
@@ -26,6 +29,7 @@ type PersonalInformationFormProps = {
     phone: string;
     cancel: string;
     save: string;
+    saveShort: string;
     saving: string;
     firstNamePlaceholder: string;
     lastNamePlaceholder: string;
@@ -77,19 +81,14 @@ export function PersonalInformationForm({
   }
 
   return (
-    <Card className="rounded-2xl border border-gray-200/80 p-5 shadow-none sm:p-7 lg:p-8">
-      <div className="mb-8 border-b border-gray-100 pb-5 sm:mb-10 sm:pb-6">
-        <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">
-          {labels.title}
-        </h1>
-      </div>
+    <section className={PROFILE_CARD_CLASS}>
+      <h1 className={`${PROFILE_SECTION_TITLE_CLASS} mb-6 text-center`}>
+        {labels.title}
+      </h1>
 
-      <form
-        action={formAction}
-        className="mx-auto max-w-xl space-y-6 lg:mx-0 lg:max-w-2xl"
-      >
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
+      <form action={formAction} className="mx-auto max-w-xl space-y-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label className={PROFILE_LABEL_CLASS}>
             {labels.firstName}
             <input
               name="firstName"
@@ -102,11 +101,11 @@ export function PersonalInformationForm({
                 }))
               }
               placeholder={labels.firstNamePlaceholder}
-              className={FIELD_CLASS}
+              className={PROFILE_FIELD_CLASS}
               autoComplete="given-name"
             />
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
+          <label className={PROFILE_LABEL_CLASS}>
             {labels.lastName}
             <input
               name="lastName"
@@ -119,44 +118,42 @@ export function PersonalInformationForm({
                 }))
               }
               placeholder={labels.lastNamePlaceholder}
-              className={FIELD_CLASS}
+              className={PROFILE_FIELD_CLASS}
               autoComplete="family-name"
             />
           </label>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            {labels.email}
-            <input
-              name="email"
-              type="email"
-              required
-              value={values.email}
-              onChange={(event) =>
-                setValues((prev) => ({ ...prev, email: event.target.value }))
-              }
-              placeholder={labels.emailPlaceholder}
-              className={FIELD_CLASS}
-              autoComplete="email"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            {labels.phone}
-            <input
-              name="phone"
-              type="tel"
-              required
-              value={values.phone}
-              onChange={(event) =>
-                setValues((prev) => ({ ...prev, phone: event.target.value }))
-              }
-              placeholder={labels.phonePlaceholder}
-              className={FIELD_CLASS}
-              autoComplete="tel"
-            />
-          </label>
-        </div>
+        <label className={PROFILE_LABEL_CLASS}>
+          {labels.email}
+          <input
+            name="email"
+            type="email"
+            required
+            value={values.email}
+            onChange={(event) =>
+              setValues((prev) => ({ ...prev, email: event.target.value }))
+            }
+            placeholder={labels.emailPlaceholder}
+            className={PROFILE_FIELD_CLASS}
+            autoComplete="email"
+          />
+        </label>
+        <label className={PROFILE_LABEL_CLASS}>
+          {labels.phone}
+          <input
+            name="phone"
+            type="tel"
+            required
+            value={values.phone}
+            onChange={(event) =>
+              setValues((prev) => ({ ...prev, phone: event.target.value }))
+            }
+            placeholder={labels.phonePlaceholder}
+            className={PROFILE_FIELD_CLASS}
+            autoComplete="tel"
+          />
+        </label>
 
         {state.error ? (
           <p className="text-sm text-red-700" role="alert">
@@ -169,26 +166,31 @@ export function PersonalInformationForm({
           </p>
         ) : null}
 
-        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:gap-4 sm:pt-4">
-          <Button
+        <div className="flex flex-nowrap items-center justify-center gap-2 pt-4">
+          <button
+            type="submit"
+            className={PROFILE_PRIMARY_BUTTON_CLASS}
+            disabled={isPending}
+          >
+            {isPending ? (
+              labels.saving
+            ) : (
+              <>
+                <span className="sm:hidden">{labels.saveShort}</span>
+                <span className="hidden sm:inline">{labels.save}</span>
+              </>
+            )}
+          </button>
+          <button
             type="button"
-            variant="outline"
-            className="h-11 w-full sm:w-auto"
+            className={PROFILE_OUTLINE_BUTTON_CLASS}
             onClick={resetToSaved}
             disabled={isPending}
           >
             {labels.cancel}
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            className="h-11 w-full sm:w-auto"
-            disabled={isPending}
-          >
-            {isPending ? labels.saving : labels.save}
-          </Button>
+          </button>
         </div>
       </form>
-    </Card>
+    </section>
   );
 }

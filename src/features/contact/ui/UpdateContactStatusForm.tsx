@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { ADMIN_LABEL } from "@/features/admin/ui/admin-form-classes";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { updateContactStatusAction } from "@/features/contact/application/update-contact-status";
 import type { ContactStatus } from "@/features/contact/domain/contact-rules";
 
@@ -24,6 +28,10 @@ export function UpdateContactStatusForm({
   eligibleStatuses,
 }: UpdateContactStatusFormProps) {
   const router = useRouter();
+  const admin = getAdminCopy(locale);
+  const copy = admin.messages;
+  const common = admin.common;
+  const users = admin.users;
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(eligibleStatuses[0] ?? "");
   const [isPending, startTransition] = useTransition();
@@ -56,13 +64,13 @@ export function UpdateContactStatusForm({
         }}
       >
         <p className="text-sm text-gray-700">
-          Current: <strong className="text-gray-900">{currentStatus}</strong>
+          {formatAdminMessage(users.current, { value: currentStatus })}
         </p>
         <div>
-          <span className={ADMIN_LABEL}>New status</span>
+          <span className={ADMIN_LABEL}>{copy.newStatus}</span>
           <SelectDropdown
             name="status"
-            ariaLabel="New status"
+            ariaLabel={copy.newStatus}
             value={status}
             options={eligibleStatuses.map((item) => ({
               label: item,
@@ -76,7 +84,7 @@ export function UpdateContactStatusForm({
         </div>
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
         <Button type="submit" size="sm" disabled={isPending}>
-          {isPending ? "Updating…" : "Update status"}
+          {isPending ? common.updating : copy.updateStatus}
         </Button>
       </form>
     </Card>

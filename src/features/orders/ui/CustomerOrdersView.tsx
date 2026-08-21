@@ -20,9 +20,21 @@ type CustomerOrdersViewOrder = {
 type CustomerOrdersViewProps = {
   locale: string;
   orders: CustomerOrdersViewOrder[];
+  labels: {
+    empty: string;
+    orderNumber: string;
+    status: string;
+    payment: string;
+    placedOn: string;
+    viewDetails: string;
+  };
 };
 
-export function CustomerOrdersView({ locale, orders }: CustomerOrdersViewProps) {
+export function CustomerOrdersView({
+  locale,
+  orders,
+  labels,
+}: CustomerOrdersViewProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [detail, setDetail] = useState<AdminOrderDetailView | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +64,17 @@ export function CustomerOrdersView({ locale, orders }: CustomerOrdersViewProps) 
 
   return (
     <>
-      <CustomerOrdersTable orders={orders} onOpenOrder={openOrder} />
+      <CustomerOrdersTable
+        locale={locale}
+        orders={orders}
+        emptyLabel={labels.empty}
+        orderNumberLabel={labels.orderNumber}
+        statusLabel={labels.status}
+        paymentLabel={labels.payment}
+        placedOnLabel={labels.placedOn}
+        viewDetailsLabel={labels.viewDetails}
+        onOpenOrder={openOrder}
+      />
       <OrderDetailsDrawer
         open={drawerOpen}
         onClose={closeDrawer}

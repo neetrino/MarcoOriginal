@@ -32,7 +32,7 @@ export function AdminCategoriesToolbar({
           <button
             type="button"
             onClick={onAddSubcategory}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-marco-slate hover:bg-marco-gray"
           >
             <Plus className="h-4 w-4" aria-hidden />
             {copy.addSubcategory}
@@ -40,7 +40,7 @@ export function AdminCategoriesToolbar({
           <button
             type="button"
             onClick={onAddCategory}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-marco-yellow px-3 py-2 text-sm font-semibold text-marco-slate transition-[filter] hover:brightness-95"
+            className="inline-flex items-center gap-1.5 rounded-full bg-marco-yellow px-4 py-2 text-sm font-semibold text-marco-slate transition-[filter] hover:brightness-95"
           >
             <Plus className="h-4 w-4" aria-hidden />
             {copy.addCategory}

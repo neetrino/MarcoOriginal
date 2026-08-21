@@ -5,11 +5,23 @@
   "storePhone": "060 500 406",
   "storeEmail": "marcofurniture@mail.ru",
   "storeAddress": "Ք․ Երևան Ալեք Մանուկյան 23",
+  "deliveryPhonesLabel": "Առաքման համար",
+  "callToUs": {
+    "description": "Մենք հասանելի ենք շաբաթվա 7 օր:"
+  },
+  "drawerCall": {
+    "cta": "Զանգահարել",
+    "chooseBranchTitle": "Ո՞ր մասնաճուղում եք ցանկանում զանգահարել",
+    "changeBranch": "Այլ մասնաճուղ ընտրել",
+    "cancel": "Հետ"
+  },
   "social": {
     "instagram": "https://www.instagram.com/marco_electronics",
     "facebook": "https://www.facebook.com/marcoelectronicss",
     "linkedin": "",
-    "telegram": "https://t.me/+37460500406"
+    "telegram": "https://t.me/+37460500406",
+    "whatsapp": "https://wa.me/37460500406",
+    "viber": "viber://chat?number=37460500406"
   },
   "locations": {
     "yerevan": "Ք․ Երևան Ալեք Մանուկյան 23",

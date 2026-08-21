@@ -126,7 +126,7 @@ export function AdminAttributeCard({
               type="button"
               disabled={busy || !draft.trim()}
               onClick={addValue}
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-gray-900 px-4 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-marco-slate px-4 text-sm font-medium text-white transition-[filter] hover:brightness-95 disabled:opacity-50"
             >
               {isPending ? copy.adding : copy.addValue}
             </button>

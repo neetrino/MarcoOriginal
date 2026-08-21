@@ -4,6 +4,7 @@ import {
   ADMIN_PAGE_SUBTITLE,
   ADMIN_PAGE_TITLE,
 } from "@/features/admin/ui/admin-form-classes";
+import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 import {
   getStoreFxRates,
   getStoreIdentity,
@@ -27,14 +28,13 @@ export default async function AdminSettingsPage({
     getStoreIdentity(),
     getStoreFxRates(),
   ]);
+  const copy = getAdminCopy(locale).settings;
 
   return (
     <section>
       <div className="mb-6">
-        <h1 className={ADMIN_PAGE_TITLE}>Store settings</h1>
-        <p className={`mt-1 ${ADMIN_PAGE_SUBTITLE}`}>
-          Configure store identity and currency exchange rates
-        </p>
+        <h1 className={ADMIN_PAGE_TITLE}>{copy.title}</h1>
+        <p className={`mt-1 ${ADMIN_PAGE_SUBTITLE}`}>{copy.subtitle}</p>
       </div>
 
       <StoreSettingsForms

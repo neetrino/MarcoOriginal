@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import {
   ConfirmDialog,
 } from "@/components/ui/ConfirmDialog";
@@ -16,9 +14,14 @@ import {
 } from "@/features/profile/application/manage-addresses";
 import type { CustomerAddressListItem } from "@/features/profile/application/address-queries";
 import { ProfileAddressCard } from "@/features/profile/ui/ProfileAddressCard";
-
-const FIELD_CLASS =
-  "h-11 w-full rounded-lg border border-gray-200 px-3 text-gray-900 outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-200";
+import {
+  PROFILE_CARD_CLASS,
+  PROFILE_FIELD_CLASS,
+  PROFILE_LABEL_CLASS,
+  PROFILE_OUTLINE_BUTTON_CLASS,
+  PROFILE_PRIMARY_BUTTON_CLASS,
+  PROFILE_SECTION_TITLE_CLASS,
+} from "@/features/profile/ui/profile-surface-classes";
 
 type AddressFormState = {
   line1: string;
@@ -160,33 +163,32 @@ export function ProfileAddressesView({
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <Card className="rounded-2xl border border-gray-200/80 p-5 shadow-none sm:p-7 lg:p-8">
-        <div className="mb-6 flex flex-col gap-4 border-b border-gray-100 pb-5 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:pb-6">
-          <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">
+    <div className="space-y-6">
+      <section className={PROFILE_CARD_CLASS}>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className={`${PROFILE_SECTION_TITLE_CLASS} text-center sm:text-left`}>
             {labels.title}
           </h1>
-          <Button
+          <button
             type="button"
-            variant="primary"
-            className="h-11 w-full shrink-0 sm:w-auto"
+            className={`${PROFILE_PRIMARY_BUTTON_CLASS} w-full sm:w-auto`}
             onClick={toggleForm}
             disabled={isPending}
           >
             {showForm ? labels.cancel : `+ ${labels.addNew}`}
-          </Button>
+          </button>
         </div>
 
         {showForm ? (
           <form
             onSubmit={onSave}
-            className="mb-8 space-y-5 rounded-2xl border border-dashed border-gray-300 bg-gray-50/50 p-4 sm:mb-10 sm:p-6"
+            className="mb-6 space-y-4 rounded-lg bg-gray-50 p-4"
           >
-            <h2 className="text-base font-semibold text-gray-900">
+            <h2 className="font-semibold text-marco-slate">
               {editingId ? labels.formEditTitle : labels.formAddTitle}
             </h2>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
-              <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className={PROFILE_LABEL_CLASS}>
                 {labels.line1}
                 <input
                   required
@@ -194,11 +196,11 @@ export function ProfileAddressesView({
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, line1: event.target.value }))
                   }
-                  className={FIELD_CLASS}
+                  className={PROFILE_FIELD_CLASS}
                   autoComplete="street-address"
                 />
               </label>
-              <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
+              <label className={PROFILE_LABEL_CLASS}>
                 {labels.city}
                 <input
                   required
@@ -206,7 +208,7 @@ export function ProfileAddressesView({
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, city: event.target.value }))
                   }
-                  className={FIELD_CLASS}
+                  className={PROFILE_FIELD_CLASS}
                   autoComplete="address-level2"
                 />
               </label>
@@ -221,15 +223,14 @@ export function ProfileAddressesView({
                     isDefault: event.target.checked,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                className="h-4 w-4 rounded border-gray-300 text-marco-slate focus:ring-marco-slate"
               />
-              <span className="text-sm text-gray-700">{labels.isDefault}</span>
+              <span className="text-sm text-marco-slate">{labels.isDefault}</span>
             </label>
-            <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:gap-3">
-              <Button
+            <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:gap-2">
+              <button
                 type="button"
-                variant="outline"
-                className="h-11 w-full sm:w-auto"
+                className={PROFILE_OUTLINE_BUTTON_CLASS}
                 onClick={() => {
                   setShowForm(false);
                   resetForm();
@@ -237,11 +238,10 @@ export function ProfileAddressesView({
                 disabled={isPending}
               >
                 {labels.cancel}
-              </Button>
-              <Button
+              </button>
+              <button
                 type="submit"
-                variant="primary"
-                className="h-11 w-full sm:w-auto"
+                className={PROFILE_PRIMARY_BUTTON_CLASS}
                 disabled={isPending}
               >
                 {isPending
@@ -249,7 +249,7 @@ export function ProfileAddressesView({
                   : editingId
                     ? labels.update
                     : labels.add}
-              </Button>
+              </button>
             </div>
           </form>
         ) : null}
@@ -265,7 +265,7 @@ export function ProfileAddressesView({
           </p>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {addresses.length > 0 ? (
             addresses.map((address) => (
               <ProfileAddressCard
@@ -284,12 +284,12 @@ export function ProfileAddressesView({
               />
             ))
           ) : (
-            <p className="col-span-full py-12 text-center text-sm text-gray-500 sm:py-16">
+            <p className="col-span-full py-12 text-center text-sm text-marco-slate/60">
               {labels.noAddresses}
             </p>
           )}
         </div>
-      </Card>
+      </section>
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

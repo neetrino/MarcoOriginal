@@ -1,89 +1,34 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition, type FormEvent } from "react";
+import { useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 
-import { Card } from "@/components/ui/Card";
-import type { CheckoutOrderProduct } from "@/features/checkout/ui/checkout-order-product";
+import { AppLink } from "@/components/ui/AppLink";
 import { previewCouponAction } from "@/features/checkout/application/preview-coupon";
 import { createOrderAction } from "@/features/checkout/create-order";
 import type { CheckoutPaymentMethod } from "@/features/checkout/domain/payment-methods";
-import { CheckoutDetailsSections } from "@/features/checkout/ui/CheckoutDetailsSections";
 import {
-  CASH_CHANGE_NONE,
-  type CashChangeValue,
-} from "@/features/checkout/ui/checkout-payment-assets";
+  CheckoutDetailsSections,
+  type CheckoutPickupBranch,
+} from "@/features/checkout/ui/CheckoutDetailsSections";
+import type { CheckoutLabels } from "@/features/checkout/ui/checkout-form-labels";
 import { CheckoutOrderSummary } from "@/features/checkout/ui/CheckoutOrderSummary";
-import { CheckoutProductsInOrder } from "@/features/checkout/ui/CheckoutProductsInOrder";
+import {
+  CHECKOUT_CARD_CLASS,
+  CHECKOUT_EMPTY_ACTION_CLASS,
+  CHECKOUT_LAYOUT_CLASS,
+  CHECKOUT_PAGE_CLASS,
+  CHECKOUT_TITLE_CLASS,
+} from "@/features/checkout/ui/checkout-section-classes";
 import type { CheckoutDeliveryOption } from "@/features/delivery/application/queries";
 import type { Locale } from "@/lib/i18n/config";
 import { formatMoneyAmount } from "@/lib/money/format";
-
-type CheckoutLabels = {
-  title: string;
-  titleLead: string;
-  titleAccent: string;
-  productsInOrder: string;
-  itemsOne: string;
-  itemsMany: string;
-  removeItem: string;
-  contactInformation: string;
-  shippingMethod: string;
-  shippingAddress: string;
-  paymentMethod: string;
-  orderSummary: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  city: string;
-  address: string;
-  deliveryLocation: string;
-  selectLocation: string;
-  phonePlaceholder: string;
-  cityPlaceholder: string;
-  addressPlaceholder: string;
-  storePickup: string;
-  storePickupDescription: string;
-  delivery: string;
-  deliveryDescription: string;
-  freePickup: string;
-  enterCity: string;
-  selectDeliveryLocation: string;
-  cashOnDelivery: string;
-  cashShort: string;
-  cashOnDeliveryDescription: string;
-  cashChangeTitle: string;
-  cashChangeHint: string;
-  cashChangeNone: string;
-  cashChangeCourier: string;
-  idram: string;
-  idramDescription: string;
-  card: string;
-  cardDescription: string;
-  couponTitle: string;
-  couponPlaceholder: string;
-  couponApply: string;
-  couponApplying: string;
-  discount: string;
-  subtotal: string;
-  shipping: string;
-  tax: string;
-  total: string;
-  placeOrder: string;
-  processing: string;
-  continueShopping: string;
-  cartEmpty: string;
-  cartEmptyDescription: string;
-  cartEmptyCta: string;
-};
 
 type CheckoutFormProps = {
   locale: Locale;
   labels: CheckoutLabels;
   productsHref: string;
-  orderProducts: CheckoutOrderProduct[];
+  pickupBranches: CheckoutPickupBranch[];
   defaultFirstName: string;
   defaultLastName: string;
   defaultEmail: string;
@@ -112,7 +57,7 @@ export function CheckoutForm({
   locale,
   labels,
   productsHref,
-  orderProducts,
+  pickupBranches,
   defaultFirstName,
   defaultLastName,
   defaultEmail,
@@ -123,7 +68,7 @@ export function CheckoutForm({
   hasItems,
 }: CheckoutFormProps) {
   const router = useRouter();
-  const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
+  const idempotencyKeyRef = useRef<string | null>(null);
   const defaultRuleId = deliveryOptions[0]?.id ?? "";
   const [shippingMethod, setShippingMethod] = useState<"pickup" | "delivery">(
     deliveryOptions.length > 0 ? "delivery" : "pickup",
@@ -131,8 +76,7 @@ export function CheckoutForm({
   const [deliveryRuleId, setDeliveryRuleId] = useState(defaultRuleId);
   const [paymentMethod, setPaymentMethod] =
     useState<CheckoutPaymentMethod>("cash_on_delivery");
-  const [cashChangeFor, setCashChangeFor] =
-    useState<CashChangeValue>(CASH_CHANGE_NONE);
+  const [pickupBranchId, setPickupBranchId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [couponDraft, setCouponDraft] = useState("");
   const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(
@@ -152,19 +96,16 @@ export function CheckoutForm({
       {
         id: "cash_on_delivery" as const,
         name: labels.cashOnDelivery,
-        shortName: labels.cashShort,
         description: labels.cashOnDeliveryDescription,
       },
       {
         id: "idram" as const,
         name: labels.idram,
-        shortName: labels.idram,
         description: labels.idramDescription,
       },
       {
         id: "arca" as const,
         name: labels.card,
-        shortName: labels.card,
         description: labels.cardDescription,
       },
     ],
@@ -173,16 +114,16 @@ export function CheckoutForm({
       labels.cardDescription,
       labels.cashOnDelivery,
       labels.cashOnDeliveryDescription,
-      labels.cashShort,
       labels.idram,
       labels.idramDescription,
     ],
   );
 
-  function onPaymentMethodChange(method: CheckoutPaymentMethod): void {
-    setPaymentMethod(method);
-    if (method === "cash_on_delivery" && !cashChangeFor) {
-      setCashChangeFor(CASH_CHANGE_NONE);
+  function onShippingMethodChange(method: "pickup" | "delivery"): void {
+    setShippingMethod(method);
+    setError(null);
+    if (method === "delivery") {
+      setPickupBranchId("");
     }
   }
 
@@ -239,25 +180,18 @@ export function CheckoutForm({
 
   if (!hasItems) {
     return (
-      <div className="mx-auto w-full max-w-[1024px] px-4 pt-[45px] pb-16 sm:px-6 lg:px-6 lg:pt-12 lg:pb-12">
-        <h1 className="mb-6 text-[26px] leading-tight font-black uppercase text-gray-900 sm:text-[30px] sm:leading-[1.2]">
-          <span className="block">{labels.titleLead}</span>
-          {labels.titleAccent ? (
-            <span className="block">{labels.titleAccent}</span>
-          ) : null}
-        </h1>
-        <Card className="rounded-2xl border border-gray-200/80 p-6 text-center shadow-none">
-          <p className="mb-2 text-lg font-semibold text-gray-900">
-            {labels.cartEmpty}
-          </p>
-          <p className="mb-6 text-gray-600">{labels.cartEmptyDescription}</p>
-          <Link
+      <div className={CHECKOUT_PAGE_CLASS}>
+        <h1 className={CHECKOUT_TITLE_CLASS}>{labels.title}</h1>
+        <div className={`${CHECKOUT_CARD_CLASS} text-center`}>
+          <p className="mb-4 text-marco-slate">{labels.cartEmpty}</p>
+          <AppLink
             href={productsHref}
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-gray-900 px-4 text-sm font-medium text-white hover:bg-gray-800"
+            prefetchPolicy="intent"
+            className={CHECKOUT_EMPTY_ACTION_CLASS}
           >
-            {labels.cartEmptyCta}
-          </Link>
-        </Card>
+            {labels.continueShopping}
+          </AppLink>
+        </div>
       </div>
     );
   }
@@ -267,10 +201,20 @@ export function CheckoutForm({
     const data = new FormData(event.currentTarget);
     setError(null);
 
+    const selectedBranch = pickupBranches.find(
+      (branch) => branch.id === pickupBranchId,
+    );
+    if (shippingMethod === "pickup" && !selectedBranch) {
+      setError(labels.branchRequired);
+      return;
+    }
+
     startTransition(async () => {
       const result = await createOrderAction({
         locale,
-        idempotencyKey,
+        idempotencyKey:
+          idempotencyKeyRef.current ??
+          (idempotencyKeyRef.current = crypto.randomUUID()),
         firstName: String(data.get("firstName") ?? ""),
         lastName: String(data.get("lastName") ?? ""),
         contactEmail: String(data.get("contactEmail") ?? ""),
@@ -286,7 +230,7 @@ export function CheckoutForm({
         line1:
           shippingMethod === "delivery"
             ? String(data.get("line1") ?? "")
-            : undefined,
+            : selectedBranch?.label,
         couponCode: appliedCouponCode ?? undefined,
       });
 
@@ -301,39 +245,25 @@ export function CheckoutForm({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1024px] px-4 pt-[45px] pb-16 sm:px-6 lg:px-6 lg:pt-12 lg:pb-12">
-      <h1 className="mb-6 text-[26px] leading-tight font-black uppercase text-gray-900 sm:text-[30px] sm:leading-[1.2]">
-        <span className="block">{labels.titleLead}</span>
-        {labels.titleAccent ? (
-          <span className="block">{labels.titleAccent}</span>
-        ) : null}
-      </h1>
-
-      <CheckoutProductsInOrder
-        products={orderProducts}
-        title={labels.productsInOrder}
-        itemsOneLabel={labels.itemsOne}
-        itemsManyLabel={labels.itemsMany}
-        removeItemLabel={labels.removeItem}
-        onCartChanged={clearAppliedCoupon}
-      />
+    <div className={CHECKOUT_PAGE_CLASS}>
+      <h1 className={CHECKOUT_TITLE_CLASS}>{labels.title}</h1>
 
       <form onSubmit={onSubmit}>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+        <div className={CHECKOUT_LAYOUT_CLASS}>
           <CheckoutDetailsSections
             labels={labels}
             pending={pending}
             shippingMethod={shippingMethod}
-            onShippingMethodChange={setShippingMethod}
+            onShippingMethodChange={onShippingMethodChange}
+            pickupBranches={pickupBranches}
+            pickupBranchId={pickupBranchId}
+            onPickupBranchChange={setPickupBranchId}
             deliveryOptions={deliveryOptions}
             deliveryRuleId={deliveryRuleId}
             onDeliveryRuleChange={setDeliveryRuleId}
             paymentMethod={paymentMethod}
-            onPaymentMethodChange={onPaymentMethodChange}
+            onPaymentMethodChange={setPaymentMethod}
             paymentOptions={paymentOptions}
-            cashChangeValue={cashChangeFor}
-            onCashChangeValue={setCashChangeFor}
-            orderTotalAmount={totalAmount}
             defaultFirstName={defaultFirstName}
             defaultLastName={defaultLastName}
             defaultEmail={defaultEmail}
@@ -350,11 +280,9 @@ export function CheckoutForm({
             discountLabel={labels.discount}
             subtotalLabel={labels.subtotal}
             shippingLabel={labels.shipping}
-            taxLabel={labels.tax}
             totalLabel={labels.total}
             subtotalFormatted={formatMoney(subtotalAmount)}
             shippingFormatted={shippingFormatted}
-            taxFormatted={formatMoney(0)}
             discountFormatted={
               discountAmount > 0 ? formatMoney(discountAmount) : null
             }
@@ -368,6 +296,8 @@ export function CheckoutForm({
             isSubmitting={pending}
             placeOrderLabel={labels.placeOrder}
             processingLabel={labels.processing}
+            continueShoppingHref={productsHref}
+            continueShoppingLabel={labels.browseProducts}
           />
         </div>
       </form>

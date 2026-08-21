@@ -19,7 +19,7 @@ import { useOpenSnapshot } from "@/lib/react/use-open-snapshot";
 /** Must match `.animate-bottom-sheet-panel-*` duration in globals.css. */
 export const PROFILE_MOBILE_TAB_SHEET_MS = 300;
 const SHEET_EASING = "cubic-bezier(0.32, 0.72, 0, 1)";
-const SHEET_HEIGHT_VH = 72;
+const SHEET_HEIGHT_VH = 75;
 
 type MotionPhase = "enter" | "idle" | "exit" | "exit-drag";
 
@@ -29,6 +29,8 @@ type ProfileMobileTabSheetProps = {
   /** Called after the close motion finishes (and the portal unmounts). */
   onExited?: () => void;
   ariaLabel: string;
+  title: string;
+  closeLabel: string;
   children: ReactNode;
 };
 
@@ -41,6 +43,8 @@ export function ProfileMobileTabSheet({
   onClose,
   onExited,
   ariaLabel,
+  title,
+  closeLabel,
   children,
 }: ProfileMobileTabSheetProps) {
   const mounted = useIsClient();
@@ -53,6 +57,8 @@ export function ProfileMobileTabSheet({
   );
   const displayChildren = useOpenSnapshot(open, children);
   const displayAriaLabel = useOpenSnapshot(open, ariaLabel);
+  const displayTitle = useOpenSnapshot(open, title);
+  const displayCloseLabel = useOpenSnapshot(open, closeLabel);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -231,7 +237,7 @@ export function ProfileMobileTabSheet({
         type="button"
         tabIndex={-1}
         aria-hidden
-        className={`absolute inset-0 rounded-none bg-black/35 backdrop-blur-[1px] ${backdropClass}`}
+        className={`absolute inset-0 rounded-none bg-black/40 ${backdropClass}`}
         style={
           dragBackdropOpacity === null
             ? phase === "exit-drag"
@@ -251,11 +257,9 @@ export function ProfileMobileTabSheet({
       />
       <div
         ref={panelRef}
-        className={`relative z-[1] flex w-full flex-col overflow-hidden bg-white shadow-2xl ${panelClass}`}
+        className={`relative z-[1] flex w-full flex-col overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-[0_-20px_60px_rgba(15,23,42,0.18)] ${panelClass}`}
         style={{
           height: `${SHEET_HEIGHT_VH}dvh`,
-          borderTopLeftRadius: "var(--radius)",
-          borderTopRightRadius: "var(--radius)",
         }}
         onClick={(event) => event.stopPropagation()}
         onAnimationEnd={handlePanelAnimationEnd}
@@ -263,18 +267,22 @@ export function ProfileMobileTabSheet({
         {...panelPointerHandlers}
       >
         <div
-          className="flex h-12 shrink-0 cursor-grab touch-none select-none items-center justify-center active:cursor-grabbing"
+          className="flex shrink-0 cursor-grab touch-none select-none items-center justify-between border-b border-slate-200 px-4 py-3 active:cursor-grabbing"
           {...headerPointerHandlers}
         >
-          <div
-            className="rounded-full bg-gray-300"
-            style={{ height: 6, width: 56 }}
-            aria-hidden
-          />
+          <div className="h-1.5 w-12 rounded-full bg-slate-300" aria-hidden />
+          <p className="text-sm font-semibold text-marco-slate">{displayTitle}</p>
+          <button
+            type="button"
+            onClick={() => onCloseRef.current()}
+            className="rounded-md px-2 py-1 text-sm text-marco-slate/70 transition hover:bg-marco-gray"
+          >
+            {displayCloseLabel}
+          </button>
         </div>
         <div
           ref={scrollAreaRef}
-          className={`profile-mobile-tab-sheet-scroll min-h-0 flex-1 overscroll-contain px-3 pt-1 ${
+          className={`profile-mobile-tab-sheet-scroll min-h-0 flex-1 overscroll-contain px-4 pt-4 ${
             isDragging || phase === "exit-drag"
               ? "touch-none overflow-hidden"
               : "overflow-y-auto"

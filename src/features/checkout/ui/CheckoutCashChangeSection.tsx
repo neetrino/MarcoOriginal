@@ -81,7 +81,7 @@ export function CheckoutCashChangeSection({
       className="rounded-[18px] border border-gray-200 bg-white p-4 sm:p-5"
       data-cash-change-section
     >
-      <h3 className="text-base font-bold tracking-wide text-gray-900">
+      <h3 className="text-base font-bold tracking-wide text-marco-slate">
         {title}
       </h3>
       <p className="mt-2 text-sm leading-snug text-gray-600">{hint}</p>

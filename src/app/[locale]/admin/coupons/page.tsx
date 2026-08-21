@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { listAdminPromotions } from "@/features/promotions/application/queries";
 import { adminPromotionsFilterSchema } from "@/features/promotions/schemas/admin-promotions";
 import { AdminCouponsView } from "@/features/promotions/ui/AdminCouponsView";
@@ -48,29 +52,33 @@ export default async function AdminCouponsPage({
 
   const { rows, total, pageSize } = await listAdminPromotions(filters);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const common = getAdminCopy(locale).common;
 
   return (
     <>
       <AdminCouponsView locale={locale} coupons={rows} />
       {totalPages > 1 ? (
-        <nav className="mt-4 flex items-center gap-3 text-sm text-gray-700">
+        <nav className="mt-4 flex items-center gap-3 text-sm text-marco-slate">
           {filters.page > 1 ? (
             <Link
               href={`/${locale}/admin/coupons?page=${filters.page - 1}`}
               className="font-medium hover:underline"
             >
-              Previous
+              {common.previous}
             </Link>
           ) : null}
           <span>
-            Page {filters.page} / {totalPages}
+            {formatAdminMessage(common.pageOf, {
+              page: filters.page,
+              total: totalPages,
+            })}
           </span>
           {filters.page < totalPages ? (
             <Link
               href={`/${locale}/admin/coupons?page=${filters.page + 1}`}
               className="font-medium hover:underline"
             >
-              Next
+              {common.next}
             </Link>
           ) : null}
         </nav>

@@ -1,9 +1,9 @@
 import "server-only";
 
-import { count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/db/client";
-import { orderItems, orders } from "@/db/schema";
+import { addresses, orderItems, orders } from "@/db/schema";
 
 const RECENT_ORDERS_LIMIT = 6;
 
@@ -12,6 +12,7 @@ export type ProfileDashboardStats = {
   pendingOrders: number;
   completedOrders: number;
   totalSpent: number;
+  addressesCount: number;
 };
 
 export type ProfileRecentOrder = {
@@ -55,7 +56,16 @@ export async function getProfileDashboardStats(
     pendingOrders: row?.pendingOrders ?? 0,
     completedOrders: row?.completedOrders ?? 0,
     totalSpent: row?.totalSpent ?? 0,
+    addressesCount: 0,
   };
+}
+
+async function getSavedAddressCount(userId: string): Promise<number> {
+  const [row] = await getDb()
+    .select({ value: count() })
+    .from(addresses)
+    .where(and(eq(addresses.userId, userId), isNull(addresses.archivedAt)));
+  return row?.value ?? 0;
 }
 
 /** Latest orders for the profile dashboard preview list. */
@@ -92,9 +102,10 @@ export async function getProfileDashboard(userId: string): Promise<{
   stats: ProfileDashboardStats;
   recentOrders: ProfileRecentOrder[];
 }> {
-  const [stats, recentOrders] = await Promise.all([
+  const [stats, recentOrders, addressesCount] = await Promise.all([
     getProfileDashboardStats(userId),
     listRecentProfileOrders(userId),
+    getSavedAddressCount(userId),
   ]);
-  return { stats, recentOrders };
+  return { stats: { ...stats, addressesCount }, recentOrders };
 }

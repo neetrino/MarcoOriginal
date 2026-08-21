@@ -6,6 +6,10 @@ import {
   ADMIN_PAGE_TITLE,
 } from "@/features/admin/ui/admin-form-classes";
 import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
+import {
   getAdminPromotionById,
   listPromotionTargetOptions,
 } from "@/features/promotions/application/queries";
@@ -33,20 +37,22 @@ export default async function AdminDiscountDetailPage({
     notFound();
   }
 
+  const copy = getAdminCopy(locale).discounts;
+
   return (
     <section>
       <div className="mb-6">
         <p className={`mb-1 ${ADMIN_PAGE_SUBTITLE}`}>
           <Link
             href={`/${locale}/admin/discounts`}
-            className="font-medium text-gray-700 hover:underline"
+            className="font-medium text-marco-slate hover:underline"
           >
-            Discounts
+            {copy.title}
           </Link>
         </p>
-        <h1 className={ADMIN_PAGE_TITLE}>Automatic discount</h1>
+        <h1 className={ADMIN_PAGE_TITLE}>{copy.detailTitle}</h1>
         <p className={`mt-1 ${ADMIN_PAGE_SUBTITLE}`}>
-          Used {promo.usedCount} times
+          {formatAdminMessage(copy.usedTimes, { count: promo.usedCount })}
         </p>
       </div>
 

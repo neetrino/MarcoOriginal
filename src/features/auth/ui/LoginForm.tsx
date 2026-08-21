@@ -5,7 +5,17 @@ import { useSearchParams } from "next/navigation";
 
 import { AppLink } from "@/components/ui/AppLink";
 import { loginAction, type AuthActionState } from "@/features/auth/login-action";
+import { AuthTextField } from "@/features/auth/ui/AuthTextField";
 import { PasswordField } from "@/features/auth/ui/PasswordField";
+import {
+  AUTH_ERROR_CLASS,
+  AUTH_FOOTER_CLASS,
+  AUTH_FORM_CLASS,
+  AUTH_LINK_CLASS,
+  AUTH_LINK_EMPHASIS_CLASS,
+  AUTH_SUBMIT_CLASS,
+  AUTH_SUCCESS_CLASS,
+} from "@/features/auth/ui/auth-form-classes";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
@@ -16,8 +26,30 @@ type LoginFormProps = {
   dictionary: Dictionary["auth"];
 };
 
-const fieldClassName =
-  "h-10 w-full rounded-lg border border-gray-200 px-3 text-gray-900 outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-200";
+function LoginAlerts({
+  resetSucceeded,
+  error,
+  dictionary,
+}: {
+  resetSucceeded: boolean;
+  error?: string;
+  dictionary: Dictionary["auth"];
+}) {
+  return (
+    <>
+      {resetSucceeded ? (
+        <p role="status" className={AUTH_SUCCESS_CLASS}>
+          {dictionary.resetPasswordSuccess}
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className={AUTH_ERROR_CLASS}>
+          {error}
+        </p>
+      ) : null}
+    </>
+  );
+}
 
 export function LoginForm({ locale, dictionary }: LoginFormProps) {
   const searchParams = useSearchParams();
@@ -27,67 +59,52 @@ export function LoginForm({ locale, dictionary }: LoginFormProps) {
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
-
-      {resetSucceeded ? (
-        <p
-          role="status"
-          className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700"
-        >
-          {dictionary.resetPasswordSuccess}
-        </p>
-      ) : null}
-
-      <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-        {dictionary.email}
-        <input
-          required
+    <>
+      <LoginAlerts
+        resetSucceeded={resetSucceeded}
+        error={state.error}
+        dictionary={dictionary}
+      />
+      <form action={formAction} className={AUTH_FORM_CLASS}>
+        {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
+        <AuthTextField
           name="email"
+          label={dictionary.email}
           type="email"
           autoComplete="email"
-          className={fieldClassName}
+          placeholder={dictionary.emailPlaceholder}
         />
-      </label>
-      <PasswordField
-        name="password"
-        label={dictionary.password}
-        showPasswordLabel={dictionary.showPassword}
-        hidePasswordLabel={dictionary.hidePassword}
-        autoComplete="current-password"
-      />
-      <div className="flex justify-end">
-        <AppLink
-          href={`/${locale}/forgot-password`}
-          prefetchPolicy="intent"
-          className="text-sm font-medium text-gray-700 underline-offset-2 hover:text-gray-900 hover:underline"
-        >
-          {dictionary.forgotPassword}
-        </AppLink>
-      </div>
-      {state.error ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600"
-        >
-          {state.error}
-        </p>
-      ) : null}
-      <button
-        disabled={isPending}
-        className="h-10 rounded-lg bg-gray-900 px-4 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-60"
-      >
-        {isPending ? "…" : dictionary.submitLogin}
-      </button>
-      <p className="text-center text-sm text-gray-600">
+        <PasswordField
+          name="password"
+          label={dictionary.password}
+          placeholder={dictionary.passwordPlaceholder}
+          showPasswordLabel={dictionary.showPassword}
+          hidePasswordLabel={dictionary.hidePassword}
+          autoComplete="current-password"
+        />
+        <div className="flex justify-end">
+          <AppLink
+            href={`/${locale}/forgot-password`}
+            prefetchPolicy="intent"
+            className={AUTH_LINK_CLASS}
+          >
+            {dictionary.forgotPassword}
+          </AppLink>
+        </div>
+        <button disabled={isPending} className={AUTH_SUBMIT_CLASS}>
+          {isPending ? dictionary.submittingLogin : dictionary.submitLogin}
+        </button>
+      </form>
+      <p className={AUTH_FOOTER_CLASS}>
+        {dictionary.noAccount}{" "}
         <AppLink
           href={`/${locale}/register`}
           prefetchPolicy="intent"
-          className="font-medium text-gray-900 underline-offset-2 hover:underline"
+          className={AUTH_LINK_EMPHASIS_CLASS}
         >
-          {dictionary.submitRegister}
+          {dictionary.signUp}
         </AppLink>
       </p>
-    </form>
+    </>
   );
 }

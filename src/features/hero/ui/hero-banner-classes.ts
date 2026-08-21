@@ -7,6 +7,6 @@ export const HERO_MOBILE_RADIUS_CLASS = "rounded-[24px]";
 
 export function heroBannerTabClass(isActive: boolean): string {
   return isActive
-    ? "border-amber-500 bg-amber-50 text-amber-950 shadow-sm ring-1 ring-amber-200/80"
-    : "border-gray-200 bg-white text-gray-600 hover:border-amber-200 hover:bg-amber-50/60 hover:text-gray-900";
+    ? "border-marco-yellow bg-marco-yellow text-marco-slate shadow-sm"
+    : "border-gray-200 bg-white text-marco-slate/70 hover:border-marco-yellow/60 hover:bg-marco-yellow/20 hover:text-marco-ink";
 }

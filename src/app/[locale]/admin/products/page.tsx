@@ -1,12 +1,11 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
   listAdminCategoryOptions,
   listAdminProducts,
 } from "@/features/products/application/list-admin-products";
+import type { AdminProductsQueryState } from "@/features/products/domain/admin-products-query";
 import { adminProductsFilterSchema } from "@/features/products/schemas/admin-list";
-import { AdminProductsFilters } from "@/features/products/ui/AdminProductsFilters";
 import { AdminProductsView } from "@/features/products/ui/AdminProductsView";
 import { isLocale } from "@/lib/i18n/config";
 
@@ -24,29 +23,16 @@ function firstParam(
   return value;
 }
 
-function buildQuery(
-  filters: {
-    q?: string;
-    sku?: string;
-    categoryId?: string;
-    stock: string;
-    sort: string;
-    dir: string;
-    page: number;
-  },
-  overrides: Partial<typeof filters> = {},
-): string {
-  const merged = { ...filters, ...overrides };
-  const params = new URLSearchParams();
-  if (merged.q) params.set("q", merged.q);
-  if (merged.sku) params.set("sku", merged.sku);
-  if (merged.categoryId) params.set("categoryId", merged.categoryId);
-  if (merged.stock !== "all") params.set("stock", merged.stock);
-  if (merged.sort !== "created") params.set("sort", merged.sort);
-  if (merged.dir !== "desc") params.set("dir", merged.dir);
-  if (merged.page > 1) params.set("page", String(merged.page));
-  return params.toString();
-}
+const FALLBACK_FILTERS: AdminProductsQueryState = {
+  page: 1,
+  stock: "all",
+  published: "all",
+  sort: "created",
+  dir: "desc",
+  q: undefined,
+  sku: undefined,
+  categoryId: undefined,
+};
 
 export default async function AdminProductsPage({
   params,
@@ -63,92 +49,29 @@ export default async function AdminProductsPage({
     sku: firstParam(raw.sku) || undefined,
     categoryId: firstParam(raw.categoryId) || undefined,
     stock: firstParam(raw.stock) ?? "all",
+    published: firstParam(raw.published) ?? "all",
     sort: firstParam(raw.sort) ?? "created",
     dir: firstParam(raw.dir) ?? "desc",
     page: firstParam(raw.page) ?? "1",
   });
 
-  const filters = parsed.success
-    ? parsed.data
-    : {
-        page: 1 as const,
-        stock: "all" as const,
-        sort: "created" as const,
-        dir: "desc" as const,
-        q: undefined,
-        sku: undefined,
-        categoryId: undefined,
-      };
-
+  const filters = parsed.success ? parsed.data : FALLBACK_FILTERS;
   const [{ rows, total, pageSize }, categories] = await Promise.all([
     listAdminProducts(locale, filters),
     listAdminCategoryOptions(locale),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  function sortHref(sort: "title" | "stock" | "price" | "created"): string {
-    const nextDir =
-      filters.sort === sort && filters.dir === "asc" ? "desc" : "asc";
-    const query = buildQuery(filters, {
-      sort,
-      dir: filters.sort === sort ? nextDir : "asc",
-      page: 1,
-    });
-    return query
-      ? `/${locale}/admin/products?${query}`
-      : `/${locale}/admin/products`;
-  }
-
-  const sortLinks = {
-    title: sortHref("title"),
-    stock: sortHref("stock"),
-    price: sortHref("price"),
-    created: sortHref("created"),
-  };
-
   return (
     <section>
-      <AdminProductsFilters
-        total={total}
-        q={filters.q}
-        sku={filters.sku}
-        categoryId={filters.categoryId}
-        stock={filters.stock}
-        categories={categories}
-        sort={filters.sort}
-        dir={filters.dir}
-      />
-
       <AdminProductsView
         locale={locale}
         products={rows}
-        sortLinks={sortLinks}
         categories={categories}
+        filters={filters}
+        total={total}
+        totalPages={totalPages}
       />
-
-      {totalPages > 1 ? (
-        <nav className="mt-4 flex items-center gap-3 text-sm text-gray-700">
-          {filters.page > 1 ? (
-            <Link
-              href={`/${locale}/admin/products?${buildQuery(filters, { page: filters.page - 1 })}`}
-              className="font-medium hover:underline"
-            >
-              Previous
-            </Link>
-          ) : null}
-          <span>
-            Page {filters.page} / {totalPages}
-          </span>
-          {filters.page < totalPages ? (
-            <Link
-              href={`/${locale}/admin/products?${buildQuery(filters, { page: filters.page + 1 })}`}
-              className="font-medium hover:underline"
-            >
-              Next
-            </Link>
-          ) : null}
-        </nav>
-      ) : null}
     </section>
   );
 }

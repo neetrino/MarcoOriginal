@@ -133,8 +133,8 @@ export function SiteFooter({ dictionary, locale }: SiteFooterProps) {
   const companyItems: FooterNavItem[] = [
     { href: `/${locale}/products`, label: dictionary.nav.shop },
     { href: `/${locale}/about`, label: dictionary.nav.about },
+    { href: `/${locale}/stores`, label: dictionary.nav.stores },
     { href: `/${locale}/contact`, label: dictionary.nav.contact },
-    { href: `/${locale}/blog`, label: dictionary.nav.blog },
   ];
   const supportItems: FooterNavItem[] = [
     { href: `/${locale}/legal/privacy`, label: footer.privacyPolicy },
@@ -142,7 +142,7 @@ export function SiteFooter({ dictionary, locale }: SiteFooterProps) {
   ];
 
   return (
-    <footer className="storefront-footer mt-auto shrink-0 border-t border-marco-slate/10 bg-marco-footer pb-24 md:pb-0">
+    <footer className="storefront-footer mt-auto hidden shrink-0 border-t border-marco-slate/10 bg-marco-footer md:block">
       <div className="mx-auto max-w-7xl px-4 pb-7 pt-6 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-x-5">
           <div className="relative flex max-w-sm flex-col md:max-[1023px]:items-center">

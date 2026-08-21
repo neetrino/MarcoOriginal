@@ -29,11 +29,10 @@ export default async function BrandPage({ params }: BrandPageProps) {
   const brands = await listStorefrontBrands(rawLocale);
 
   return (
-    <section className="flex flex-col gap-8">
-      <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-        {dictionary.nav.brand}
-      </h1>
+    <section className="-mx-4 -my-10 bg-white px-4 pt-6 pb-24 sm:-mx-6 sm:px-6 md:pb-16 lg:-mx-8 lg:px-8 lg:pt-10">
       <BrandDirectory
+        locale={rawLocale}
+        title={dictionary.nav.brand}
         brands={brands}
         emptyLabel={dictionary.catalog.brandsEmpty}
       />

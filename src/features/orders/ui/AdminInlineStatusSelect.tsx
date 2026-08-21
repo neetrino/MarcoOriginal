@@ -23,6 +23,11 @@ import {
 import { changeOrderStatusAction } from "@/features/orders/application/change-order-status";
 import { changePaymentStatusAction } from "@/features/orders/application/change-payment-status";
 import {
+  formatAdminMessage,
+  getAdminCopy,
+  type AdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
+import {
   ADMIN_ORDER_STATUS_OPTIONS,
   orderStatusLabel,
   type OrderStatus,
@@ -41,6 +46,26 @@ type MenuPosition = {
   minWidth: number;
 };
 
+function localizeOrderStatus(copy: AdminCopy["orders"], status: string): string {
+  const label = orderStatusLabel(status);
+  if (label === "Pending") return copy.statusPending;
+  if (label === "Processing") return copy.statusProcessing;
+  if (label === "Completed") return copy.statusCompleted;
+  if (label === "Cancelled") return copy.statusCancelled;
+  return label;
+}
+
+function localizePaymentStatus(
+  copy: AdminCopy["orders"],
+  status: string,
+): string {
+  const label = paymentStatusLabel(status);
+  if (label === "Paid") return copy.paymentPaid;
+  if (label === "Pending") return copy.paymentPending;
+  if (label === "Failed") return copy.paymentFailed;
+  return label;
+}
+
 type AdminInlineStatusSelectProps = {
   locale: string;
   orderNumber: string;
@@ -56,6 +81,7 @@ export function AdminInlineStatusSelect({
   value,
   disabled = false,
 }: AdminInlineStatusSelectProps) {
+  const copy = getAdminCopy(locale).orders;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const mounted = useHoldFlag(open, DROPDOWN_ANIMATION_MS);
@@ -83,8 +109,8 @@ export function AdminInlineStatusSelect({
 
   const currentLabel =
     kind === "order"
-      ? orderStatusLabel(displayValue)
-      : paymentStatusLabel(displayValue);
+      ? localizeOrderStatus(copy, displayValue)
+      : localizePaymentStatus(copy, displayValue);
 
   const badgeClassName =
     kind === "order"
@@ -212,7 +238,9 @@ export function AdminInlineStatusSelect({
             <div
               id={menuId}
               role="listbox"
-              aria-label={`Change ${kind} status`}
+              aria-label={formatAdminMessage(copy.changeStatus, {
+                kind: kind === "order" ? copy.kindOrder : copy.kindPayment,
+              })}
               className="overflow-hidden rounded-2xl border border-gray-100 bg-white py-2"
             >
               {options.map((option) => {
@@ -225,7 +253,11 @@ export function AdminInlineStatusSelect({
                 return (
                   <SelectDropdownOptionRow
                     key={option.value}
-                    label={option.label}
+                    label={
+                      kind === "order"
+                        ? localizeOrderStatus(copy, option.value)
+                        : localizePaymentStatus(copy, option.value)
+                    }
                     selected={selected}
                     onSelect={() => selectStatus(option.value)}
                   />
@@ -243,7 +275,9 @@ export function AdminInlineStatusSelect({
         type="button"
         disabled={disabled || isPending}
         className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium outline-none transition-opacity disabled:opacity-50 ${badgeClassName}`}
-        aria-label={`Change ${kind} status`}
+        aria-label={formatAdminMessage(copy.changeStatus, {
+          kind: kind === "order" ? copy.kindOrder : copy.kindPayment,
+        })}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={menuId}

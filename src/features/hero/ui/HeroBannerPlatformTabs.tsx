@@ -25,7 +25,7 @@ export function HeroBannerPlatformTabs({
         aria-selected={activeTab === "desktop"}
         id="admin-hero-banner-tab-desktop"
         aria-controls="admin-hero-banner-panel-desktop"
-        className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${heroBannerTabClass(activeTab === "desktop")}`}
+        className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-marco-yellow/50 ${heroBannerTabClass(activeTab === "desktop")}`}
         onClick={() => onTabChange("desktop")}
       >
         <svg
@@ -49,7 +49,7 @@ export function HeroBannerPlatformTabs({
         aria-selected={activeTab === "mobile"}
         id="admin-hero-banner-tab-mobile"
         aria-controls="admin-hero-banner-panel-mobile"
-        className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${heroBannerTabClass(activeTab === "mobile")}`}
+        className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-marco-yellow/50 ${heroBannerTabClass(activeTab === "mobile")}`}
         onClick={() => onTabChange("mobile")}
       >
         <svg

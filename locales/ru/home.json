@@ -14,5 +14,6 @@
   "playReel": "Смотреть reel",
   "closeReel": "Закрыть",
   "viewAll": "Смотреть ещё",
-  "emptyFeatured": "Пока нет рекомендуемых товаров."
+  "emptyFeatured": "Пока нет рекомендуемых товаров.",
+  "emptyReels": "Пока нет reels."
 }

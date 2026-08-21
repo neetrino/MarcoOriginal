@@ -12,6 +12,10 @@ import {
   orderStatusBadgeClass,
   paymentStatusBadgeClass,
 } from "@/features/admin/ui/status-badge";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { getAdminUserById } from "@/features/users/application/queries";
 import {
   getEligibleUserStatuses,
@@ -66,6 +70,7 @@ export default async function AdminUserDetailPage({
   const status = isUserStatus(user.status) ? user.status : null;
   const eligibleStatuses = status ? getEligibleUserStatuses(status) : [];
   const isAnonymized = status === "ANONYMIZED";
+  const copy = getAdminCopy(locale).users;
 
   return (
     <section>
@@ -73,9 +78,9 @@ export default async function AdminUserDetailPage({
         <p className={`mb-1 ${ADMIN_PAGE_SUBTITLE}`}>
           <Link
             href={`/${locale}/admin/users`}
-            className="font-medium text-gray-700 hover:underline"
+            className="font-medium text-marco-slate hover:underline"
           >
-            Users
+            {copy.detailBack}
           </Link>
         </p>
         <h1 className={ADMIN_PAGE_TITLE}>
@@ -87,7 +92,7 @@ export default async function AdminUserDetailPage({
       <Card className="mb-6 p-6">
         <div className="grid gap-3 text-sm md:grid-cols-2">
           <p className="text-gray-700">
-            Role:{" "}
+            {copy.role}:{" "}
             <span
               className={`${ADMIN_BADGE} ${userRoleBadgeClass(user.role)}`}
             >
@@ -95,29 +100,34 @@ export default async function AdminUserDetailPage({
             </span>
           </p>
           <p className="text-gray-700">
-            Status:{" "}
+            {copy.status}:{" "}
             <span
               className={`${ADMIN_BADGE} ${userStatusBadgeClass(user.status)}`}
             >
               {user.status}
             </span>
           </p>
-          <p className="text-gray-700">Phone: {user.phone ?? "—"}</p>
           <p className="text-gray-700">
-            Email verified:{" "}
-            {user.emailVerifiedAt
-              ? user.emailVerifiedAt.toISOString().slice(0, 10)
-              : "no"}
+            {formatAdminMessage(copy.phone, { value: user.phone ?? "—" })}
           </p>
           <p className="text-gray-700">
-            Last login:{" "}
-            {user.lastLoginAt
-              ? user.lastLoginAt.toISOString().slice(0, 16).replace("T", " ")
-              : "never"}{" "}
-            UTC
+            {formatAdminMessage(copy.emailVerified, {
+              value: user.emailVerifiedAt
+                ? user.emailVerifiedAt.toISOString().slice(0, 10)
+                : copy.emailVerifiedNo,
+            })}
           </p>
           <p className="text-gray-700">
-            Created: {user.createdAt.toISOString().slice(0, 10)}
+            {formatAdminMessage(copy.lastLogin, {
+              value: user.lastLoginAt
+                ? user.lastLoginAt.toISOString().slice(0, 16).replace("T", " ")
+                : copy.lastLoginNever,
+            })}
+          </p>
+          <p className="text-gray-700">
+            {formatAdminMessage(copy.created, {
+              value: user.createdAt.toISOString().slice(0, 10),
+            })}
           </p>
         </div>
       </Card>
@@ -131,7 +141,7 @@ export default async function AdminUserDetailPage({
             disabled={isAnonymized}
           />
         ) : (
-          <p className="text-sm text-red-700">Unknown role.</p>
+          <p className="text-sm text-red-700">{copy.unknownRole}</p>
         )}
         {status ? (
           <UpdateUserStatusForm
@@ -141,12 +151,12 @@ export default async function AdminUserDetailPage({
             eligibleStatuses={eligibleStatuses}
           />
         ) : (
-          <p className="text-sm text-red-700">Unknown status.</p>
+          <p className="text-sm text-red-700">{copy.unknownStatus}</p>
         )}
       </div>
 
       <Card className="p-6">
-        <h2 className={`mb-4 ${ADMIN_SECTION_TITLE}`}>Recent orders</h2>
+        <h2 className={`mb-4 ${ADMIN_SECTION_TITLE}`}>{copy.recentOrders}</h2>
         <div className="space-y-3">
           {recentOrders.map((order) => (
             <Link
@@ -175,7 +185,7 @@ export default async function AdminUserDetailPage({
             </Link>
           ))}
           {recentOrders.length === 0 ? (
-            <p className="text-sm text-gray-600">No orders.</p>
+            <p className="text-sm text-gray-600">{copy.noOrders}</p>
           ) : null}
         </div>
       </Card>

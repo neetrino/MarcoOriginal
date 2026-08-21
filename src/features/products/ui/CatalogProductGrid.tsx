@@ -3,6 +3,7 @@ import {
   type ProductCardItem,
 } from "@/features/products/ui/ProductCard";
 import { CATALOG_GRID } from "@/features/products/ui/catalog-filter-classes";
+import { CatalogProductGridShell } from "@/features/products/ui/CatalogProductGridShell";
 import { PRODUCT_CARD_PLP_MAX_WIDTH_CLASS } from "@/features/products/ui/product-card.constants";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -14,6 +15,7 @@ type CatalogProductGridProps = {
   addToCartLabel: string;
   isSignedIn: boolean;
   products: readonly ProductCardItem[];
+  gridClassName?: string;
 };
 
 export function CatalogProductGrid({
@@ -24,6 +26,7 @@ export function CatalogProductGrid({
   addToCartLabel,
   isSignedIn,
   products,
+  gridClassName = CATALOG_GRID,
 }: CatalogProductGridProps) {
   if (products.length === 0) {
     return (
@@ -32,11 +35,11 @@ export function CatalogProductGrid({
   }
 
   return (
-    <div className={CATALOG_GRID}>
+    <CatalogProductGridShell fallbackClassName={gridClassName}>
       {products.map((product, index) => (
         <div
           key={product.id}
-          className="flex min-w-0 justify-center sm:justify-end sm:pr-3 md:pr-4"
+          className="flex min-w-0 justify-center pb-7 sm:justify-end sm:pr-3 sm:pb-0 md:pr-4"
         >
           <ProductCard
             product={product}
@@ -50,6 +53,6 @@ export function CatalogProductGrid({
           />
         </div>
       ))}
-    </div>
+    </CatalogProductGridShell>
   );
 }

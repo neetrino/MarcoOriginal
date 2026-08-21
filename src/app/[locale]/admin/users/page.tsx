@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { listAdminUsers } from "@/features/users/application/queries";
 import { adminUsersFilterSchema } from "@/features/users/schemas/admin-users";
 import { AdminUsersView } from "@/features/users/ui/AdminUsersView";
@@ -60,6 +64,7 @@ export default async function AdminUsersPage({
 
   const { rows, total, pageSize } = await listAdminUsers(filters);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const common = getAdminCopy(locale).common;
 
   return (
     <>
@@ -72,24 +77,27 @@ export default async function AdminUsersPage({
       />
 
       {totalPages > 1 ? (
-        <nav className="mt-4 flex items-center gap-3 text-sm text-gray-700">
+        <nav className="mt-4 flex items-center gap-3 text-sm text-marco-slate">
           {filters.page > 1 ? (
             <Link
               href={`/${locale}/admin/users?${buildUsersQuery(filters, filters.page - 1)}`}
               className="font-medium hover:underline"
             >
-              Previous
+              {common.previous}
             </Link>
           ) : null}
           <span>
-            Page {filters.page} / {totalPages}
+            {formatAdminMessage(common.pageOf, {
+              page: filters.page,
+              total: totalPages,
+            })}
           </span>
           {filters.page < totalPages ? (
             <Link
               href={`/${locale}/admin/users?${buildUsersQuery(filters, filters.page + 1)}`}
               className="font-medium hover:underline"
             >
-              Next
+              {common.next}
             </Link>
           ) : null}
         </nav>

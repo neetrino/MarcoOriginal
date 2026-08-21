@@ -1,11 +1,11 @@
 "use client";
 
 import type { MouseEvent } from "react";
-import { Scale } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { toggleCompareAction } from "@/features/compare/actions";
+import { CompareIcon } from "@/features/compare/ui/CompareIcon";
 
 type CompareButtonProps = {
   productId: string;
@@ -29,7 +29,7 @@ export function CompareButton({
   const router = useRouter();
   const [inCompare, setInCompare] = useState(initialInCompare);
   const [pending, startTransition] = useTransition();
-  const iconClass = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  const iconSize = size === "sm" ? 16 : 20;
 
   function handleClick(event: MouseEvent<HTMLButtonElement>): void {
     event.preventDefault();
@@ -59,9 +59,9 @@ export function CompareButton({
         inCompare && activeClassName ? activeClassName : className
       }`}
     >
-      <Scale
-        className={`${iconClass} ${iconClassName ?? "text-gray-700"}`}
-        aria-hidden
+      <CompareIcon
+        size={iconSize}
+        className={`shrink-0 ${iconClassName ?? "text-gray-700"}`}
       />
     </button>
   );

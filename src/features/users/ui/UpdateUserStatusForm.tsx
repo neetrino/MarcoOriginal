@@ -10,6 +10,10 @@ import {
   ADMIN_LABEL,
   ADMIN_SECTION_TITLE,
 } from "@/features/admin/ui/admin-form-classes";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { updateUserStatusAction } from "@/features/users/application/update-user";
 import type { UserStatus } from "@/features/users/domain/user-lifecycle";
 
@@ -27,6 +31,8 @@ export function UpdateUserStatusForm({
   eligibleStatuses,
 }: UpdateUserStatusFormProps) {
   const router = useRouter();
+  const copy = getAdminCopy(locale).users;
+  const common = getAdminCopy(locale).common;
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(eligibleStatuses[0] ?? "");
   const [isPending, startTransition] = useTransition();
@@ -60,15 +66,15 @@ export function UpdateUserStatusForm({
           });
         }}
       >
-        <h3 className={ADMIN_SECTION_TITLE}>Status</h3>
+        <h3 className={ADMIN_SECTION_TITLE}>{copy.status}</h3>
         <p className="text-sm text-gray-700">
-          Current: <strong className="text-gray-900">{currentStatus}</strong>
+          {formatAdminMessage(copy.current, { value: currentStatus })}
         </p>
         <div>
-          <span className={ADMIN_LABEL}>New status</span>
+          <span className={ADMIN_LABEL}>{copy.newStatus}</span>
           <SelectDropdown
             name="status"
-            ariaLabel="New status"
+            ariaLabel={copy.newStatus}
             value={status}
             options={eligibleStatuses.map((item) => ({
               label: item,
@@ -82,7 +88,7 @@ export function UpdateUserStatusForm({
         </div>
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
         <Button type="submit" size="sm" disabled={isPending}>
-          {isPending ? "Updating…" : "Update status"}
+          {isPending ? common.updating : copy.updateStatus}
         </Button>
       </form>
     </Card>

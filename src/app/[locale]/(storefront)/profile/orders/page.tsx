@@ -6,6 +6,11 @@ import type { OrderStatus } from "@/features/orders/domain/order-status";
 import { adminOrdersFilterSchema } from "@/features/orders/schemas/change-status";
 import { CustomerOrdersFilters } from "@/features/orders/ui/CustomerOrdersFilters";
 import { CustomerOrdersView } from "@/features/orders/ui/CustomerOrdersView";
+import {
+  PROFILE_CARD_CLASS,
+  PROFILE_OUTLINE_BUTTON_CLASS,
+  PROFILE_SECTION_TITLE_CLASS,
+} from "@/features/profile/ui/profile-surface-classes";
 import { requireUser } from "@/lib/auth/policies";
 import { isLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
@@ -52,6 +57,7 @@ export default async function OrdersPage({
 
   const user = await requireUser(locale);
   const dictionary = getDictionary(locale);
+  const copy = dictionary.profile;
 
   const raw = await searchParams;
   const parsed = adminOrdersFilterSchema.safeParse({
@@ -79,42 +85,55 @@ export default async function OrdersPage({
 
   return (
     <section className="profile-sheet-keep-frame space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-        {dictionary.profile.orders}
-      </h1>
+      <div className={PROFILE_CARD_CLASS}>
+        <h1 className={`${PROFILE_SECTION_TITLE_CLASS} mb-6`}>{copy.orders}</h1>
 
-      <CustomerOrdersFilters
-        total={total}
-        status={filters.status}
-        paymentStatus={filters.paymentStatus}
-        q={filters.q}
-      />
+        <CustomerOrdersFilters
+          total={total}
+          status={filters.status}
+          paymentStatus={filters.paymentStatus}
+          q={filters.q}
+        />
 
-      <CustomerOrdersView locale={locale} orders={rows} />
+        <CustomerOrdersView
+          locale={locale}
+          orders={rows}
+          labels={{
+            empty: copy.noOrders,
+            orderNumber: copy.orderNumber,
+            status: copy.status,
+            payment: copy.paymentStatus,
+            placedOn: copy.placedOn,
+            viewDetails: copy.viewDetails,
+          }}
+        />
 
-      {totalPages > 1 ? (
-        <nav className="flex items-center gap-3 text-sm text-gray-700">
-          {filters.page > 1 ? (
-            <Link
-              href={`/${locale}/profile/orders?${buildOrdersQuery(filters, filters.page - 1)}`}
-              className="font-medium hover:underline"
-            >
-              Previous
-            </Link>
-          ) : null}
-          <span>
-            Page {filters.page} / {totalPages}
-          </span>
-          {filters.page < totalPages ? (
-            <Link
-              href={`/${locale}/profile/orders?${buildOrdersQuery(filters, filters.page + 1)}`}
-              className="font-medium hover:underline"
-            >
-              Next
-            </Link>
-          ) : null}
-        </nav>
-      ) : null}
+        {totalPages > 1 ? (
+          <nav className="mt-6 flex items-center justify-between border-t border-gray-200 pt-6 text-sm text-marco-slate">
+            <span>
+              {filters.page} / {totalPages}
+            </span>
+            <div className="flex gap-2">
+              {filters.page > 1 ? (
+                <Link
+                  href={`/${locale}/profile/orders?${buildOrdersQuery(filters, filters.page - 1)}`}
+                  className={PROFILE_OUTLINE_BUTTON_CLASS}
+                >
+                  {copy.previous}
+                </Link>
+              ) : null}
+              {filters.page < totalPages ? (
+                <Link
+                  href={`/${locale}/profile/orders?${buildOrdersQuery(filters, filters.page + 1)}`}
+                  className={PROFILE_OUTLINE_BUTTON_CLASS}
+                >
+                  {copy.next}
+                </Link>
+              ) : null}
+            </div>
+          </nav>
+        ) : null}
+      </div>
     </section>
   );
 }

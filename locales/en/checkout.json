@@ -19,12 +19,15 @@
     "address": "Address",
     "city": "City",
     "deliveryLocation": "Delivery location",
-    "selectLocation": "Select location"
+    "selectLocation": "Select location",
+    "branchAddress": "Branch address",
+    "notes": "Order notes (optional)"
   },
   "placeholders": {
     "phone": "+374XXXXXXXX",
     "address": "Street, apartment, office, etc.",
-    "city": "City"
+    "city": "City",
+    "notes": "Delivery instructions or other comments"
   },
   "shipping": {
     "storePickup": "Store Pickup",
@@ -33,28 +36,33 @@
     "deliveryDescription": "We will deliver your order to your address",
     "freePickup": "Free (Store Pickup)",
     "enterCity": "Enter City",
-    "selectDeliveryLocation": "Select delivery location"
+    "selectDeliveryLocation": "Select delivery location",
+    "pickupToggle": "Store pickup",
+    "deliveryToggle": "Delivery",
+    "selectBranch": "Select a branch"
   },
   "payment": {
+    "cash": "Cash",
+    "cashDescription": "Pay cash when you receive your order",
     "cashOnDelivery": "Cash on Delivery",
     "cashShort": "Cash",
-    "cashOnDeliveryDescription": "Pay when receiving the order.",
+    "cashOnDeliveryDescription": "Pay cash when you receive your order",
     "cashChange": {
       "title": "CHANGE",
       "hint": "Click the banknote you will pay with so we can prepare the change:",
       "none": "No change needed",
       "courierChange": "Courier should bring {amount} in change"
     },
-    "idram": "iDram",
-    "idramDescription": "Pay using your iDram account.",
-    "card": "Bank card",
-    "cardDescription": "Pay securely by bank card.",
-    "arca": "Bank card",
-    "arcaDescription": "Pay securely by bank card."
+    "idram": "Idram",
+    "idramDescription": "Pay with your Idram wallet",
+    "card": "By card",
+    "cardDescription": "Pay with Visa, Mastercard, or ArCa",
+    "arca": "By card",
+    "arcaDescription": "Pay with Visa, Mastercard, or ArCa"
   },
   "coupon": {
-    "title": "Have a coupon?",
-    "placeholder": "Enter your coupon code",
+    "title": "Promo code",
+    "placeholder": "Enter your coupon",
     "apply": "Apply",
     "applying": "Applying…"
   },
@@ -68,9 +76,11 @@
   "buttons": {
     "placeOrder": "Place Order",
     "processing": "Processing...",
-    "continueShopping": "Continue Shopping"
+    "continueShopping": "Continue Shopping",
+    "browseProducts": "Browse Products"
   },
   "errors": {
+    "branchRequired": "Please select a branch",
     "cartEmpty": "Cart is empty",
     "cartEmptyDescription": "Add products to continue shopping",
     "cartEmptyCta": "Continue Shopping"

@@ -22,6 +22,10 @@ import {
   orderStatusBadgeClass,
   paymentStatusBadgeClass,
 } from "@/features/admin/ui/status-badge";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { getAdminOrderByNumber } from "@/features/orders/application/queries";
 import { isLocale } from "@/lib/i18n/config";
 
@@ -48,6 +52,8 @@ export default async function AdminOrderDetailPage({
 
   const { order, items, events } = detail;
   const address = order.shippingAddress;
+  const copy = getAdminCopy(locale).orders;
+  const common = getAdminCopy(locale).common;
 
   return (
     <section>
@@ -56,9 +62,9 @@ export default async function AdminOrderDetailPage({
           <p className={`mb-1 ${ADMIN_PAGE_SUBTITLE}`}>
             <Link
               href={`/${locale}/admin/orders`}
-              className="font-medium text-gray-700 hover:underline"
+              className="font-medium text-marco-slate hover:underline"
             >
-              Orders
+              {copy.detailBack}
             </Link>
           </p>
           <h1 className={ADMIN_PAGE_TITLE}>{order.orderNumber}</h1>
@@ -75,7 +81,7 @@ export default async function AdminOrderDetailPage({
             </span>
             {order.isArchived ? (
               <span className={`${ADMIN_BADGE} bg-gray-100 text-gray-800`}>
-                Archived
+                {copy.archived}
               </span>
             ) : null}
           </div>
@@ -84,7 +90,7 @@ export default async function AdminOrderDetailPage({
 
       <div className="mb-6 grid gap-6 md:grid-cols-2">
         <Card className="p-6">
-          <h2 className={`mb-3 ${ADMIN_SECTION_TITLE}`}>Customer</h2>
+          <h2 className={`mb-3 ${ADMIN_SECTION_TITLE}`}>{copy.customer}</h2>
           <p className="text-sm font-medium text-gray-900">{order.contactName}</p>
           <p className="text-sm text-gray-600">{order.contactEmail}</p>
           <p className="text-sm text-gray-600">{order.contactPhone}</p>
@@ -101,45 +107,55 @@ export default async function AdminOrderDetailPage({
         </Card>
 
         <Card className="p-6">
-          <h2 className={`mb-3 ${ADMIN_SECTION_TITLE}`}>Totals</h2>
+          <h2 className={`mb-3 ${ADMIN_SECTION_TITLE}`}>{copy.totals}</h2>
           <p className="text-sm text-gray-700">
-            Subtotal: {formatMoney(order.subtotalAmount, order.baseCurrency)}
+            {formatAdminMessage(copy.subtotal, {
+              amount: formatMoney(order.subtotalAmount, order.baseCurrency),
+            })}
           </p>
           <p className="text-sm text-gray-700">
-            Delivery
-            {order.deliveryLabelSnapshot
-              ? ` (${order.deliveryLabelSnapshot})`
-              : ""}
-            : {formatMoney(order.deliveryAmount, order.baseCurrency)}
+            {formatAdminMessage(copy.delivery, {
+              label: order.deliveryLabelSnapshot
+                ? ` (${order.deliveryLabelSnapshot})`
+                : "",
+              amount: formatMoney(order.deliveryAmount, order.baseCurrency),
+            })}
           </p>
           <p className="text-sm text-gray-700">
-            Coupon discount
-            {order.promotionCodeSnapshot
-              ? ` (${order.promotionCodeSnapshot})`
-              : ""}
-            : {formatMoney(order.discountAmount, order.baseCurrency)}
+            {formatAdminMessage(copy.couponDiscount, {
+              label: order.promotionCodeSnapshot
+                ? ` (${order.promotionCodeSnapshot})`
+                : "",
+              amount: formatMoney(order.discountAmount, order.baseCurrency),
+            })}
           </p>
           <p className="mt-2 text-sm font-semibold text-gray-900">
-            Total: {formatMoney(order.totalAmount, order.baseCurrency)}
+            {formatAdminMessage(copy.detailTotal, {
+              amount: formatMoney(order.totalAmount, order.baseCurrency),
+            })}
           </p>
           <p className="mt-2 text-sm text-gray-500">
-            Placed{" "}
-            {order.placedAt.toISOString().slice(0, 16).replace("T", " ")} UTC
+            {formatAdminMessage(copy.placedAt, {
+              datetime: order.placedAt
+                .toISOString()
+                .slice(0, 16)
+                .replace("T", " "),
+            })}
           </p>
         </Card>
       </div>
 
       <Card className={`mb-6 ${ADMIN_TABLE_CARD}`}>
         <div className="border-b border-gray-200 px-4 py-3 sm:px-5">
-          <h2 className={ADMIN_SECTION_TITLE}>Line items</h2>
+          <h2 className={ADMIN_SECTION_TITLE}>{copy.lineItems}</h2>
         </div>
         <div className={ADMIN_TABLE_OUTER_SCROLL}>
           <table className={ADMIN_TABLE}>
             <thead className={ADMIN_TABLE_THEAD}>
               <tr>
-                <th className={ADMIN_TABLE_TH}>Product</th>
-                <th className={ADMIN_TABLE_TH}>Qty</th>
-                <th className={ADMIN_TABLE_TH}>Line total</th>
+                <th className={ADMIN_TABLE_TH}>{copy.columnProduct}</th>
+                <th className={ADMIN_TABLE_TH}>{copy.columnQty}</th>
+                <th className={ADMIN_TABLE_TH}>{copy.columnLineTotal}</th>
               </tr>
             </thead>
             <tbody className={ADMIN_TABLE_TBODY}>
@@ -165,7 +181,7 @@ export default async function AdminOrderDetailPage({
       </Card>
 
       <Card className="p-6">
-        <h2 className={`mb-4 ${ADMIN_SECTION_TITLE}`}>History</h2>
+        <h2 className={`mb-4 ${ADMIN_SECTION_TITLE}`}>{copy.history}</h2>
         <ol className="space-y-3">
           {events.map((event) => (
             <li
@@ -180,8 +196,10 @@ export default async function AdminOrderDetailPage({
               </p>
               <p className="text-gray-500">
                 {event.createdAt.toISOString().slice(0, 19).replace("T", " ")}{" "}
-                UTC
-                {event.isCustomerVisible ? " · customer-visible" : " · internal"}
+                {common.utc}
+                {event.isCustomerVisible
+                  ? ` · ${copy.customerVisible}`
+                  : ` · ${copy.internal}`}
               </p>
               {event.payload &&
               typeof event.payload === "object" &&
@@ -192,7 +210,7 @@ export default async function AdminOrderDetailPage({
             </li>
           ))}
           {events.length === 0 ? (
-            <li className="text-sm text-gray-600">No events yet.</li>
+            <li className="text-sm text-gray-600">{copy.noEvents}</li>
           ) : null}
         </ol>
       </Card>

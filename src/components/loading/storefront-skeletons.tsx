@@ -133,10 +133,10 @@ export function AdminPageSkeleton() {
     <div className={`${pulse} space-y-6`} aria-busy="true" aria-live="polite">
       <div className="flex items-center justify-between gap-4">
         <Block className="h-8 w-48" />
-        <Block className="h-10 w-32 rounded-lg" />
+        <Block className="h-10 w-32 rounded-full" />
       </div>
-      <Block className="h-12 w-full rounded-lg" />
-      <Block className="h-72 w-full rounded-lg" />
+      <Block className="h-12 w-full rounded-full" />
+      <Block className="h-72 w-full rounded-2xl" />
     </div>
   );
 }

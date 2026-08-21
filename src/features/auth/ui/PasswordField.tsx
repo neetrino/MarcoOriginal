@@ -3,8 +3,12 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
-const fieldClassName =
-  "h-10 w-full rounded-lg border border-gray-200 px-3 pr-10 text-gray-900 outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-200";
+import {
+  AUTH_HINT_CLASS,
+  AUTH_LABEL_CLASS,
+  AUTH_PASSWORD_FIELD_CLASS,
+  AUTH_PASSWORD_TOGGLE_CLASS,
+} from "@/features/auth/ui/auth-form-classes";
 
 type PasswordFieldProps = {
   name: string;
@@ -12,6 +16,8 @@ type PasswordFieldProps = {
   showPasswordLabel: string;
   hidePasswordLabel: string;
   autoComplete: string;
+  placeholder?: string;
+  hint?: string;
 };
 
 export function PasswordField({
@@ -20,34 +26,41 @@ export function PasswordField({
   showPasswordLabel,
   hidePasswordLabel,
   autoComplete,
+  placeholder,
+  hint,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
 
   return (
-    <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-      {label}
-      <span className="relative block">
+    <div>
+      <label htmlFor={name} className={AUTH_LABEL_CLASS}>
+        {label}
+      </label>
+      <div className="relative">
         <input
+          id={name}
           required
           name={name}
           type={visible ? "text" : "password"}
           autoComplete={autoComplete}
-          className={fieldClassName}
+          placeholder={placeholder}
+          className={AUTH_PASSWORD_FIELD_CLASS}
         />
         <button
           type="button"
-          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-gray-500 transition hover:text-gray-800"
+          className={AUTH_PASSWORD_TOGGLE_CLASS}
           aria-label={visible ? hidePasswordLabel : showPasswordLabel}
           aria-pressed={visible}
           onClick={() => setVisible((current) => !current)}
         >
           {visible ? (
-            <EyeOff className="h-4 w-4" aria-hidden="true" />
+            <EyeOff className="h-5 w-5" aria-hidden="true" />
           ) : (
-            <Eye className="h-4 w-4" aria-hidden="true" />
+            <Eye className="h-5 w-5" aria-hidden="true" />
           )}
         </button>
-      </span>
-    </label>
+      </div>
+      {hint ? <p className={AUTH_HINT_CLASS}>{hint}</p> : null}
+    </div>
   );
 }

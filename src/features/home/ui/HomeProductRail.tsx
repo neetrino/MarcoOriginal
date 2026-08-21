@@ -218,7 +218,7 @@ function ProductSnapPages({
     <div
       ref={scrollerRef}
       onScroll={onScroll}
-      className={HOME_SCROLLER_CLASS}
+      className={`${HOME_SCROLLER_CLASS} max-md:pb-8`}
       style={{
         gap: HOME_PRODUCT_CARD_GAP_PX,
         scrollSnapType: "x mandatory",

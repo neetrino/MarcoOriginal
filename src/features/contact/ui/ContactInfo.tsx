@@ -37,7 +37,7 @@ function ContactLocationBlock({
           strokeWidth={2}
           aria-hidden
         />
-        <p className="text-sm leading-snug font-medium text-foreground sm:text-base">
+        <p className="text-sm leading-snug font-medium text-marco-slate sm:text-base">
           {location.address}
         </p>
       </div>
@@ -48,7 +48,7 @@ function ContactLocationBlock({
             <a
               key={phone}
               href={phoneToTelHref(phone)}
-              className="text-sm leading-snug font-semibold text-foreground transition-colors hover:text-marco-yellow sm:text-base"
+              className="text-sm leading-snug font-semibold text-marco-slate transition-colors hover:text-marco-yellow sm:text-base"
             >
               {phone}
             </a>
@@ -63,10 +63,10 @@ function ContactLocationBlock({
 export function ContactInfo({ copy, locations }: ContactInfoProps) {
   return (
     <div className="flex w-full flex-col md:max-w-lg">
-      <p className="mb-2 text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
+      <p className="mb-2 text-[11px] font-bold tracking-[0.08em] text-marco-slate uppercase">
         {copy.writeToUsTitle}
       </p>
-      <h1 className="mb-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      <h1 className="mb-6 text-2xl font-bold tracking-tight text-marco-slate sm:mb-8 sm:text-4xl">
         {copy.title}
       </h1>
       <div className="w-full max-w-md">
@@ -84,7 +84,7 @@ export function ContactInfo({ copy, locations }: ContactInfoProps) {
               <ContactMailIcon className="mt-0.5 h-[12px] w-auto shrink-0 translate-y-[3px] text-marco-yellow" />
               <a
                 href={`mailto:${email}`}
-                className="text-xs leading-snug font-semibold break-all text-foreground transition-colors hover:text-marco-yellow sm:text-sm"
+                className="text-xs leading-snug font-semibold break-all text-marco-slate transition-colors hover:text-marco-yellow sm:text-sm"
               >
                 {email}
               </a>

@@ -11,7 +11,7 @@ export default async function TermsPage({ params }: TermsPageProps) {
 
   return (
     <article className="prose flex max-w-2xl flex-col gap-3">
-      <h1 className="text-3xl font-semibold">Terms of Service</h1>
+      <h1 className="text-3xl font-semibold text-marco-slate">Terms of Service</h1>
       <p className="text-[var(--muted)]">
         Draft placeholder. Approved legal copy must replace this before
         production launch (OPEN-014).

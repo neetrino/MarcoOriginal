@@ -5,11 +5,23 @@
   "storePhone": "060 500 406",
   "storeEmail": "marcofurniture@mail.ru",
   "storeAddress": "Yerevan, Alek Manukyan 23",
+  "deliveryPhonesLabel": "For delivery",
+  "callToUs": {
+    "description": "We are available 7 days a week."
+  },
+  "drawerCall": {
+    "cta": "Call",
+    "chooseBranchTitle": "Which store would you like to call?",
+    "changeBranch": "Choose another store",
+    "cancel": "Back"
+  },
   "social": {
     "instagram": "https://www.instagram.com/marco_electronics",
     "facebook": "https://www.facebook.com/marcoelectronicss",
     "linkedin": "",
-    "telegram": "https://t.me/+37460500406"
+    "telegram": "https://t.me/+37460500406",
+    "whatsapp": "https://wa.me/37460500406",
+    "viber": "viber://chat?number=37460500406"
   },
   "locations": {
     "yerevan": "23 Alek Manukyan St, Yerevan",

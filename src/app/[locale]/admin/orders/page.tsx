@@ -2,6 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ADMIN_PAGE_TITLE } from "@/features/admin/ui/admin-form-classes";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { listAdminOrders } from "@/features/orders/application/queries";
 import type { OrderStatus } from "@/features/orders/domain/order-status";
 import { adminOrdersFilterSchema } from "@/features/orders/schemas/change-status";
@@ -72,14 +76,17 @@ export default async function AdminOrdersPage({
 
   const { rows, total, pageSize } = await listAdminOrders(filters);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const copy = getAdminCopy(locale).orders;
+  const common = getAdminCopy(locale).common;
 
   return (
     <section>
       <div className="mb-6">
-        <h1 className={ADMIN_PAGE_TITLE}>Orders</h1>
+        <h1 className={ADMIN_PAGE_TITLE}>{copy.title}</h1>
       </div>
 
       <AdminOrdersFilters
+        locale={locale}
         total={total}
         status={filters.status}
         paymentStatus={filters.paymentStatus}
@@ -89,24 +96,27 @@ export default async function AdminOrdersPage({
       <AdminOrdersView locale={locale} orders={rows} />
 
       {totalPages > 1 ? (
-        <nav className="mt-4 flex items-center gap-3 text-sm text-gray-700">
+        <nav className="mt-4 flex items-center gap-3 text-sm text-marco-slate">
           {filters.page > 1 ? (
             <Link
               href={`/${locale}/admin/orders?${buildOrdersQuery(filters, filters.page - 1)}`}
               className="font-medium hover:underline"
             >
-              Previous
+              {common.previous}
             </Link>
           ) : null}
           <span>
-            Page {filters.page} / {totalPages}
+            {formatAdminMessage(common.pageOf, {
+              page: filters.page,
+              total: totalPages,
+            })}
           </span>
           {filters.page < totalPages ? (
             <Link
               href={`/${locale}/admin/orders?${buildOrdersQuery(filters, filters.page + 1)}`}
               className="font-medium hover:underline"
             >
-              Next
+              {common.next}
             </Link>
           ) : null}
         </nav>

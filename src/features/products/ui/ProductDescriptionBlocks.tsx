@@ -37,7 +37,7 @@ export function ProductSpecificationsTable({
 
   return (
     <section className="border-t border-gray-200 pt-10" aria-label={title}>
-      <h2 className="text-2xl font-bold tracking-tight text-marco-ink uppercase md:text-3xl">
+      <h2 className="text-2xl font-bold tracking-tight text-marco-slate uppercase md:text-3xl">
         {title}
       </h2>
       <dl className="mt-6 grid grid-cols-1 gap-x-8 overflow-hidden rounded-2xl border border-gray-200/90 bg-white px-4 shadow-sm ring-1 ring-black/[0.02] sm:grid-cols-[max-content_minmax(0,1fr)] sm:items-center sm:px-5">

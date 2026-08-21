@@ -1,4 +1,10 @@
 import type { CatalogSearchParams } from "@/features/products/domain/catalog-search-params";
+import {
+  DEFAULT_CATALOG_PRICE_PRESENCE,
+  DEFAULT_CATALOG_SORT,
+  type CatalogPricePresence,
+  type CatalogSort,
+} from "@/features/products/domain/catalog-sort";
 
 function appendList(
   params: URLSearchParams,
@@ -24,6 +30,12 @@ export function catalogHref(
   }
   if (filters.maxPrice != null) {
     params.set("maxPrice", String(filters.maxPrice));
+  }
+  if (filters.sort !== DEFAULT_CATALOG_SORT) {
+    params.set("sort", filters.sort);
+  }
+  if (filters.pricePresence !== DEFAULT_CATALOG_PRICE_PRESENCE) {
+    params.set("pricePresence", filters.pricePresence);
   }
   if (filters.page > 1) {
     params.set("page", String(filters.page));
@@ -95,4 +107,20 @@ export function withCatalogPage(
   page: number,
 ): CatalogSearchParams {
   return { ...filters, page };
+}
+
+/** Sets listing sort and resets pagination. */
+export function withCatalogSort(
+  filters: CatalogSearchParams,
+  sort: CatalogSort,
+): CatalogSearchParams {
+  return { ...filters, page: 1, sort };
+}
+
+/** Sets priced vs unpriced listing mode and resets pagination. */
+export function withCatalogPricePresence(
+  filters: CatalogSearchParams,
+  pricePresence: CatalogPricePresence,
+): CatalogSearchParams {
+  return { ...filters, page: 1, pricePresence };
 }

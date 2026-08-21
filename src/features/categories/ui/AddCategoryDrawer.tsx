@@ -243,7 +243,7 @@ export function AddCategoryDrawer({
           <button
             type="submit"
             disabled={isPending || !draft.title.trim()}
-            className="rounded-xl bg-marco-yellow px-5 py-2.5 text-sm font-semibold text-marco-slate transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-marco-yellow px-5 py-2.5 text-sm font-semibold text-marco-slate transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending
               ? isEdit

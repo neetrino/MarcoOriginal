@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/ConfirmDialog";
 import { AdminSearchInput } from "@/features/admin/ui/AdminSearchInput";
 import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
+import {
   ADMIN_BADGE,
 } from "@/features/admin/ui/status-badge";
 import {
@@ -75,6 +79,8 @@ export function AdminUsersView({
   role,
 }: AdminUsersViewProps) {
   const router = useRouter();
+  const copy = getAdminCopy(locale).users;
+  const common = getAdminCopy(locale).common;
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -104,7 +110,7 @@ export function AdminUsersView({
         await action();
         router.refresh();
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Action failed.");
+        setError(caught instanceof Error ? caught.message : common.actionFailed);
       }
     });
   }
@@ -120,15 +126,15 @@ export function AdminUsersView({
         setConfirmOpen(false);
         router.refresh();
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Action failed.");
+        setError(caught instanceof Error ? caught.message : common.actionFailed);
       }
     });
   }
 
   const rolePills = [
-    { label: "All", value: undefined },
-    { label: "Admins", value: "ADMIN" },
-    { label: "Customers", value: "CUSTOMER" },
+    { label: copy.filterAll, value: undefined },
+    { label: copy.filterAdmins, value: "ADMIN" },
+    { label: copy.filterCustomers, value: "CUSTOMER" },
   ] as const;
 
   return (
@@ -137,19 +143,19 @@ export function AdminUsersView({
         <AdminSearchInput
           name="q"
           defaultValue={q ?? ""}
-          placeholder="Search by email, phone, name..."
+          placeholder={copy.searchPlaceholder}
           wrapperClassName="min-w-[220px] flex-1"
-          aria-label="Search users"
+          aria-label={copy.searchAria}
         />
         {role ? <input type="hidden" name="role" value={role} /> : null}
         <Button type="submit" size="sm">
-          Search
+          {copy.search}
         </Button>
       </form>
 
       <div className="mb-4">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-          Admin / Customer
+          {copy.roleGroup}
         </p>
         <div className="flex flex-wrap gap-2">
           {rolePills.map((pill) => {
@@ -160,8 +166,8 @@ export function AdminUsersView({
                 href={roleFilterHref(locale, pill.value, q)}
                 className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-gray-200 text-gray-900"
-                    : "bg-white text-gray-600 ring-1 ring-gray-300 hover:bg-gray-50"
+                    ? "bg-marco-yellow text-marco-slate"
+                    : "bg-white text-marco-slate/70 ring-1 ring-gray-300 hover:bg-marco-gray"
                 }`}
               >
                 {pill.label}
@@ -171,13 +177,18 @@ export function AdminUsersView({
         </div>
       </div>
 
-      <p className="mb-3 text-sm text-gray-600">Total users: {total}</p>
+      <p className="mb-3 text-sm text-gray-600">
+        {formatAdminMessage(copy.total, { count: total })}
+      </p>
 
       {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
 
       <Card className="mb-4 flex flex-wrap items-center justify-between gap-3 p-4">
         <p className="text-sm text-gray-700">
-          Selected {selected.size} user{selected.size === 1 ? "" : "s"}
+          {formatAdminMessage(
+            selected.size === 1 ? copy.selectedOne : copy.selected,
+            { count: selected.size },
+          )}
         </p>
         <Button
           type="button"
@@ -189,14 +200,14 @@ export function AdminUsersView({
             setConfirmOpen(true);
           }}
         >
-          Delete Selected
+          {copy.deleteSelected}
         </Button>
       </Card>
 
       <Card className={ADMIN_TABLE_CARD}>
         {users.length === 0 ? (
           <p className={`${ADMIN_TABLE_STATE_INSET} text-sm text-gray-600`}>
-            No users match these filters.
+            {copy.empty}
           </p>
         ) : (
           <div className={ADMIN_TABLE_OUTER_SCROLL}>
@@ -210,15 +221,15 @@ export function AdminUsersView({
                       checked={allSelected}
                       onChange={toggleAll}
                       disabled={isPending || users.length === 0}
-                      aria-label="Select all users"
+                      aria-label={copy.selectAll}
                     />
                   </th>
-                  <th className={ADMIN_TABLE_TH}>User</th>
-                  <th className={ADMIN_TABLE_TH}>Contact</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Orders</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Roles</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Status</th>
-                  <th className={ADMIN_TABLE_TH_CENTER}>Created</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnUser}</th>
+                  <th className={ADMIN_TABLE_TH}>{copy.columnContact}</th>
+                  <th className={ADMIN_TABLE_TH_CENTER}>{copy.columnOrders}</th>
+                  <th className={ADMIN_TABLE_TH_CENTER}>{copy.columnRoles}</th>
+                  <th className={ADMIN_TABLE_TH_CENTER}>{copy.columnStatus}</th>
+                  <th className={ADMIN_TABLE_TH_CENTER}>{copy.columnCreated}</th>
                 </tr>
               </thead>
               <tbody className={ADMIN_TABLE_TBODY}>
@@ -236,7 +247,9 @@ export function AdminUsersView({
                           checked={selected.has(user.id)}
                           onChange={() => toggleOne(user.id)}
                           disabled={isPending || user.status === "ANONYMIZED"}
-                          aria-label={`Select ${displayName(user)}`}
+                          aria-label={formatAdminMessage(common.selectAria, {
+                            name: displayName(user),
+                          })}
                         />
                       </td>
                       <td className={ADMIN_TABLE_TD}>
@@ -297,11 +310,10 @@ export function AdminUsersView({
                           className={`relative mx-auto block h-5 w-9 rounded-full transition-colors disabled:opacity-40 ${
                             isActive ? "bg-green-500" : "bg-gray-300"
                           }`}
-                          aria-label={
-                            isActive
-                              ? `Suspend ${displayName(user)}`
-                              : `Activate ${displayName(user)}`
-                          }
+                          aria-label={formatAdminMessage(
+                            isActive ? copy.suspend : copy.activate,
+                            { name: displayName(user) },
+                          )}
                         >
                           <span
                             className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
@@ -326,8 +338,13 @@ export function AdminUsersView({
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Delete"
-        description={`Are you sure you want to delete ${selected.size} selected user${selected.size === 1 ? "" : "s"}? This anonymizes their accounts and cannot be undone.`}
+        title={common.delete}
+        confirmLabel={common.delete}
+        cancelLabel={common.cancel}
+        description={formatAdminMessage(
+          selected.size === 1 ? copy.deleteConfirmOne : copy.deleteConfirm,
+          { count: selected.size },
+        )}
         isPending={isPending}
         onClose={() => {
           if (!isPending) setConfirmOpen(false);

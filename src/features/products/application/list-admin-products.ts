@@ -74,6 +74,7 @@ export type AdminProductListItem = {
 export type AdminCategoryOption = {
   id: string;
   title: string;
+  parentId: string | null;
 };
 
 function translationFor(
@@ -94,12 +95,19 @@ function buildWhere(filters: AdminProductsFilter, locale: Locale): SQL | undefin
         sql`${products.translations}->${locale}->>'slug' ILIKE ${pattern}`,
         sql`${products.translations}->'hy'->>'title' ILIKE ${pattern}`,
         sql`${products.translations}->'hy'->>'slug' ILIKE ${pattern}`,
+        ilike(products.sku, pattern),
       )!,
     );
   }
 
   if (filters.sku) {
     conditions.push(ilike(products.sku, `%${filters.sku}%`));
+  }
+
+  if (filters.published === "published") {
+    conditions.push(eq(products.status, "ACTIVE"));
+  } else if (filters.published === "unpublished") {
+    conditions.push(inArray(products.status, ["DRAFT", "ARCHIVED"]));
   }
 
   if (filters.stock === "in_stock") {
@@ -281,5 +289,6 @@ export async function listAdminCategoryOptions(
   return rows.map((row) => ({
     id: row.id,
     title: translationFor(row.translations, locale)?.title ?? "Category",
+    parentId: row.parentId,
   }));
 }

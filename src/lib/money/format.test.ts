@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatMoneyAmount } from "@/lib/money/format";
+import { formatMoneyAmount, formatMoneyWithSymbol } from "@/lib/money/format";
 
 describe("formatMoneyAmount", () => {
   it("formats AMD without fraction digits and with a stable currency code", () => {
@@ -18,5 +18,11 @@ describe("formatMoneyAmount", () => {
       formatMoneyAmount(amount, "AMD", "en"),
     );
     expect(formatMoneyAmount(amount, "AMD", "hy")).toBe("1\u202f234 AMD");
+  });
+
+  it("formats with a currency glyph for header totals", () => {
+    expect(formatMoneyWithSymbol(12_500, "AMD", "hy")).toBe("12\u202f500\u00a0֏");
+    expect(formatMoneyWithSymbol(2600n, "USD", "en")).toBe("26.00\u00a0$");
+    expect(formatMoneyWithSymbol(0, "RUB", "ru")).toBe("0.00\u00a0₽");
   });
 });

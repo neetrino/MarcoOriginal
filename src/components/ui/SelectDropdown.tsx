@@ -26,6 +26,7 @@ type SelectDropdownProps = {
   deferChange?: boolean;
   /** Size the trigger to the selected label instead of full width. */
   fitContent?: boolean;
+  triggerClassName?: string;
 };
 
 export function SelectDropdown({
@@ -39,6 +40,7 @@ export function SelectDropdown({
   onValueChange,
   deferChange = true,
   fitContent = false,
+  triggerClassName = "",
 }: SelectDropdownProps) {
   const [open, setOpen] = useState(false);
   const elevated = useHoldFlag(open, DROPDOWN_ANIMATION_MS);
@@ -106,7 +108,7 @@ export function SelectDropdown({
         disabled={disabled}
         className={`flex h-11 items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 pr-3 text-left text-sm text-gray-900 shadow-sm outline-none transition-colors hover:border-gray-300 disabled:cursor-not-allowed disabled:opacity-50 ${
           fitContent ? "w-auto max-w-full" : "w-full"
-        }`}
+        } ${triggerClassName}`}
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}

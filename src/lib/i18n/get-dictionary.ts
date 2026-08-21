@@ -9,6 +9,7 @@ import enCatalog from "@/locales/en/catalog.json";
 import enCheckout from "@/locales/en/checkout.json";
 import enCommon from "@/locales/en/common.json";
 import enContact from "@/locales/en/contact.json";
+import enStores from "@/locales/en/stores.json";
 import enHome from "@/locales/en/home.json";
 import enProduct from "@/locales/en/product.json";
 import enProfile from "@/locales/en/profile.json";
@@ -24,6 +25,7 @@ import hyCatalog from "@/locales/hy/catalog.json";
 import hyCheckout from "@/locales/hy/checkout.json";
 import hyCommon from "@/locales/hy/common.json";
 import hyContact from "@/locales/hy/contact.json";
+import hyStores from "@/locales/hy/stores.json";
 import hyHome from "@/locales/hy/home.json";
 import hyProduct from "@/locales/hy/product.json";
 import hyProfile from "@/locales/hy/profile.json";
@@ -39,6 +41,7 @@ import ruCatalog from "@/locales/ru/catalog.json";
 import ruCheckout from "@/locales/ru/checkout.json";
 import ruCommon from "@/locales/ru/common.json";
 import ruContact from "@/locales/ru/contact.json";
+import ruStores from "@/locales/ru/stores.json";
 import ruHome from "@/locales/ru/home.json";
 import ruProduct from "@/locales/ru/product.json";
 import ruProfile from "@/locales/ru/profile.json";
@@ -49,6 +52,7 @@ type LocaleNamespaces = {
   common: typeof hyCommon;
   home: typeof hyHome;
   contact: typeof hyContact;
+  stores: typeof hyStores;
   about: typeof hyAbout;
   admin: typeof hyAdmin;
   auth: typeof hyAuth;
@@ -70,6 +74,7 @@ function buildDictionary(namespaces: LocaleNamespaces) {
     footer: namespaces.common.footer,
     home: namespaces.home,
     contact: namespaces.contact,
+    stores: namespaces.stores,
     about: namespaces.about,
     admin: namespaces.admin,
     auth: namespaces.auth,
@@ -89,6 +94,7 @@ const dictionaries = {
     common: hyCommon,
     home: hyHome,
     contact: hyContact,
+    stores: hyStores,
     about: hyAbout,
     admin: hyAdmin,
     auth: hyAuth,
@@ -105,6 +111,7 @@ const dictionaries = {
     common: enCommon,
     home: enHome,
     contact: enContact,
+    stores: enStores,
     about: enAbout,
     admin: enAdmin,
     auth: enAuth,
@@ -121,6 +128,7 @@ const dictionaries = {
     common: ruCommon,
     home: ruHome,
     contact: ruContact,
+    stores: ruStores,
     about: ruAbout,
     admin: ruAdmin,
     auth: ruAuth,

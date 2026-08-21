@@ -52,7 +52,7 @@ export function ProductRelatedRail({
   return (
     <section className="mt-16 border-t border-gray-200 pt-12 md:mt-20">
       <div className="mb-10 flex items-center justify-between gap-4">
-        <h2 className="text-3xl font-bold text-marco-ink">{title}</h2>
+        <h2 className="text-3xl font-bold text-marco-slate">{title}</h2>
         {showNav ? (
           <HomeRoundNavButtons
             prevLabel={previousPageLabel}

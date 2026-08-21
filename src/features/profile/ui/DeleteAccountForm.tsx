@@ -2,15 +2,17 @@
 
 import { useActionState, useState } from "react";
 
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import {
   deleteAccountAction,
   type DeleteAccountActionState,
 } from "@/features/auth/delete-account-action";
-
-const FIELD_CLASS =
-  "h-11 w-full rounded-lg border border-gray-200 px-3 text-gray-900 outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-200";
+import {
+  PROFILE_CARD_CLASS,
+  PROFILE_DANGER_BUTTON_CLASS,
+  PROFILE_FIELD_CLASS,
+  PROFILE_LABEL_CLASS,
+  PROFILE_SECTION_TITLE_CLASS,
+} from "@/features/profile/ui/profile-surface-classes";
 
 type DeleteAccountFormProps = {
   locale: string;
@@ -37,27 +39,22 @@ export function DeleteAccountForm({ locale, labels }: DeleteAccountFormProps) {
   const [acknowledged, setAcknowledged] = useState(false);
 
   return (
-    <Card className="rounded-2xl border border-red-200 bg-red-50/30 p-5 shadow-none sm:p-7 lg:p-8">
-      <div className="mb-6 space-y-2 sm:mb-8">
-        <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">
-          {labels.title}
-        </h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-gray-700">
-          {labels.description}
-        </p>
-      </div>
+    <section className={`${PROFILE_CARD_CLASS} border-red-200`}>
+      <h1 className={`${PROFILE_SECTION_TITLE_CLASS} mb-2 text-center`}>
+        {labels.title}
+      </h1>
+      <p className="mb-4 text-center text-sm text-marco-slate/70">
+        {labels.description}
+      </p>
 
-      <ul className="mb-8 max-w-2xl list-disc space-y-2 pl-5 text-sm text-gray-600 sm:mb-10">
+      <ul className="mb-6 list-disc space-y-1 pl-5 text-sm text-marco-slate">
         <li>{labels.pointOrders}</li>
         <li>{labels.pointLogin}</li>
         <li>{labels.pointData}</li>
       </ul>
 
-      <form
-        action={formAction}
-        className="mx-auto max-w-xl space-y-6 lg:mx-0 lg:max-w-2xl"
-      >
-        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
+      <form action={formAction} className="mx-auto max-w-xl space-y-6">
+        <label className={PROFILE_LABEL_CLASS}>
           {labels.currentPassword}
           <input
             name="password"
@@ -66,12 +63,12 @@ export function DeleteAccountForm({ locale, labels }: DeleteAccountFormProps) {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder={labels.currentPasswordPlaceholder}
-            className={FIELD_CLASS}
+            className={PROFILE_FIELD_CLASS}
             autoComplete="current-password"
           />
         </label>
 
-        <label className="flex cursor-pointer items-start gap-3">
+        <label className="flex cursor-pointer items-start gap-3 text-sm text-marco-slate">
           <input
             name="acknowledged"
             type="checkbox"
@@ -80,9 +77,7 @@ export function DeleteAccountForm({ locale, labels }: DeleteAccountFormProps) {
             checked={acknowledged}
             onChange={(event) => setAcknowledged(event.target.checked)}
           />
-          <span className="text-sm leading-snug text-gray-800">
-            {labels.acknowledge}
-          </span>
+          <span>{labels.acknowledge}</span>
         </label>
 
         {state.error ? (
@@ -91,17 +86,16 @@ export function DeleteAccountForm({ locale, labels }: DeleteAccountFormProps) {
           </p>
         ) : null}
 
-        <div className="pt-1 sm:pt-2">
-          <Button
+        <div className="flex justify-center">
+          <button
             type="submit"
-            variant="primary"
-            className="h-11 w-full !bg-red-700 hover:!bg-red-800 focus:!ring-red-600 sm:w-auto"
+            className={PROFILE_DANGER_BUTTON_CLASS}
             disabled={isPending || !acknowledged}
           >
             {isPending ? labels.deleting : labels.submit}
-          </Button>
+          </button>
         </div>
       </form>
-    </Card>
+    </section>
   );
 }

@@ -22,7 +22,7 @@ export default async function ForgotPasswordPage({
   return (
     <section className="mx-auto max-w-lg px-0 py-2 sm:py-4">
       <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900">
+        <h1 className="mb-2 text-3xl font-bold tracking-tight text-marco-slate">
           {dictionary.auth.forgotPasswordTitle}
         </h1>
         <p className="mb-8 text-gray-600">

@@ -11,7 +11,7 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
 
   return (
     <article className="prose flex max-w-2xl flex-col gap-3">
-      <h1 className="text-3xl font-semibold">Privacy Policy</h1>
+      <h1 className="text-3xl font-semibold text-marco-slate">Privacy Policy</h1>
       <p className="text-[var(--muted)]">
         Draft placeholder. Approved privacy/retention copy must replace this
         before production launch (OPEN-014).

@@ -1,5 +1,4 @@
-import { Scale } from "lucide-react";
-
+import { CompareIcon } from "@/features/compare/ui/CompareIcon";
 import { AppLink } from "@/components/ui/AppLink";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -19,13 +18,13 @@ export function CompareHeaderLink({
       href={`/${locale}/compare`}
       prefetchPolicy="intent"
       aria-label={label}
-      className={`relative inline-flex h-10 w-10 items-center justify-center rounded-full text-marco-slate transition-colors duration-200 hover:bg-marco-yellow ${
+      className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-transparent text-marco-slate transition-[background-color,color] duration-200 hover:bg-marco-yellow ${
         count > 0 ? "bg-marco-yellow" : "bg-marco-gray"
       }`}
     >
-      <Scale className="h-5 w-5" aria-hidden="true" />
+      <CompareIcon size={18} className="h-[18px] w-[18px] shrink-0" />
       {count > 0 ? (
-        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-marco-slate px-1 text-[10px] font-semibold text-white">
+        <span className="absolute -top-[13px] -right-[13px] flex h-4 min-w-[18px] items-center justify-center rounded-full bg-red-600 px-0.5 text-[9px] font-bold leading-none text-white">
           {count > 99 ? "99+" : count}
         </span>
       ) : null}

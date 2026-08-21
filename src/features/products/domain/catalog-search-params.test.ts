@@ -12,6 +12,8 @@ describe("parseCatalogSearchParams", () => {
       colorHexes: [],
       minPrice: null,
       maxPrice: null,
+      sort: "default",
+      pricePresence: "with",
     });
   });
 
@@ -24,6 +26,8 @@ describe("parseCatalogSearchParams", () => {
         minPrice: "7",
         maxPrice: "4975",
         page: "2",
+        sort: "price-asc",
+        pricePresence: "without",
       }),
     ).toEqual({
       page: 2,
@@ -32,6 +36,8 @@ describe("parseCatalogSearchParams", () => {
       colorHexes: ["ffca03", "000000"],
       minPrice: 7,
       maxPrice: 4975,
+      sort: "price-asc",
+      pricePresence: "without",
     });
   });
 
@@ -50,6 +56,8 @@ describe("parseCatalogSearchParams", () => {
       colorHexes: [],
       minPrice: 10,
       maxPrice: 90,
+      sort: "default",
+      pricePresence: "with",
     });
   });
 });
@@ -64,6 +72,8 @@ describe("catalogHref", () => {
         colorHexes: [],
         minPrice: null,
         maxPrice: null,
+        sort: "default",
+        pricePresence: "with",
       }),
     ).toBe("/hy/products");
   });
@@ -77,9 +87,11 @@ describe("catalogHref", () => {
         colorHexes: ["000000"],
         minPrice: 7,
         maxPrice: 4975,
+        sort: "name-desc",
+        pricePresence: "without",
       }),
     ).toBe(
-      "/hy/products?category=hoods&brand=lex&color=000000&minPrice=7&maxPrice=4975&page=2",
+      "/hy/products?category=hoods&brand=lex&color=000000&minPrice=7&maxPrice=4975&sort=name-desc&pricePresence=without&page=2",
     );
   });
 });

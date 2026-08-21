@@ -55,7 +55,7 @@ function toProductFilter(
   priceBounds: DisplayMajorRange | null,
   currency: Currency,
   rate: string,
-): CatalogListFilter | undefined {
+): CatalogListFilter {
   const categoryIds = collectCategoryIdsForSlugs(
     facets.categories,
     filters.categorySlugs,
@@ -73,11 +73,18 @@ function toProductFilter(
         )
       : null;
 
-  if (categoryIds.length === 0 && amdRange == null) return undefined;
+  if (categoryIds.length === 0 && amdRange == null) {
+    return {
+      sort: filters.sort,
+      pricePresence: filters.pricePresence,
+    };
+  }
   return {
     categoryIds,
     minPriceAmd: amdRange?.minAmd,
     maxPriceAmd: amdRange?.maxAmd,
+    sort: filters.sort,
+    pricePresence: filters.pricePresence,
   };
 }
 

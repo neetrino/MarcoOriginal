@@ -7,6 +7,10 @@ import {
   ADMIN_PAGE_TITLE,
   ADMIN_SECTION_TITLE,
 } from "@/features/admin/ui/admin-form-classes";
+import {
+  formatAdminMessage,
+  getAdminCopy,
+} from "@/features/admin/ui/get-admin-copy";
 import { ADMIN_BADGE } from "@/features/admin/ui/status-badge";
 import { getAdminContactMessageById } from "@/features/contact/application/queries";
 import {
@@ -44,6 +48,11 @@ export default async function AdminMessageDetailPage({
 
   const status = isContactStatus(message.status) ? message.status : null;
   const eligible = status ? getEligibleContactStatuses(status) : [];
+  const copy = getAdminCopy(locale).messages;
+  const receivedAt = message.createdAt
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
 
   return (
     <section>
@@ -51,9 +60,9 @@ export default async function AdminMessageDetailPage({
         <p className={`mb-1 ${ADMIN_PAGE_SUBTITLE}`}>
           <Link
             href={`/${locale}/admin/messages`}
-            className="font-medium text-gray-700 hover:underline"
+            className="font-medium text-marco-slate hover:underline"
           >
-            Messages
+            {copy.detailBack}
           </Link>
         </p>
         <h1 className={ADMIN_PAGE_TITLE}>{message.subject}</h1>
@@ -62,12 +71,16 @@ export default async function AdminMessageDetailPage({
       <Card className="mb-6 p-6">
         <div className="grid gap-3 text-sm md:grid-cols-2">
           <p className="text-gray-700">
-            From: <strong className="text-gray-900">{message.name}</strong>
+            {formatAdminMessage(copy.from, { name: message.name })}
           </p>
-          <p className="text-gray-700">Email: {message.email}</p>
-          <p className="text-gray-700">Phone: {message.phone ?? "—"}</p>
           <p className="text-gray-700">
-            Status:{" "}
+            {formatAdminMessage(copy.email, { value: message.email })}
+          </p>
+          <p className="text-gray-700">
+            {formatAdminMessage(copy.phone, { value: message.phone ?? "—" })}
+          </p>
+          <p className="text-gray-700">
+            {copy.statusLabel}:{" "}
             <span
               className={`${ADMIN_BADGE} ${contactStatusBadgeClass(message.status)}`}
             >
@@ -75,19 +88,18 @@ export default async function AdminMessageDetailPage({
             </span>
           </p>
           <p className="text-gray-700">
-            Spam score:{" "}
-            {message.spamScore === null ? "—" : message.spamScore}
+            {formatAdminMessage(copy.spamScore, {
+              value: message.spamScore === null ? "—" : message.spamScore,
+            })}
           </p>
           <p className="text-gray-700">
-            Received:{" "}
-            {message.createdAt.toISOString().slice(0, 19).replace("T", " ")}{" "}
-            UTC
+            {formatAdminMessage(copy.received, { datetime: receivedAt })}
           </p>
         </div>
       </Card>
 
       <Card className="mb-6 p-6">
-        <h2 className={`mb-3 ${ADMIN_SECTION_TITLE}`}>Message</h2>
+        <h2 className={`mb-3 ${ADMIN_SECTION_TITLE}`}>{copy.body}</h2>
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
           {message.message}
         </p>
@@ -101,7 +113,7 @@ export default async function AdminMessageDetailPage({
           eligibleStatuses={eligible}
         />
       ) : (
-        <p className="text-sm text-red-700">Unknown status.</p>
+        <p className="text-sm text-red-700">{copy.unknownStatus}</p>
       )}
     </section>
   );

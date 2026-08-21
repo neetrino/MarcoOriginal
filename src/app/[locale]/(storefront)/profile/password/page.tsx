@@ -32,6 +32,7 @@ export default async function PasswordPage({ params }: PasswordPageProps) {
           newPasswordPlaceholder: copy.newPasswordPlaceholder,
           confirmPasswordPlaceholder: copy.confirmPasswordPlaceholder,
           change: copy.change,
+          changeShort: dictionary.profile.changeShort,
           changing: copy.changing,
         }}
       />

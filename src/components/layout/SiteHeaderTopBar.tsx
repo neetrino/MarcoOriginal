@@ -4,6 +4,10 @@ import { HeaderSocialCircles } from "@/components/layout/HeaderSocialCircles";
 import { MarcoLogo } from "@/components/layout/MarcoLogo";
 import { SITE_HEADER_INNER } from "@/components/layout/site-header-classes";
 import type { HeaderNavItem } from "@/components/layout/HeaderPrimaryNav";
+import {
+  buildContactLocations,
+  buildContactPhoneSections,
+} from "@/features/contact/content/contact-locations";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -14,13 +18,19 @@ type SiteHeaderTopBarProps = {
 };
 
 /**
- * Desktop first stripe: logo, primary nav, socials, phone, address.
+ * Desktop first stripe: logo, primary nav, socials, phone, addresses.
  */
 export function SiteHeaderTopBar({
   locale,
   dictionary,
   navItems,
 }: SiteHeaderTopBarProps) {
+  const locations = buildContactLocations(dictionary.contact.locations);
+  const phoneSections = buildContactPhoneSections(
+    locations,
+    dictionary.contact.deliveryPhonesLabel,
+  );
+
   return (
     <div className="hidden border-b border-gray-200 bg-white min-[1180px]:block">
       <div
@@ -36,20 +46,32 @@ export function SiteHeaderTopBar({
             />
           </div>
           <HeaderSocialCircles
-            className="ml-8 min-[1367px]:ml-[54px]"
+            variant="header"
+            className="ml-8 min-[1367px]:ml-[54px] min-h-11 min-[1367px]:min-h-9"
             instagramHref={dictionary.contact.social.instagram}
             facebookHref={dictionary.contact.social.facebook}
             telegramHref={dictionary.contact.social.telegram}
+            whatsappHref={dictionary.contact.social.whatsapp}
+            viberHref={dictionary.contact.social.viber}
             ariaLabel={dictionary.header.socialLinks}
             instagramLabel="Instagram"
             facebookLabel="Facebook"
             telegramLabel="Telegram"
+            whatsappLabel={dictionary.header.whatsapp}
+            viberLabel={dictionary.header.viber}
           />
           <div className="ml-4 min-h-0 min-w-0 flex-1" aria-hidden />
         </div>
         <HeaderContactCluster
-          phone={dictionary.contact.storePhone}
-          address={dictionary.contact.storeAddress}
+          locale={locale}
+          phoneDisplay={dictionary.contact.storePhone}
+          phoneSections={phoneSections}
+          locations={locations}
+          addressesLabel={dictionary.nav.addresses}
+          storesLabel={dictionary.nav.stores}
+          openInMapsLabel={dictionary.nav.openInMaps}
+          choosePhoneLabel={dictionary.header.choosePhone}
+          chooseAddressLabel={dictionary.header.chooseAddress}
         />
       </div>
     </div>

@@ -18,7 +18,7 @@ export function AboutPartners({ copy }: AboutPartnersProps) {
 
           <p className={`mb-4 ${ABOUT_EYEBROW_CLASS}`}>{copy.partnersEyebrow}</p>
 
-          <h2 className="mb-6 text-4xl font-bold text-gray-900 md:text-5xl lg:text-6xl">
+          <h2 className="mb-6 text-4xl font-bold text-marco-slate md:text-5xl lg:text-6xl">
             {copy.partnersTitle}
           </h2>
 
