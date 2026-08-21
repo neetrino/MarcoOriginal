@@ -79,11 +79,6 @@ export type AdminCategoryOption = {
   parentId: string | null;
 };
 
-export type AdminBrandOption = {
-  id: string;
-  title: string;
-};
-
 function translationFor(
   translations: (typeof products.$inferSelect)["translations"],
   locale: Locale,

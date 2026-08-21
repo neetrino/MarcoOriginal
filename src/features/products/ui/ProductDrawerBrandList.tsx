@@ -1,9 +1,13 @@
-import type { AdminBrandOption } from "@/features/products/application/list-admin-products";
 import { ProductDrawerCatalogCheck } from "@/features/products/ui/ProductDrawerCatalogCheck";
 import { CATALOG_PICKER_ROW } from "@/features/products/ui/product-drawer-catalog.classes";
 
+type BrandOption = {
+  id: string;
+  title: string;
+};
+
 type ProductDrawerBrandListProps = {
-  brands: readonly AdminBrandOption[];
+  brands: readonly BrandOption[];
   selectedIds: readonly string[];
   disabled: boolean;
   onToggle: (id: string) => void;

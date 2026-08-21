@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import type {
-  AdminBrandOption,
   AdminCategoryOption,
   AdminProductListItem,
 } from "@/features/products/application/list-admin-products";
@@ -21,7 +20,7 @@ type AdminProductsViewProps = {
   locale: string;
   products: AdminProductListItem[];
   categories: AdminCategoryOption[];
-  brands: AdminBrandOption[];
+  brands: readonly { id: string; title: string }[];
   filters: AdminProductsQueryState;
   total: number;
   totalPages: number;

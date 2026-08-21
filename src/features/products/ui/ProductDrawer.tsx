@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { SideSheet } from "@/components/ui/SideSheet";
 import type {
-  AdminBrandOption,
   AdminCategoryOption,
   AdminProductListItem,
 } from "@/features/products/application/list-admin-products";
@@ -57,7 +56,7 @@ type ProductDrawerProps = {
   onClose: () => void;
   product?: ProductDrawerProduct | null;
   categories: AdminCategoryOption[];
-  brands: AdminBrandOption[];
+  brands: readonly { id: string; title: string }[];
 };;
 
 function tabFromInvalidTarget(target: EventTarget | null): ProductDrawerTab | null {
@@ -119,7 +118,7 @@ function ProductDrawerForm({
   locale: string;
   product: ProductDrawerProduct | null;
   categories: AdminCategoryOption[];
-  brands: AdminBrandOption[];
+  brands: readonly { id: string; title: string }[];
   copy: Dictionary["admin"]["productEditor"];
   onClose: () => void;
 }) {

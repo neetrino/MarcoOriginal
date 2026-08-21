@@ -2,10 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import type {
-  AdminBrandOption,
-  AdminCategoryOption,
-} from "@/features/products/application/list-admin-products";
+import type { AdminCategoryOption } from "@/features/products/application/list-admin-products";
 import {
   filterBrandOptions,
   filterCategoryOptions,
@@ -22,7 +19,7 @@ type ProductDrawerCatalogTabProps = {
   copy: EditorCopy;
   categories: readonly AdminCategoryOption[];
   categoryIds: readonly string[];
-  brands: readonly AdminBrandOption[];
+  brands: readonly { id: string; title: string }[];
   brandIds: readonly string[];
   disabled: boolean;
   onCategoryIdsChange: (ids: string[]) => void;

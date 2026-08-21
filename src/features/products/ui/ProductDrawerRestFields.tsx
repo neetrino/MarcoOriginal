@@ -1,7 +1,4 @@
-import type {
-  AdminBrandOption,
-  AdminCategoryOption,
-} from "@/features/products/application/list-admin-products";
+import type { AdminCategoryOption } from "@/features/products/application/list-admin-products";
 import { ProductDrawerCatalogTab } from "@/features/products/ui/ProductDrawerCatalogTab";
 import {
   ProductDrawerImages,
@@ -19,7 +16,7 @@ type ProductDrawerRestFieldsProps = {
   images: ProductDraftImage[];
   categories: AdminCategoryOption[];
   categoryIds: string[];
-  brands: AdminBrandOption[];
+  brands: readonly { id: string; title: string }[];
   brandIds: string[];
   priceAmount: string;
   discountPercent: string;
