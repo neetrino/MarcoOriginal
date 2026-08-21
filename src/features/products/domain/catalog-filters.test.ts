@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   categoryHasSelectedDescendant,
+  collectBrandIdsForSlugs,
   collectCategoryIdsForSlugs,
+  type CatalogBrandFacet,
   type CatalogCategoryFacet,
 } from "@/features/products/domain/catalog-filters";
 
@@ -34,6 +36,17 @@ describe("collectCategoryIdsForSlugs", () => {
 
   it("selects a child without the parent", () => {
     expect(collectCategoryIdsForSlugs(tree, ["hoods"])).toEqual(["hoods"]);
+  });
+});
+
+describe("collectBrandIdsForSlugs", () => {
+  const brands: CatalogBrandFacet[] = [
+    { id: "b1", slug: "lex", title: "Lex" },
+    { id: "b2", slug: "aux", title: "AUX" },
+  ];
+
+  it("maps selected slugs to brand ids", () => {
+    expect(collectBrandIdsForSlugs(brands, ["aux"])).toEqual(["b2"]);
   });
 });
 

@@ -2,6 +2,7 @@ import "server-only";
 
 import { getCatalogFacets } from "@/features/products/application/load-catalog-facets";
 import {
+  collectBrandIdsForSlugs,
   collectCategoryIdsForSlugs,
   type CatalogFacets,
 } from "@/features/products/domain/catalog-filters";
@@ -60,6 +61,7 @@ function toProductFilter(
     facets.categories,
     filters.categorySlugs,
   );
+  const brandIds = collectBrandIdsForSlugs(facets.brands, filters.brandSlugs);
   const hasPrice =
     priceBounds != null &&
     (filters.minPrice != null || filters.maxPrice != null);
@@ -73,7 +75,7 @@ function toProductFilter(
         )
       : null;
 
-  if (categoryIds.length === 0 && amdRange == null) {
+  if (categoryIds.length === 0 && brandIds.length === 0 && amdRange == null) {
     return {
       sort: filters.sort,
       pricePresence: filters.pricePresence,
@@ -81,6 +83,7 @@ function toProductFilter(
   }
   return {
     categoryIds,
+    brandIds,
     minPriceAmd: amdRange?.minAmd,
     maxPriceAmd: amdRange?.maxAmd,
     sort: filters.sort,

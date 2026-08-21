@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { SideSheet } from "@/components/ui/SideSheet";
 import type {
+  AdminBrandOption,
   AdminCategoryOption,
   AdminProductListItem,
 } from "@/features/products/application/list-admin-products";
@@ -42,6 +43,7 @@ type ProductDrawerProduct = Pick<
   | "stockOnHand"
   | "status"
   | "categoryIds"
+  | "brandIds"
   | "images"
   | "salesClass"
   | "warrantyYears"
@@ -55,7 +57,8 @@ type ProductDrawerProps = {
   onClose: () => void;
   product?: ProductDrawerProduct | null;
   categories: AdminCategoryOption[];
-};
+  brands: AdminBrandOption[];
+};;
 
 function tabFromInvalidTarget(target: EventTarget | null): ProductDrawerTab | null {
   if (!(target instanceof HTMLElement)) return null;
@@ -78,6 +81,7 @@ export function ProductDrawer({
   onClose,
   product = null,
   categories,
+  brands,
 }: ProductDrawerProps) {
   const copy = isLocale(locale)
     ? getDictionary(locale).admin.productEditor
@@ -96,6 +100,7 @@ export function ProductDrawer({
         locale={locale}
         product={product}
         categories={categories}
+        brands={brands}
         copy={copy}
         onClose={onClose}
       />
@@ -107,12 +112,14 @@ function ProductDrawerForm({
   locale,
   product,
   categories: initialCategories,
+  brands,
   copy,
   onClose,
 }: {
   locale: string;
   product: ProductDrawerProduct | null;
   categories: AdminCategoryOption[];
+  brands: AdminBrandOption[];
   copy: Dictionary["admin"]["productEditor"];
   onClose: () => void;
 }) {
@@ -149,6 +156,7 @@ function ProductDrawerForm({
         Number(form.discountPercent),
       ),
       categoryIds: form.categoryIds,
+      brandIds: form.brandIds,
       status: (product?.status === "ACTIVE" || product?.status === "ARCHIVED"
         ? product.status
         : "DRAFT") as "DRAFT" | "ACTIVE" | "ARCHIVED",
@@ -250,19 +258,20 @@ function ProductDrawerForm({
             </div>
 
             <ProductDrawerRestFields
-              locale={locale}
               tab={form.tab}
               copy={copy}
               images={form.images}
               categories={form.categories}
               categoryIds={form.categoryIds}
+              brands={brands}
+              brandIds={form.brandIds}
               priceAmount={form.priceAmount}
               discountPercent={form.discountPercent}
               sku={form.sku}
               disabled={isPending}
               onImagesChange={form.handleImagesChange}
-              onCategoriesChange={form.setCategories}
               onCategoryIdsChange={form.setCategoryIds}
+              onBrandIdsChange={form.setBrandIds}
               onPriceAmountChange={form.setPriceAmount}
               onDiscountPercentChange={form.setDiscountPercent}
               onSkuChange={form.setSku}

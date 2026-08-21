@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 
 import { getDb } from "@/db/client";
 import {
+  brands,
   categories,
+  productBrands,
   productCategories,
   products,
   stockMovements,
@@ -123,6 +125,40 @@ async function syncProductCategories(
   return null;
 }
 
+async function syncProductBrands(
+  productId: string,
+  brandIds: string[],
+): Promise<string | null> {
+  const uniqueIds = [...new Set(brandIds)];
+  if (uniqueIds.length > 0) {
+    const found = await getDb()
+      .select({ id: brands.id })
+      .from(brands)
+      .where(and(inArray(brands.id, uniqueIds), isNull(brands.deletedAt)));
+    if (found.length !== uniqueIds.length) {
+      return "One or more brands were not found.";
+    }
+  }
+
+  await getDb()
+    .delete(productBrands)
+    .where(eq(productBrands.productId, productId));
+
+  if (uniqueIds.length === 0) return null;
+
+  await getDb().insert(productBrands).values(
+    uniqueIds.map((brandId, index) => ({
+      id: createId(),
+      productId,
+      brandId,
+      isPrimary: index === 0,
+      sortOrder: index,
+    })),
+  );
+
+  return null;
+}
+
 /** Creates a product from the admin drawer (fields + optional images). */
 export async function createProductFromDrawerAction(
   locale: string,
@@ -168,6 +204,11 @@ export async function createProductFromDrawerAction(
   const categoryError = await syncProductCategories(id, data.categoryIds);
   if (categoryError) {
     return err("VALIDATION_ERROR", categoryError);
+  }
+
+  const brandError = await syncProductBrands(id, data.brandIds);
+  if (brandError) {
+    return err("VALIDATION_ERROR", brandError);
   }
 
   await getDb().insert(stockMovements).values({
@@ -257,6 +298,11 @@ export async function updateProductFromDrawerAction(
   );
   if (categoryError) {
     return err("VALIDATION_ERROR", categoryError);
+  }
+
+  const brandError = await syncProductBrands(existing.id, data.brandIds);
+  if (brandError) {
+    return err("VALIDATION_ERROR", brandError);
   }
 
   const mediaResult = await persistProductMedia({

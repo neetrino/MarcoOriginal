@@ -31,6 +31,7 @@ type DrawerProduct = Pick<
   | "stockOnHand"
   | "status"
   | "categoryIds"
+  | "brandIds"
   | "images"
   | "salesClass"
   | "warrantyYears"
@@ -61,11 +62,10 @@ export function useProductDrawerForm(args: {
     imagesFromProduct(product),
   );
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
-  const [categories, setCategories] =
-    useState<AdminCategoryOption[]>(initialCategories);
   const [categoryIds, setCategoryIds] = useState<string[]>(
     product?.categoryIds ?? [],
   );
+  const [brandIds, setBrandIds] = useState<string[]>(product?.brandIds ?? []);
   const [priceAmount, setPriceAmount] = useState(
     product ? String(product.priceAmount) : "",
   );
@@ -132,10 +132,11 @@ export function useProductDrawerForm(args: {
     setDescription,
     images,
     removedImageIds,
-    categories,
-    setCategories,
+    categories: initialCategories,
     categoryIds,
     setCategoryIds,
+    brandIds,
+    setBrandIds,
     priceAmount,
     setPriceAmount,
     discountPercent,

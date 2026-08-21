@@ -20,6 +20,7 @@ import { getDb } from "@/db/client";
 import {
   categories,
   mediaAssets,
+  productBrands,
   productCategories,
   products,
   type LocaleTranslation,
@@ -67,6 +68,7 @@ export type AdminProductListItem = {
   specifications: ProductSpecification[];
   imageUrl: string | null;
   categoryIds: string[];
+  brandIds: string[];
   categoryLabels: string[];
   images: AdminProductImage[];
 };
@@ -75,6 +77,11 @@ export type AdminCategoryOption = {
   id: string;
   title: string;
   parentId: string | null;
+};
+
+export type AdminBrandOption = {
+  id: string;
+  title: string;
 };
 
 function translationFor(
@@ -210,6 +217,29 @@ async function loadCategoryMeta(
   return map;
 }
 
+async function loadBrandIds(
+  productIds: string[],
+): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>();
+  if (productIds.length === 0) return map;
+
+  const rows = await getDb()
+    .select({
+      productId: productBrands.productId,
+      brandId: productBrands.brandId,
+    })
+    .from(productBrands)
+    .where(inArray(productBrands.productId, productIds))
+    .orderBy(asc(productBrands.sortOrder));
+
+  for (const row of rows) {
+    const ids = map.get(row.productId) ?? [];
+    ids.push(row.brandId);
+    map.set(row.productId, ids);
+  }
+  return map;
+}
+
 /** Lists products for the admin catalog table with filters and sort. */
 export async function listAdminProducts(
   locale: Locale,
@@ -235,11 +265,13 @@ export async function listAdminProducts(
     .offset(offset);
 
   const ids = rows.map((row) => row.id);
-  const [primaryImages, categoryMap, galleryImages] = await Promise.all([
-    loadPrimaryImages(ids),
-    loadCategoryMeta(ids, locale),
-    loadProductImagesForAdmin(ids),
-  ]);
+  const [primaryImages, categoryMap, brandMap, galleryImages] =
+    await Promise.all([
+      loadPrimaryImages(ids),
+      loadCategoryMeta(ids, locale),
+      loadBrandIds(ids),
+      loadProductImagesForAdmin(ids),
+    ]);
 
   return {
     total,
@@ -269,6 +301,7 @@ export async function listAdminProducts(
         specifications: parseProductSpecs(translation?.specifications),
         imageUrl: primaryImages.get(product.id) ?? null,
         categoryIds: categoryMeta?.ids ?? [],
+        brandIds: brandMap.get(product.id) ?? [],
         categoryLabels: categoryMeta?.labels ?? [],
         images: galleryImages.get(product.id) ?? [],
       };

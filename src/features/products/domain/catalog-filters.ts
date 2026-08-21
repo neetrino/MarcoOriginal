@@ -59,6 +59,16 @@ export function collectCategoryIdsForSlugs(
   return [...ids];
 }
 
+/** Brand ids matching selected locale slugs. */
+export function collectBrandIdsForSlugs(
+  brands: readonly CatalogBrandFacet[],
+  slugs: readonly string[],
+): string[] {
+  if (slugs.length === 0) return [];
+  const wanted = new Set(slugs);
+  return brands.filter((brand) => wanted.has(brand.slug)).map((brand) => brand.id);
+}
+
 /** True when a node or any descendant slug is selected. */
 export function categoryHasSelectedDescendant(
   node: CatalogCategoryFacet,

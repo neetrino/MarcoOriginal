@@ -12,7 +12,10 @@ import {
   removeBrandImage,
 } from "@/features/brands/application/persist-brand-media";
 import { requireAdmin } from "@/lib/auth/policies";
-import { invalidateBrandsCache } from "@/lib/cache/invalidate-public";
+import {
+  invalidateBrandsCache,
+  invalidateProductsCache,
+} from "@/lib/cache/invalidate-public";
 import { createId } from "@/lib/id";
 import { isLocale, locales, type Locale } from "@/lib/i18n/config";
 import { err, ok, type Result } from "@/lib/result";
@@ -32,6 +35,7 @@ function revalidateBrands(locale: string): void {
     revalidatePath(`/${loc}/brand`);
   }
   invalidateBrandsCache();
+  invalidateProductsCache();
 }
 
 async function readBrandTitle(

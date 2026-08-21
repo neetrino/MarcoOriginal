@@ -1,41 +1,29 @@
 import { ADMIN_INPUT, ADMIN_LABEL } from "@/features/admin/ui/admin-form-classes";
-import type { AdminCategoryOption } from "@/features/products/application/list-admin-products";
 import { MAX_PRODUCT_DISCOUNT_PERCENT } from "@/features/products/domain/product-discount";
-import { ProductDrawerCategories } from "@/features/products/ui/ProductDrawerCategories";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 type EditorCopy = Dictionary["admin"]["productEditor"];
 
 type ProductDrawerPriceTabProps = {
-  locale: string;
   copy: EditorCopy;
   priceAmount: string;
   discountPercent: string;
   sku: string;
-  categories: AdminCategoryOption[];
-  categoryIds: string[];
   disabled: boolean;
   onPriceAmountChange: (value: string) => void;
   onDiscountPercentChange: (value: string) => void;
   onSkuChange: (value: string) => void;
-  onCategoriesChange: (categories: AdminCategoryOption[]) => void;
-  onCategoryIdsChange: (ids: string[]) => void;
 };
 
 export function ProductDrawerPriceTab({
-  locale,
   copy,
   priceAmount,
   discountPercent,
   sku,
-  categories,
-  categoryIds,
   disabled,
   onPriceAmountChange,
   onDiscountPercentChange,
   onSkuChange,
-  onCategoriesChange,
-  onCategoryIdsChange,
 }: ProductDrawerPriceTabProps) {
   return (
     <section className="flex flex-col gap-5">
@@ -96,26 +84,6 @@ export function ProductDrawerPriceTab({
           disabled={disabled}
         />
       </label>
-
-      <ProductDrawerCategories
-        locale={locale}
-        categories={categories}
-        selectedIds={categoryIds}
-        disabled={disabled}
-        copy={{
-          label: copy.categoriesLabel,
-          placeholder: copy.categoriesPlaceholder,
-          empty: copy.categoriesEmpty,
-          add: copy.addCategory,
-          titleLabel: copy.categoryTitleLabel,
-          titlePlaceholder: copy.categoryTitlePlaceholder,
-          addSubmit: copy.categoryAddSubmit,
-          adding: copy.categoryAdding,
-          cancel: copy.cancel,
-        }}
-        onCategoriesChange={onCategoriesChange}
-        onSelectedChange={onCategoryIdsChange}
-      />
     </section>
   );
 }

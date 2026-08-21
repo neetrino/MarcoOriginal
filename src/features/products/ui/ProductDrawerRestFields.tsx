@@ -1,5 +1,8 @@
-import type { AdminCategoryOption } from "@/features/products/application/list-admin-products";
-import { ProductDrawerCategories } from "@/features/products/ui/ProductDrawerCategories";
+import type {
+  AdminBrandOption,
+  AdminCategoryOption,
+} from "@/features/products/application/list-admin-products";
+import { ProductDrawerCatalogTab } from "@/features/products/ui/ProductDrawerCatalogTab";
 import {
   ProductDrawerImages,
   type ProductDraftImage,
@@ -11,38 +14,40 @@ import type { Dictionary } from "@/lib/i18n/get-dictionary";
 type EditorCopy = Dictionary["admin"]["productEditor"];
 
 type ProductDrawerRestFieldsProps = {
-  locale: string;
   tab: ProductDrawerTab;
   copy: EditorCopy;
   images: ProductDraftImage[];
   categories: AdminCategoryOption[];
   categoryIds: string[];
+  brands: AdminBrandOption[];
+  brandIds: string[];
   priceAmount: string;
   discountPercent: string;
   sku: string;
   disabled: boolean;
   onImagesChange: (images: ProductDraftImage[]) => void;
-  onCategoriesChange: (categories: AdminCategoryOption[]) => void;
   onCategoryIdsChange: (ids: string[]) => void;
+  onBrandIdsChange: (ids: string[]) => void;
   onPriceAmountChange: (value: string) => void;
   onDiscountPercentChange: (value: string) => void;
   onSkuChange: (value: string) => void;
 };
 
 export function ProductDrawerRestFields({
-  locale,
   tab,
   copy,
   images,
   categories,
   categoryIds,
+  brands,
+  brandIds,
   priceAmount,
   discountPercent,
   sku,
   disabled,
   onImagesChange,
-  onCategoriesChange,
   onCategoryIdsChange,
+  onBrandIdsChange,
   onPriceAmountChange,
   onDiscountPercentChange,
   onSkuChange,
@@ -58,42 +63,28 @@ export function ProductDrawerRestFields({
       </div>
 
       <div hidden={tab !== "catalog"} data-drawer-tab="catalog">
-        <ProductDrawerCategories
-          locale={locale}
+        <ProductDrawerCatalogTab
+          copy={copy}
           categories={categories}
-          selectedIds={categoryIds}
+          categoryIds={categoryIds}
+          brands={brands}
+          brandIds={brandIds}
           disabled={disabled}
-          copy={{
-            label: copy.categoriesLabel,
-            placeholder: copy.categoriesPlaceholder,
-            empty: copy.categoriesEmpty,
-            add: copy.addCategory,
-            titleLabel: copy.categoryTitleLabel,
-            titlePlaceholder: copy.categoryTitlePlaceholder,
-            addSubmit: copy.categoryAddSubmit,
-            adding: copy.categoryAdding,
-            cancel: copy.cancel,
-          }}
-          onCategoriesChange={onCategoriesChange}
-          onSelectedChange={onCategoryIdsChange}
+          onCategoryIdsChange={onCategoryIdsChange}
+          onBrandIdsChange={onBrandIdsChange}
         />
       </div>
 
       <div hidden={tab !== "price"} data-drawer-tab="price">
         <ProductDrawerPriceTab
-          locale={locale}
           copy={copy}
           priceAmount={priceAmount}
           discountPercent={discountPercent}
           sku={sku}
-          categories={categories}
-          categoryIds={categoryIds}
           disabled={disabled}
           onPriceAmountChange={onPriceAmountChange}
           onDiscountPercentChange={onDiscountPercentChange}
           onSkuChange={onSkuChange}
-          onCategoriesChange={onCategoriesChange}
-          onCategoryIdsChange={onCategoryIdsChange}
         />
       </div>
     </>

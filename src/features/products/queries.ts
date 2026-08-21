@@ -8,9 +8,11 @@ import { getDb } from "@/db/client";
 import {
   categories,
   mediaAssets,
+  productBrands,
   productCategories,
   products,
 } from "@/db/schema";
+import { loadProductBrandLogoUrls } from "@/features/products/application/load-product-brand-logos";
 import { parseProductTags } from "@/features/products/domain/product-presentation";
 import type {
   CatalogPricePresence,
@@ -66,6 +68,7 @@ function toCatalogProduct(
       ),
     },
     imageUrl,
+    brandLogoUrl: null,
     warrantyYears: product.warrantyYears,
     tags: parseProductTags(product.tags),
   };
@@ -112,7 +115,7 @@ async function withProductImages(
   locale: Locale,
 ): Promise<CatalogProduct[]> {
   const productIds = rows.map((row) => row.id);
-  const [images, prices] = await Promise.all([
+  const [images, prices, logos] = await Promise.all([
     loadPrimaryProductImages(productIds),
     resolveProductPrices(
       rows.map((row) => ({
@@ -121,6 +124,7 @@ async function withProductImages(
         compareAtAmount: row.compareAtAmount,
       })),
     ),
+    loadProductBrandLogoUrls(productIds),
   ]);
 
   return rows
@@ -135,6 +139,7 @@ async function withProductImages(
       const resolved = prices.get(product.id);
       return {
         ...base,
+        brandLogoUrl: logos.get(product.id) ?? null,
         listPriceAmount: resolved?.listAmount ?? product.priceAmount,
         priceAmount: resolved?.unitAmount ?? product.priceAmount,
         compareAtAmount: resolved?.compareAtAmount ?? null,
@@ -151,6 +156,7 @@ const activeCatalogWhere = and(
 
 export type CatalogListFilter = {
   categoryIds?: readonly string[];
+  brandIds?: readonly string[];
   minPriceAmd?: number;
   maxPriceAmd?: number;
   sort?: CatalogSort;
@@ -193,6 +199,17 @@ function catalogListWhere(filter?: CatalogListFilter) {
       ),
     );
   }
+  if (filter?.brandIds && filter.brandIds.length > 0) {
+    conditions.push(
+      inArray(
+        products.id,
+        getDb()
+          .select({ id: productBrands.productId })
+          .from(productBrands)
+          .where(inArray(productBrands.brandId, [...filter.brandIds])),
+      ),
+    );
+  }
   if (filter?.minPriceAmd != null) {
     conditions.push(gte(products.priceAmount, filter.minPriceAmd));
   }
@@ -210,8 +227,10 @@ function catalogListWhere(filter?: CatalogListFilter) {
 function catalogFilterCacheKey(filter?: CatalogListFilter): string {
   if (!filter) return "";
   const categoryKey = [...(filter.categoryIds ?? [])].sort().join(",");
+  const brandKey = [...(filter.brandIds ?? [])].sort().join(",");
   return [
     categoryKey,
+    brandKey,
     filter.minPriceAmd ?? "",
     filter.maxPriceAmd ?? "",
     filter.sort ?? "",

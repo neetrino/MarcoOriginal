@@ -6,6 +6,8 @@ import { CompareButton } from "@/features/compare/ui/CompareButton";
 import type { ProductTag } from "@/db/schema";
 import { ProductWarrantyBadge } from "@/features/products/ui/ProductCardMeta";
 import {
+  PRODUCT_CARD_BRAND_LOGO_HEIGHT_PX,
+  PRODUCT_CARD_BRAND_LOGO_MAX_WIDTH_PX,
   PRODUCT_CARD_CART_CLASS,
   PRODUCT_CARD_COMPARE_ACTIVE_CLASS,
   PRODUCT_CARD_CUTOUT_SIZE_PX,
@@ -32,6 +34,7 @@ export type ProductCardItem = {
   compareAtFormatted?: string | null;
   discountPercent?: number | null;
   imageUrl: string | null;
+  brandLogoUrl?: string | null;
   inStock: boolean;
   inWishlist?: boolean;
   inCompare?: boolean;
@@ -186,6 +189,17 @@ function ProductCardBody({
       <ProductCardWarranty product={product} />
       <ProductCardMedia product={product} priority={priority} />
       <div className="flex min-h-0 w-full flex-1 flex-col max-md:mt-[31px] max-md:px-4">
+        {product.brandLogoUrl ? (
+          <div className="mb-1.5 flex h-6 items-center">
+            <Image
+              src={product.brandLogoUrl}
+              alt=""
+              width={PRODUCT_CARD_BRAND_LOGO_MAX_WIDTH_PX}
+              height={PRODUCT_CARD_BRAND_LOGO_HEIGHT_PX}
+              className="max-h-6 w-auto object-contain object-left"
+            />
+          </div>
+        ) : null}
         <h3 className="line-clamp-2 text-left text-[14px] font-bold leading-5 text-marco-slate md:min-h-[2.5rem] md:text-sm md:font-semibold">
           {product.title}
         </h3>

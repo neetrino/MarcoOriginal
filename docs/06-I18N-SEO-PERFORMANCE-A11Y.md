@@ -44,7 +44,7 @@ locales/
 
 ## 3. Database translation model
 
-- Product, category, brand, attribute, hero և blog admin-managed translations-ը պահվում են համապատասխան parent table-ի versioned `translations JSONB` դաշտում։ Առանձին translation tables չկան canonical 29-table schema-ում։
+- Product, category, brand, attribute, hero և blog admin-managed translations-ը պահվում են համապատասխան parent table-ի versioned `translations JSONB` դաշտում։ Առանձին translation tables չկան canonical 30-table schema-ում։
 - JSON structure-ը entity-specific Zod schema ունի; `hy`/`en`/`ru` keys-ը optional են (partial translations թույլատրված են՝ `DEC-017`)։
 - Slug-ը unique է per locale/entity namespace՝ PostgreSQL expression unique indexes-ով (`translations->'hy'->>'slug'` և այլն) միայն առկա locale keys-ի համար։
 - Public publish command-ը ստուգում է առնվազն մեկ լրիվ locale-ի completeness-ը, ոչ բոլոր երեք locale-ները։

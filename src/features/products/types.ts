@@ -21,6 +21,7 @@ export type CatalogProduct = {
   stockOnHand: number;
   translation: LocaleTranslation;
   imageUrl: string | null;
+  brandLogoUrl: string | null;
   warrantyYears: number;
   tags: ProductTag[];
 };

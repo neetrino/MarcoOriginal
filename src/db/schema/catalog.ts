@@ -237,3 +237,26 @@ export const productCategories = pgTable(
       .where(sql`${table.isPrimary} = true`),
   ],
 );
+
+export const productBrands = pgTable(
+  "product_brands",
+  {
+    id: idColumn(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "restrict" }),
+    brandId: uuid("brand_id")
+      .notNull()
+      .references(() => brands.id, { onDelete: "restrict" }),
+    isPrimary: boolean("is_primary").notNull().default(false),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("product_brands_uidx").on(table.productId, table.brandId),
+    index("product_brands_brand_idx").on(table.brandId),
+    uniqueIndex("product_brands_primary_uidx")
+      .on(table.productId)
+      .where(sql`${table.isPrimary} = true`),
+  ],
+);

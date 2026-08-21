@@ -5,6 +5,7 @@ export {
   attributeValues,
   brands,
   categories,
+  productBrands,
   productCategories,
   products,
   PRODUCT_TAG_TYPES,

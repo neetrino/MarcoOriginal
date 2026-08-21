@@ -2,9 +2,9 @@
 
 **Database.** PostgreSQL (Neon)
 **ORM/migrations.** Drizzle ORM / Drizzle Kit
-**Կարգավիճակ.** Canonical 29-table schema migrated; idempotent seed available (`pnpm db:seed`)
-**Canonical table count.** 29
-**Վերջին թարմացում.** 2026-08-20
+**Կարգավիճակ.** Canonical 30-table schema migrated; idempotent seed available (`pnpm db:seed`)
+**Canonical table count.** 30
+**Վերջին թարմացում.** 2026-08-21
 
 ## 1. Սխեմայի նպատակը
 
@@ -29,7 +29,7 @@
 - Financial, stock և audit records-ը hard delete չեն ընդունում։
 - Flexible JSONB-ը միշտ Zod schema/version ունի և business-critical relational կապերը չի փոխարինում։
 
-## 3. Canonical 29-table inventory
+## 3. Canonical 30-table inventory
 
 | # | Table | Domain | Նշանակություն |
 |---:|---|---|---|
@@ -44,24 +44,25 @@
 | 9 | `attributes` | Catalog | Global attribute names (color, size, material) |
 | 10 | `attribute_values` | Catalog | Color swatches and image swatches per attribute |
 | 11 | `product_categories` | Catalog | Product/category many-to-many կապ |
-| 12 | `stock_movements` | Inventory | Immutable stock ledger |
-| 13 | `hero_slides` | Content | Hero configuration և translations |
-| 14 | `blog_posts` | Content | Blog content, translations և tags |
-| 15 | `reels` | Content | Homepage reel videos, titles և counters |
-| 16 | `carts` | Commerce | Guest/customer cart identity/lifecycle |
-| 17 | `cart_items` | Commerce | Cart product quantities |
-| 18 | `wishlist_items` | Commerce | Customer wishlist entries |
-| 19 | `promotions` | Pricing | Coupons և automatic discounts մեկ rule model-ում |
-| 20 | `promotion_users` | Pricing | User-restricted promotion allowlist |
-| 21 | `delivery_rules` | Fulfillment | Location-based delivery pricing |
-| 22 | `orders` | Orders | Order, address/money/promotion snapshots, idempotency |
-| 23 | `order_items` | Orders | Immutable purchased-item snapshots |
-| 24 | `order_events` | Orders | Status, notes և payment provider events |
-| 25 | `payments` | Payments | Payment attempts/current provider state |
-| 26 | `reviews` | Engagement | Verified-purchase reviews/moderation |
-| 27 | `contact_messages` | Support | Contact inbox |
-| 28 | `audit_logs` | Security | Immutable admin/security audit |
-| 29 | `outbox_events` | Reliability | Reliable post-commit email/provider/cache work |
+| 12 | `product_brands` | Catalog | Product/brand many-to-many կապ |
+| 13 | `stock_movements` | Inventory | Immutable stock ledger |
+| 14 | `hero_slides` | Content | Hero configuration և translations |
+| 15 | `blog_posts` | Content | Blog content, translations և tags |
+| 16 | `reels` | Content | Homepage reel videos, titles և counters |
+| 17 | `carts` | Commerce | Guest/customer cart identity/lifecycle |
+| 18 | `cart_items` | Commerce | Cart product quantities |
+| 19 | `wishlist_items` | Commerce | Customer wishlist entries |
+| 20 | `promotions` | Pricing | Coupons և automatic discounts մեկ rule model-ում |
+| 21 | `promotion_users` | Pricing | User-restricted promotion allowlist |
+| 22 | `delivery_rules` | Fulfillment | Location-based delivery pricing |
+| 23 | `orders` | Orders | Order, address/money/promotion snapshots, idempotency |
+| 24 | `order_items` | Orders | Immutable purchased-item snapshots |
+| 25 | `order_events` | Orders | Status, notes և payment provider events |
+| 26 | `payments` | Payments | Payment attempts/current provider state |
+| 27 | `reviews` | Engagement | Verified-purchase reviews/moderation |
+| 28 | `contact_messages` | Support | Contact inbox |
+| 29 | `audit_logs` | Security | Immutable admin/security audit |
+| 30 | `outbox_events` | Reliability | Reliable post-commit email/provider/cache work |
 
 ### Count assumptions
 
@@ -174,7 +175,7 @@ Self-referencing `parent_id`, `translations JSONB`, sort order, active/archive s
 Brand identity for the catalog: unique SKU, `translations JSONB` (title/slug), sort order և timestamps/`deleted_at`։ Logo-ն resolve է լինում `media_assets.brand_id` + primary role-ով։
 
 - SKU-ն generate է լինում title-ից և unique է ամբողջ table-ում։
-- Product-brand կապը այս table-ում չէ. առանձին relation կավելացվի երբ products-ին bind արվի։
+- Product-brand կապը `product_brands` junction table-ում է (մեկ կամ մի քանի brand, optional primary)։
 
 ### 6.4 `attributes`
 
@@ -195,9 +196,13 @@ Per-attribute named values with optional color/image swatches, sort order և tim
 
 ### 6.6 `product_categories`
 
-Composite unique `(product_id, category_id)`, optional `is_primary`, sort metadata և reverse lookup indexes։ Պահվում է, որովհետև product-ը կարող է ունենալ մի քանի category։
+Composite unique `(product_id, category_id)`, optional `is_primary`, sort metadata և reverse lookup indexes։ Պահվում է, որովհետև product-ը կարող է ունենալ մի քանի category։ Առաջին ընտրված category-ն primary է URL/catalog path-ի համար։
 
-### 6.7 `stock_movements`
+### 6.7 `product_brands`
+
+Composite unique `(product_id, brand_id)`, optional `is_primary`, sort metadata և reverse lookup indexes։ Product-ը կարող է կապված լինել մեկ կամ մի քանի brand-ի հետ։ Primary brand-ի logo-ն ցուցադրվում է storefront product card-ում։
+
+### 6.8 `stock_movements`
 
 Immutable ledger՝ product, signed delta, reason (`ORDER`,`CANCEL`,`RETURN`,`ADMIN_ADJUSTMENT`,`IMPORT`...), optional order/actor, resulting balance, correlation ID և timestamp։
 

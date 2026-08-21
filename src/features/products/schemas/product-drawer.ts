@@ -57,6 +57,7 @@ export const productUpsertSchema = z.object({
   priceAmount: z.number().int().nonnegative(),
   compareAtAmount: z.number().int().nonnegative().nullable(),
   categoryIds: z.array(z.string().uuid()),
+  brandIds: z.array(z.string().uuid()).default([]),
   status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
   salesClass: z.enum(PRODUCT_SALES_CLASSES),
   warrantyYears: z.number().int().refine(
