@@ -611,6 +611,7 @@
     "parentSearchPlaceholder": "Մուտքագրեք՝ ֆիլտրելու ցուցակը...",
     "parentSelect": "Ընտրել կատեգորիա",
     "parentRequired": "Ենթակատեգորիայի համար ընտրեք գլխավոր կատեգորիա։",
+    "slugTaken": "Այս slug-ով կատեգորիա արդեն կա։",
     "image": "Նկար",
     "uploadImage": "+ Վերբեռնել նկար",
     "changeImage": "Փոխել նկարը",

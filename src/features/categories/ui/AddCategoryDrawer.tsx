@@ -42,6 +42,14 @@ type AddCategoryDrawerProps = {
   defaultParentId?: string;
 };
 
+function mapDrawerError(
+  copy: CategoriesCopy,
+  error: { code: string; message: string },
+): string {
+  if (error.code === "SLUG_TAKEN") return copy.slugTaken;
+  return error.message;
+}
+
 function previewFromFile(current: string | null, file: File | null): string | null {
   if (current?.startsWith("blob:")) URL.revokeObjectURL(current);
   return file ? URL.createObjectURL(file) : null;
@@ -126,7 +134,7 @@ export function AddCategoryDrawer({
           ? await updateCategoryFromDrawerAction(locale, category.id, formData)
           : await createCategoryFromDrawerAction(locale, formData);
       if (!result.ok) {
-        setError(result.error.message);
+        setError(mapDrawerError(copy, result.error));
         return;
       }
       onClose();

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ChevronRight, LayoutGrid } from "lucide-react";
+import { memo } from "react";
 
 import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
 import {
@@ -36,7 +37,7 @@ export function HeaderCategoryRail({
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain pr-0">
           <div className="flex flex-col gap-3 pr-1.5">
             {categories.map((category) => (
-              <RailRow
+              <MemoRailRow
                 key={category.id}
                 category={category}
                 selected={category.id === selectedId}
@@ -54,11 +55,7 @@ function RailRow({
   category,
   selected,
   onSelect,
-}: {
-  category: HeaderCategoryNode;
-  selected: boolean;
-  onSelect: (id: string) => void;
-}) {
+}: RailRowProps) {
   return (
     <button
       type="button"
@@ -83,6 +80,14 @@ function RailRow({
     </button>
   );
 }
+
+type RailRowProps = {
+  category: HeaderCategoryNode;
+  selected: boolean;
+  onSelect: (id: string) => void;
+};
+
+const MemoRailRow = memo(RailRow);
 
 function RailIcon({ imageUrl }: { imageUrl: string | null }) {
   if (imageUrl) {

@@ -45,6 +45,104 @@ function buildTranslations(title: string, slug: string): TranslationsJson {
   return { hy: translation, en: translation, ru: translation };
 }
 
+function isCategorySlugUniqueViolation(error: unknown): boolean {
+  const queue: unknown[] = [error];
+  const visited = new Set<unknown>();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || visited.has(current)) continue;
+    visited.add(current);
+
+    if (current instanceof Error) {
+      if (
+        current.message.includes("categories_slug_") ||
+        current.message.includes("duplicate key")
+      ) {
+        return true;
+      }
+    }
+
+    if (typeof current !== "object") continue;
+    const value = current as {
+      code?: unknown;
+      constraint?: unknown;
+      detail?: unknown;
+      message?: unknown;
+      cause?: unknown;
+    };
+
+    if (
+      value.code === "23505" &&
+      typeof value.constraint === "string" &&
+      value.constraint.includes("categories_slug_")
+    ) {
+      return true;
+    }
+    if (
+      typeof value.detail === "string" &&
+      value.detail.includes("already exists")
+    ) {
+      return true;
+    }
+    if (
+      typeof value.message === "string" &&
+      (value.message.includes("categories_slug_") ||
+        value.message.includes("duplicate key"))
+    ) {
+      return true;
+    }
+    if (value.cause) queue.push(value.cause);
+  }
+
+  return false;
+}
+
+function isCategoryParentForeignKeyViolation(error: unknown): boolean {
+  const queue: unknown[] = [error];
+  const visited = new Set<unknown>();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || visited.has(current)) continue;
+    visited.add(current);
+
+    if (current instanceof Error) {
+      if (
+        current.message.includes("categories_parent_id_fkey") ||
+        current.message.includes("foreign key constraint")
+      ) {
+        return true;
+      }
+    }
+
+    if (typeof current !== "object") continue;
+    const value = current as {
+      code?: unknown;
+      constraint?: unknown;
+      message?: unknown;
+      cause?: unknown;
+    };
+
+    if (
+      value.code === "23503" &&
+      value.constraint === "categories_parent_id_fkey"
+    ) {
+      return true;
+    }
+    if (
+      typeof value.message === "string" &&
+      (value.message.includes("categories_parent_id_fkey") ||
+        value.message.includes("foreign key constraint"))
+    ) {
+      return true;
+    }
+    if (value.cause) queue.push(value.cause);
+  }
+
+  return false;
+}
+
 function revalidateCategories(locale: string): void {
   revalidatePath(`/${locale}/admin/categories`);
   revalidatePath(`/${locale}/admin/products`);
@@ -125,13 +223,23 @@ async function insertCategory(
   if (!parentCheck.ok) return parentCheck;
 
   const id = createId();
-  await getDb().insert(categories).values({
-    id,
-    parentId: data.parentId,
-    translations: data.translations,
-    sortOrder: await nextSortOrder(data.parentId),
-    status: data.status,
-  });
+  try {
+    await getDb().insert(categories).values({
+      id,
+      parentId: data.parentId,
+      translations: data.translations,
+      sortOrder: await nextSortOrder(data.parentId),
+      status: data.status,
+    });
+  } catch (error) {
+    if (isCategorySlugUniqueViolation(error)) {
+      return err("SLUG_TAKEN", "Category slug is already in use.");
+    }
+    if (isCategoryParentForeignKeyViolation(error)) {
+      return err("NOT_FOUND", "Parent category not found.");
+    }
+    return err("CATEGORY_CREATE_FAILED", "Unable to create category.");
+  }
 
   revalidateCategories(locale);
   return ok({ id });
@@ -233,18 +341,28 @@ export async function updateCategoryFromDrawerAction(
   const parentCheck = await assertParent(parsed.data.parentId, existing.id);
   if (!parentCheck.ok) return parentCheck;
 
-  await getDb()
-    .update(categories)
-    .set({
-      parentId: parsed.data.parentId,
-      translations: {
-        ...existing.translations,
-        ...parsed.data.translations,
-      },
-      status: parsed.data.status,
-      updatedAt: new Date(),
-    })
-    .where(eq(categories.id, existing.id));
+  try {
+    await getDb()
+      .update(categories)
+      .set({
+        parentId: parsed.data.parentId,
+        translations: {
+          ...existing.translations,
+          ...parsed.data.translations,
+        },
+        status: parsed.data.status,
+        updatedAt: new Date(),
+      })
+      .where(eq(categories.id, existing.id));
+  } catch (error) {
+    if (isCategorySlugUniqueViolation(error)) {
+      return err("SLUG_TAKEN", "Category slug is already in use.");
+    }
+    if (isCategoryParentForeignKeyViolation(error)) {
+      return err("NOT_FOUND", "Parent category not found.");
+    }
+    return err("CATEGORY_UPDATE_FAILED", "Unable to update category.");
+  }
 
   return persistDrawerImage(locale, existing.id, formData);
 }

@@ -45,7 +45,7 @@ export function HeaderCategoryContent({
             >
               <AppLink
                 href={hrefFor(selected.slug)}
-                prefetchPolicy="intent"
+                prefetchPolicy="none"
                 onClick={onNavigate}
                 className="hover:opacity-90"
               >

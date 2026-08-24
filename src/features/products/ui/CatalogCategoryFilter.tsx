@@ -70,11 +70,12 @@ function CatalogCategoryNode({
   const [open, setOpen] = useState(() =>
     categoryHasSelectedDescendant(node, selectedSlugs),
   );
+  const highlighted = selected || open;
 
   return (
     <li className="flex flex-col gap-3">
       <div
-        className={`flex items-center gap-2 ${selected ? CATALOG_FILTER_ROW_SELECTED : ""}`}
+        className={`flex items-center gap-2 ${highlighted ? CATALOG_FILTER_ROW_SELECTED : ""}`}
         style={depth > 0 ? { paddingLeft: depth * 14 } : undefined}
       >
         <CatalogFilterCheckRow

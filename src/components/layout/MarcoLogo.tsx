@@ -32,7 +32,7 @@ export function MarcoLogo({ locale, ariaLabel }: MarcoLogoProps) {
           height={MARCO_LOGO_INTRINSIC_HEIGHT}
           className="absolute -left-[48.54%] -top-[75.88%] h-[278.35%] w-[197.08%] max-w-none"
           priority
-          quality={100}
+          quality={75}
           sizes={MARCO_LOGO_SIZES}
         />
       </span>

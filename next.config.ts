@@ -83,6 +83,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: buildImageRemotePatterns(),
+    qualities: [100, 75],
   },
   async headers() {
     return [

@@ -21,7 +21,8 @@ export const CATALOG_CHECKBOX_BOX =
 
 export const CATALOG_FILTER_LIST = "flex max-h-[18rem] flex-col gap-3 overflow-y-auto pr-2.5";
 
-export const CATALOG_FILTER_ROW_SELECTED = "rounded-md bg-[#f1f5f9] py-1";
+export const CATALOG_FILTER_ROW_SELECTED =
+  "rounded-full bg-marco-yellow/95 py-1 pl-1 pr-2";
 
 export const CATALOG_PRICE_TITLE =
   "shrink-0 text-sm font-semibold leading-6 tracking-[-0.31px] text-marco-slate lg:text-base";

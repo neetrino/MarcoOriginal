@@ -5,6 +5,9 @@ import { HomeBannerCta } from "@/features/home/ui/HomeBannerCta";
 import { HOME_PROMO_RADIUS_PX } from "@/features/home/ui/home-floor-banners.constants";
 import { HOME_PAGE_SHELL_CLASS } from "@/features/home/ui/home-section-classes";
 
+const HOME_MOBILE_FLOOR_IMAGE_SIZES =
+  "(max-width: 640px) calc(100vw - 2rem), (max-width: 768px) calc(100vw - 3rem), 0px";
+
 type HomeMobileFloorBannerProps = {
   imageUrl: string;
   href: string;
@@ -33,7 +36,7 @@ export function HomeMobileFloorBanner({
             src={imageUrl}
             alt=""
             fill
-            sizes="100vw"
+            sizes={HOME_MOBILE_FLOOR_IMAGE_SIZES}
             className="object-cover"
           />
           <div className="absolute inset-x-4 bottom-4">

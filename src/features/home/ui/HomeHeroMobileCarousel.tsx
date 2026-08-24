@@ -12,6 +12,9 @@ type HomeHeroMobileCarouselProps = {
   images: readonly string[];
 };
 
+const MOBILE_HERO_IMAGE_SIZES =
+  "(max-width: 640px) calc(100vw - 2rem), (max-width: 768px) calc(100vw - 3rem), 0px";
+
 /** Mobile-only home hero slider: swipe, dots, auto-advance when more than one slide. */
 export function HomeHeroMobileCarousel({ images }: HomeHeroMobileCarouselProps) {
   const slides = images.filter((src) => src.length > 0);
@@ -75,7 +78,7 @@ export function HomeHeroMobileCarousel({ images }: HomeHeroMobileCarouselProps) 
           fill
           priority
           className="object-cover object-center"
-          sizes="100vw"
+          sizes={MOBILE_HERO_IMAGE_SIZES}
         />
       </div>
     );
@@ -102,7 +105,7 @@ export function HomeHeroMobileCarousel({ images }: HomeHeroMobileCarouselProps) 
               fill
               priority={index === 0}
               className="object-cover object-center"
-              sizes="100vw"
+              sizes={MOBILE_HERO_IMAGE_SIZES}
             />
           </div>
         ))}

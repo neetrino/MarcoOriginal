@@ -611,6 +611,7 @@
     "parentSearchPlaceholder": "Type to filter the list...",
     "parentSelect": "Select category",
     "parentRequired": "Choose a parent category for the subcategory.",
+    "slugTaken": "A category with this slug already exists.",
     "image": "Image",
     "uploadImage": "+ Upload image",
     "changeImage": "Change image",

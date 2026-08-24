@@ -45,7 +45,7 @@ export function AdminBrandMark({
           width={MARCO_LOGO_INTRINSIC_WIDTH}
           height={MARCO_LOGO_INTRINSIC_HEIGHT}
           className={MARCO_LOGO_CROP_CLASS}
-          quality={100}
+          quality={75}
         />
       </span>
       {compact ? null : (

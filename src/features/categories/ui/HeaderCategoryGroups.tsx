@@ -72,7 +72,7 @@ function GroupParent({
     <div className="mb-2 min-w-0">
       <AppLink
         href={href}
-        prefetchPolicy="intent"
+        prefetchPolicy="none"
         onClick={onNavigate}
         className={HEADER_CATEGORY_PARENT_LINK_CLASS}
       >
@@ -121,7 +121,7 @@ function DescendantList({
         <li key={category.id}>
           <AppLink
             href={hrefFor(category.slug)}
-            prefetchPolicy="intent"
+            prefetchPolicy="none"
             onClick={onNavigate}
             className={HEADER_CATEGORY_CHILD_LINK_CLASS}
           >

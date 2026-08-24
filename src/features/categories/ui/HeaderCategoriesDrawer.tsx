@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SideSheet } from "@/components/ui/SideSheet";
 import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
@@ -39,6 +39,19 @@ export function HeaderCategoriesDrawer({
   const [selectedId, setSelectedId] = useState(categories[0]?.id ?? "");
   const selected =
     categories.find((category) => category.id === selectedId) ?? categories[0];
+
+  useEffect(() => {
+    const firstCategory = categories[0];
+    if (!firstCategory) {
+      setSelectedId("");
+      return;
+    }
+
+    const hasSelected = categories.some((category) => category.id === selectedId);
+    if (!hasSelected) {
+      setSelectedId(firstCategory.id);
+    }
+  }, [categories, selectedId]);
 
   function hrefFor(slug: string): string {
     return catalogHref(locale, {

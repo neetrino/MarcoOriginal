@@ -143,6 +143,7 @@ function HeroBannerFilledPreview({
   onRemove,
 }: HeroBannerFilledPreviewProps) {
   const overlayClass = `absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-black/45 px-4 opacity-0 backdrop-blur-[2px] transition duration-200 group-hover:opacity-100 group-focus-within:opacity-100 ${radiusClassName} ${uploading ? "opacity-100" : ""}`;
+  const previewSizes = "(max-width: 1024px) 100vw, 480px";
 
   return (
     <div className="absolute inset-0">
@@ -150,7 +151,7 @@ function HeroBannerFilledPreview({
         src={url}
         alt={label}
         fill
-        sizes="100vw"
+        sizes={previewSizes}
         className="object-cover transition duration-200 group-hover:scale-[1.01] group-hover:brightness-[0.92]"
         unoptimized={url.startsWith("blob:")}
       />
