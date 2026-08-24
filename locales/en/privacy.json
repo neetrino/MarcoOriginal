@@ -1,0 +1,89 @@
+{
+  "title": "Privacy Policy",
+  "intro": [
+    "By visiting the website marco.am (hereinafter referred to as the \"Website\") and making purchases, you automatically consent to the collection, processing, and use of your personal data.",
+    "By \"Personal Data,\" we mean any information that allows or may allow us to directly or indirectly identify your identity, such as your name, surname, address, email, phone number, and other data (hereinafter referred to as \"Data\").",
+    "In this Privacy Policy, \"we,\" \"us,\" and \"our\" refer to Website (for more information, please visit the \"About Us\" section), while \"you,\" \"your,\" and \"yours\" refer to any individual who visits the Website or uses our services."
+  ],
+  "sections": [
+    {
+      "title": "1. Collected Data",
+      "intro": "We may collect the following types of information:",
+      "points": [
+        "Contact information – name, surname, address, phone number, email address",
+        "Purchase information – products purchased, payment methods",
+        "Technical information – device type, browser, operating system",
+        "Cookies and tracking technologies – for website usage analysis"
+      ],
+      "closing": ""
+    },
+    {
+      "title": "2. Use of Data",
+      "intro": "Collected data is never sold or provided to third parties for marketing purposes. It is used only for the following purposes:",
+      "points": [
+        "Processing and shipping orders",
+        "Providing user support",
+        "Improving website functionality",
+        "Complying with legal requirements"
+      ],
+      "closing": ""
+    },
+    {
+      "title": "3. Data Retention Periods",
+      "intro": "Your personal data is stored as follows:",
+      "points": [
+        "User account data – as long as the account is active",
+        "Purchase history – 5 years (to comply with tax and accounting regulations)",
+        "Marketing data – 2 years or until the user opts out"
+      ],
+      "closing": ""
+    },
+    {
+      "title": "4. Data Security",
+      "intro": "We implement appropriate technical and organizational measures to ensure the protection of your data, including:",
+      "points": [
+        "SSL encryption – to secure payment and personal data transmission",
+        "Access control – limited access to personal data",
+        "Regular audits – to detect potential security vulnerabilities"
+      ],
+      "closing": ""
+    },
+    {
+      "title": "5. Sharing Data with Third Parties",
+      "intro": "We do not sell or provide your data to third parties, except for:",
+      "points": [
+        "Shipping services – to ensure order delivery",
+        "Payment systems – for secure payment processing",
+        "Law enforcement authorities – in cases required by law"
+      ],
+      "closing": "All third parties are obligated to protect your data and cannot use it for other purposes."
+    },
+    {
+      "title": "6. User Rights",
+      "intro": "You have the right to:",
+      "points": [
+        "Receive a copy of your personal data",
+        "Edit or delete your data (through our website settings or customer support)",
+        "Opt-out of marketing emails (via the \"unsubscribe\" link in each email)",
+        "Request that your data is not processed for specific purposes, except in cases required by law"
+      ],
+      "closing": ""
+    },
+    {
+      "title": "7. Cookies Usage",
+      "intro": "Our website uses cookies to optimize user experience. We use:",
+      "points": [
+        "Functional cookies – to ensure proper website operation",
+        "Analytical cookies – to understand user behavior and improve the website",
+        "Marketing cookies (only with your consent) – to provide more relevant advertisements"
+      ],
+      "closing": ""
+    },
+    {
+      "title": "8. Policy Changes",
+      "intro": "We reserve the right to make legally permitted changes to this page and the above sections. Updates will be posted on the Website.",
+      "points": [],
+      "closing": ""
+    }
+  ]
+}

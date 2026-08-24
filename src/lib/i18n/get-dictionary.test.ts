@@ -15,7 +15,12 @@ describe("getDictionary", () => {
     expect(dictionary.catalog.withPrice).toBe("With price");
     expect(dictionary.home.title).toBe("White Shop");
     expect(dictionary.contact.title).toBe("CONTACT US");
+    expect(dictionary.header.socialBrands.marcoGroup).toBe("Marco Group");
     expect(dictionary.contact.drawerCall.cta).toBe("Call");
+    expect(dictionary.deliveryReturn.title).toBe("Delivery and Returns");
+    expect(dictionary.privacy.title).toBe("Privacy Policy");
+    expect(dictionary.terms.title).toBe("Terms and Conditions");
+    expect(dictionary.refundPolicy.title).toBe("Refund Policy");
     expect(dictionary.nav.menuCopyright).toContain("MARCO GROUP");
     expect(dictionary.cartDrawer.title).toBe("My Cart");
     expect(dictionary.checkout.title).toBe("Checkout");
@@ -33,6 +38,18 @@ describe("getDictionary", () => {
   it("loads Armenian and Russian namespaces", () => {
     expect(getDictionary("hy").nav.home).toBe("Գլխավոր");
     expect(getDictionary("ru").nav.home).toBe("Главная");
+    expect(getDictionary("hy").deliveryReturn.title).toBe("Առաքում և վերադարձ");
+    expect(getDictionary("ru").deliveryReturn.title).toBe("Доставка и возврат");
+    expect(getDictionary("hy").privacy.title).toBe(
+      "Գաղտնիության քաղաքականություն",
+    );
+    expect(getDictionary("ru").privacy.title).toBe("Политика конфиденциальности");
+    expect(getDictionary("hy").terms.title).toBe("Օգտագործման պայմաններ");
+    expect(getDictionary("ru").terms.title).toBe("Условия использования");
+    expect(getDictionary("hy").refundPolicy.title).toBe(
+      "Փոխհատուցման քաղաքականություն",
+    );
+    expect(getDictionary("ru").refundPolicy.title).toBe("Политика возврата");
     expect(getDictionary("hy").admin.nav.dashboard).toBe("Վահանակ");
     expect(getDictionary("ru").admin.nav.dashboard).toBe("Панель");
     expect(getDictionary("hy").admin.dashboard.title).toBe("Ադմին էջ");

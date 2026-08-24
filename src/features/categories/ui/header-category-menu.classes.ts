@@ -19,7 +19,7 @@ export const HEADER_CATEGORY_GRID_CLASS =
   "grid w-full min-w-0 grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 md:grid-cols-3 min-[1680px]:grid-cols-4";
 
 export const HEADER_CATEGORY_ROOT_ROW_CLASS =
-  "flex w-full min-w-0 shrink-0 cursor-pointer items-center gap-2 rounded-[40px] px-1.5 py-0 text-left text-[13px] leading-[21px] tracking-[0.15px] text-marco-slate transition-[background-color,color,opacity] duration-150";
+  "flex w-full min-w-0 shrink-0 cursor-pointer items-start gap-2 rounded-[40px] px-1.5 py-0 text-left text-[13px] leading-[21px] tracking-[0.15px] text-marco-slate transition-[background-color,color,opacity] duration-150";
 
 export const HEADER_CATEGORY_ROOT_SELECTED_CLASS =
   "bg-marco-yellow font-bold";
@@ -28,10 +28,33 @@ export const HEADER_CATEGORY_ROOT_IDLE_CLASS =
   "font-normal hover:bg-marco-gray/70";
 
 export const HEADER_CATEGORY_PARENT_LINK_CLASS =
-  "group flex w-full max-w-full items-center gap-2 rounded-xl px-1 py-1.5 text-marco-slate transition-[background-color,color] duration-150 hover:bg-marco-gray/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/15";
+  "group flex w-full max-w-full items-start gap-2 rounded-xl px-1 py-1.5 text-marco-slate transition-[background-color,color] duration-150 hover:bg-marco-gray/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/15";
 
 export const HEADER_CATEGORY_CHILD_LINK_CLASS =
   "block rounded-lg px-2 py-1.5 text-sm leading-5 text-marco-slate/85 transition-[background-color,color] duration-150 hover:bg-marco-gray/60 hover:text-marco-slate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/10";
 
 export const HEADER_CATEGORY_SEE_ALL_CLASS =
   "mt-0.5 block w-full rounded-lg px-2 py-1.5 text-left text-sm font-semibold leading-5 text-marco-slate underline decoration-marco-slate/30 underline-offset-2 transition-[background-color,color,decoration-color] duration-150 hover:bg-marco-gray/60 hover:decoration-marco-slate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/10";
+
+export const HEADER_CATEGORY_PROMO_CARD_CLASS =
+  "relative mb-6 w-full overflow-hidden rounded-[24px] bg-gradient-to-b from-marco-yellow/45 to-[#fff9e5] p-5 pb-6 md:mb-5 md:p-6";
+
+export const HEADER_CATEGORY_PROMO_IMAGE_WRAP_CLASS =
+  "pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] sm:block";
+
+export const HEADER_CATEGORY_PROMO_CONTENT_CLASS = "relative sm:max-w-[58%]";
+
+export const HEADER_CATEGORY_PROMO_BADGE_CLASS =
+  "relative -top-1 mb-3 inline-flex rounded-full bg-[rgba(110,108,77,0.2)] px-3 py-1 text-xs font-bold leading-4 text-marco-slate";
+
+export const HEADER_CATEGORY_PROMO_HEADLINE_CLASS =
+  "mb-3 text-2xl font-black leading-[1.15] tracking-tight text-marco-slate md:text-[28px]";
+
+export const HEADER_CATEGORY_PROMO_SUBLINE_CLASS =
+  "mb-6 text-base leading-7 text-[#475569] md:text-lg md:leading-8";
+
+export const HEADER_CATEGORY_PROMO_CTA_CLASS =
+  "inline-flex w-auto max-w-full items-center gap-2 self-start rounded-[68px] bg-marco-yellow py-2 pr-1.5 pl-4 text-sm font-bold text-marco-slate transition-[filter] hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/20 sm:gap-2.5 sm:pr-2 sm:pl-5 sm:text-base";
+
+export const HEADER_CATEGORY_PROMO_CTA_ICON_CLASS =
+  "flex size-9 shrink-0 items-center justify-center rounded-full bg-marco-slate text-white sm:size-10";

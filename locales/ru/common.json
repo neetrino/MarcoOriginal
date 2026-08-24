@@ -38,7 +38,23 @@
     "choosePhone": "Выберите номер для звонка",
     "chooseAddress": "Выберите адрес магазина или откройте карту",
     "whatsapp": "WhatsApp",
-    "viber": "Viber"
+    "viber": "Viber",
+    "socialBrands": {
+      "marcoGroup": "Marco Group",
+      "marcoElectronics": "Marco Electronics",
+      "instagramMenu": "Профили Instagram",
+      "facebookMenu": "Профили Facebook"
+    },
+    "categoryPromo": {
+      "badge": "Ограниченное предложение",
+      "cta": "КУПИТЬ СЕЙЧАС",
+      "furnitureHeadline": "Скидка до 30% на мебель для гостиной",
+      "furnitureSubline": "Переосмыслите пространство с нашей подборкой — качество, комфорт и современная элегантность.",
+      "hardwareHeadline": "Скидка до 25% на мебельную фурнитуру",
+      "hardwareSubline": "Надежные детали и аксессуары для ваших проектов.",
+      "genericHeadline": "Специальные предложения в этой категории",
+      "genericSubline": "Посмотрите подборку и найдите подходящий вариант."
+    }
   },
   "footer": {
     "shop": "Магазин",
@@ -48,6 +64,8 @@
     "legal": "Правовая информация",
     "privacyPolicy": "Политика конфиденциальности",
     "terms": "Условия",
+    "deliveryReturn": "Доставка и возврат",
+    "refundPolicy": "Политика возврата",
     "contactInfo": "Контактная информация",
     "company": "Навигация",
     "support": "Поддержка",

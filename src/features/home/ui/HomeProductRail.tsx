@@ -152,6 +152,7 @@ function HomeProductRailPages({
           onScroll={mobile.onScroll}
           pages={chunkItems(products, HOME_PRODUCT_MOBILE_PAGE_SIZE)}
           columns={HOME_PRODUCT_MOBILE_PAGE_SIZE}
+          cardLayout="mobileGrid"
           cardProps={cardProps}
           priorityCount={priorityCount}
         />
@@ -196,6 +197,7 @@ type ProductSnapPagesProps = {
   onScroll: () => void;
   pages: ProductCardItem[][];
   columns: number;
+  cardLayout?: "default" | "mobileGrid";
   cardProps: {
     locale: Locale;
     wishlistLabel: string;
@@ -211,6 +213,7 @@ function ProductSnapPages({
   onScroll,
   pages,
   columns,
+  cardLayout = "default",
   cardProps,
   priorityCount,
 }: ProductSnapPagesProps) {
@@ -238,6 +241,7 @@ function ProductSnapPages({
               <ProductCard
                 product={product}
                 priority={pageIndex === 0 && slotIndex < priorityCount}
+                layout={cardLayout}
                 {...cardProps}
               />
             </div>

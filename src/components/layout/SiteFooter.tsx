@@ -1,18 +1,38 @@
 import Image from "next/image";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 import { FooterPaymentMarks } from "@/components/layout/FooterPaymentMarks";
-import { HeaderSocialCircles } from "@/components/layout/HeaderSocialCircles";
+import { FooterSocialTiles } from "@/components/layout/FooterSocialTiles";
 import { AppLink } from "@/components/ui/AppLink";
+import {
+  FOOTER_BRAND_COLUMN_GAP_CLASS,
+  FOOTER_BRAND_DESCRIPTION_OVERLAP_CLASS,
+  FOOTER_BRAND_DESCRIPTION_TEXT_CLASS,
+  FOOTER_BRAND_LOGO_BOX_CLASS,
+  FOOTER_BRAND_LOGO_SHIFT_CLASS,
+  FOOTER_CONTACT_MAIL_ICON_CLASS,
+  FOOTER_CONTACT_ROW_CENTER_CLASS,
+  FOOTER_CONTACT_PHONE_ICON_CLASS,
+  FOOTER_GRID_COMPANY_SUPPORT_WRAPPER_CLASS,
+  FOOTER_GRID_CONTACTS_WRAPPER_CLASS,
+  FOOTER_HEADING_CLASS,
+  FOOTER_LINK_CLASS,
+  FOOTER_MAIN_GRID_CLASS,
+  FOOTER_NAV_COLUMN_HEADING_LIST_GAP_CLASS,
+  FOOTER_NAV_COLUMN_LIST_ITEM_GAP_CLASS,
+  FOOTER_NAV_THREE_COLUMN_ROW_CLASS,
+  FOOTER_SURFACE_CLASS,
+  FOOTER_TABLET_COLUMN_CENTER_CLASS,
+} from "@/components/layout/site-footer.classes";
+import {
+  FOOTER_CONTACT_MAIL_ICON_SRC,
+  FOOTER_CONTACT_PHONE_ICON_SRC,
+} from "@/components/layout/site-footer.constants";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 import type { Locale } from "@/lib/i18n/config";
 
-const NEETRINO_STUDIO_HREF = "https://neetrino.com/"; 
+const NEETRINO_STUDIO_HREF = "https://neetrino.com/";
 const MARCO_LOGO_SRC = "/logo.webp";
-const FOOTER_LINK_CLASS =
-  "text-[13px] leading-tight text-marco-slate transition-opacity hover:opacity-80 sm:text-[14px]";
-const FOOTER_HEADING_CLASS =
-  "text-[13px] font-bold uppercase leading-tight text-marco-slate sm:text-sm";
 
 type SiteFooterProps = {
   dictionary: Dictionary;
@@ -32,9 +52,11 @@ function FooterNavColumn({
   items: readonly FooterNavItem[];
 }) {
   return (
-    <div className="flex w-full flex-col gap-1.5 md:max-[1023px]:items-center md:max-[1023px]:text-center">
+    <div
+      className={`flex h-full w-full max-w-full flex-col ${FOOTER_NAV_COLUMN_HEADING_LIST_GAP_CLASS} ${FOOTER_TABLET_COLUMN_CENTER_CLASS}`}
+    >
       <p className={FOOTER_HEADING_CLASS}>{title}</p>
-      <ul className="flex flex-col gap-0.5">
+      <ul className={`flex flex-col ${FOOTER_NAV_COLUMN_LIST_ITEM_GAP_CLASS}`}>
         {items.map((item) => (
           <li key={`${item.href}-${item.label}`}>
             <AppLink
@@ -55,15 +77,27 @@ function FooterContactsColumn({ dictionary }: { dictionary: Dictionary }) {
   const footer = dictionary.footer;
 
   return (
-    <div className="flex w-full flex-col gap-2 md:max-[1023px]:items-center md:max-[1023px]:text-center">
+    <div
+      className={`flex h-full w-full max-w-full flex-col gap-2 ${FOOTER_TABLET_COLUMN_CENTER_CLASS}`}
+    >
       <p className={FOOTER_HEADING_CLASS}>{footer.contacts}</p>
-      <p className={`flex items-start gap-2 ${FOOTER_LINK_CLASS}`}>
-        <MapPin className="mt-0.5 h-[18px] w-[18px] shrink-0" aria-hidden />
-        <span>{dictionary.contact.storeAddress}</span>
-      </p>
-      <div className="flex items-start gap-2">
-        <Phone
-          className="mt-0.5 h-[18px] w-[18px] shrink-0 text-marco-slate"
+      <div className={`flex items-start gap-2 ${FOOTER_CONTACT_ROW_CENTER_CLASS}`}>
+        <MapPin
+          className="mt-0 h-[18px] w-[18px] shrink-0 -translate-x-px translate-y-[3px] self-start text-marco-slate"
+          strokeWidth={2}
+          aria-hidden
+        />
+        <p className={`${FOOTER_LINK_CLASS} leading-snug whitespace-pre-line`}>
+          {dictionary.contact.storeAddress}
+        </p>
+      </div>
+      <div className={`flex items-start gap-2 ${FOOTER_CONTACT_ROW_CENTER_CLASS}`}>
+        <Image
+          src={FOOTER_CONTACT_PHONE_ICON_SRC}
+          alt=""
+          width={18}
+          height={15}
+          className={FOOTER_CONTACT_PHONE_ICON_CLASS}
           aria-hidden
         />
         <div className="flex flex-col gap-0.5">
@@ -78,20 +112,35 @@ function FooterContactsColumn({ dictionary }: { dictionary: Dictionary }) {
           ))}
         </div>
       </div>
-      <a
-        href={`mailto:${dictionary.contact.storeEmail}`}
-        className={`flex items-start gap-2 ${FOOTER_LINK_CLASS}`}
-      >
-        <Mail className="mt-0.5 h-[18px] w-[18px] shrink-0" aria-hidden />
-        {dictionary.contact.storeEmail}
-      </a>
-      <a
-        href={`mailto:${footer.secondaryEmail}`}
-        className={`flex items-start gap-2 ${FOOTER_LINK_CLASS}`}
-      >
-        <Mail className="mt-0.5 h-[18px] w-[18px] shrink-0" aria-hidden />
-        {footer.secondaryEmail}
-      </a>
+      <div className={`flex items-start gap-2 ${FOOTER_CONTACT_ROW_CENTER_CLASS}`}>
+        <Image
+          src={FOOTER_CONTACT_MAIL_ICON_SRC}
+          alt=""
+          width={20}
+          height={14}
+          className={FOOTER_CONTACT_MAIL_ICON_CLASS}
+          aria-hidden
+        />
+        <a
+          href={`mailto:${dictionary.contact.storeEmail}`}
+          className={FOOTER_LINK_CLASS}
+        >
+          {dictionary.contact.storeEmail}
+        </a>
+      </div>
+      <div className={`flex items-start gap-2 ${FOOTER_CONTACT_ROW_CENTER_CLASS}`}>
+        <Image
+          src={FOOTER_CONTACT_MAIL_ICON_SRC}
+          alt=""
+          width={20}
+          height={14}
+          className={FOOTER_CONTACT_MAIL_ICON_CLASS}
+          aria-hidden
+        />
+        <a href={`mailto:${footer.secondaryEmail}`} className={FOOTER_LINK_CLASS}>
+          {footer.secondaryEmail}
+        </a>
+      </div>
     </div>
   );
 }
@@ -102,28 +151,26 @@ function FooterCopyrightStrip({ dictionary }: { dictionary: Dictionary }) {
 
   return (
     <div className="mt-4 flex w-full flex-row items-center justify-between gap-2 border-t border-marco-slate/15 pt-3">
-      <HeaderSocialCircles
-        instagramHref={dictionary.contact.social.instagram}
-        facebookHref={dictionary.contact.social.facebook}
-        telegramHref={dictionary.contact.social.telegram}
-        ariaLabel={dictionary.header.socialLinks}
-        instagramLabel="Instagram"
-        facebookLabel="Facebook"
-        telegramLabel="Telegram"
-      />
-      <p className="min-w-0 flex-1 px-2 text-center text-[10px] leading-tight text-marco-slate sm:text-[11px] md:text-xs">
-        <span>{footer.copyrightBefore.replace("{year}", String(year))}</span>
-        <a
-          href={NEETRINO_STUDIO_HREF}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-marco-slate no-underline hover:opacity-80"
-        >
-          {footer.creditStudio}
-        </a>
-        <span>{footer.copyrightAfter}</span>
-      </p>
-      <FooterPaymentMarks ariaLabel={footer.paymentMethods} />
+      <div className="flex shrink-0 justify-start">
+        <FooterSocialTiles dictionary={dictionary} />
+      </div>
+      <div className="scrollbar-hide flex min-w-0 flex-1 justify-center overflow-x-auto px-2">
+        <p className="inline-block whitespace-nowrap text-center text-[10px] leading-tight text-marco-slate sm:text-[11px] md:text-xs lg:text-[13px]">
+          <span>{footer.copyrightBefore.replace("{year}", String(year))}</span>
+          <a
+            href={NEETRINO_STUDIO_HREF}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-marco-slate no-underline hover:opacity-80"
+          >
+            {footer.creditStudio}
+          </a>
+          <span>{footer.copyrightAfter}</span>
+        </p>
+      </div>
+      <div className="flex shrink-0 justify-end">
+        <FooterPaymentMarks ariaLabel={footer.paymentMethods} />
+      </div>
     </div>
   );
 }
@@ -133,36 +180,64 @@ export function SiteFooter({ dictionary, locale }: SiteFooterProps) {
   const companyItems: FooterNavItem[] = [
     { href: `/${locale}/products`, label: dictionary.nav.shop },
     { href: `/${locale}/about`, label: dictionary.nav.about },
-    { href: `/${locale}/stores`, label: dictionary.nav.stores },
     { href: `/${locale}/contact`, label: dictionary.nav.contact },
+    { href: `/${locale}/brand`, label: dictionary.nav.brand },
+    { href: `/${locale}/reels`, label: dictionary.nav.reels },
   ];
   const supportItems: FooterNavItem[] = [
-    { href: `/${locale}/legal/privacy`, label: footer.privacyPolicy },
-    { href: `/${locale}/legal/terms`, label: footer.terms },
+    {
+      href: `/${locale}/delivery-return`,
+      label: footer.deliveryReturn,
+    },
+    {
+      href: `/${locale}/legal/privacy`,
+      label: footer.privacyPolicy,
+    },
+    {
+      href: `/${locale}/legal/terms`,
+      label: footer.terms,
+    },
+    {
+      href: `/${locale}/refund-policy`,
+      label: footer.refundPolicy,
+    },
   ];
 
   return (
-    <footer className="storefront-footer mt-auto hidden shrink-0 border-t border-marco-slate/10 bg-marco-footer md:block">
+    <footer className={`storefront-footer hidden md:block ${FOOTER_SURFACE_CLASS}`}>
       <div className="mx-auto max-w-7xl px-4 pb-7 pt-6 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-x-5">
-          <div className="relative flex max-w-sm flex-col md:max-[1023px]:items-center">
-            <div className="relative h-28 w-40 shrink-0 sm:h-36 sm:w-52">
+        <div className={FOOTER_MAIN_GRID_CLASS}>
+          <div
+            className={`relative flex max-w-sm flex-col md:max-[1023px]:items-center min-[1024px]:max-[1366px]:items-center lg:self-start ${FOOTER_BRAND_COLUMN_GAP_CLASS}`}
+          >
+            <div
+              className={`${FOOTER_BRAND_LOGO_BOX_CLASS} ${FOOTER_BRAND_LOGO_SHIFT_CLASS}`}
+            >
               <Image
                 src={MARCO_LOGO_SRC}
                 alt={dictionary.brand}
                 fill
-                className="object-contain object-left-top md:max-[1023px]:object-center"
-                sizes="208px"
+                className="object-contain object-left-top md:max-[1023px]:object-center min-[1024px]:max-[1366px]:object-center"
+                sizes="380px"
               />
             </div>
-            <p className="mt-3 whitespace-pre-line text-[11px] leading-snug text-marco-slate sm:text-[12px] md:max-[1023px]:text-center">
+            <p
+              className={`${FOOTER_BRAND_DESCRIPTION_OVERLAP_CLASS} ${FOOTER_BRAND_DESCRIPTION_TEXT_CLASS}`}
+            >
               {footer.brandDescription}
             </p>
           </div>
-          <div className="contents lg:flex lg:w-full lg:items-start lg:justify-between lg:gap-x-8 lg:pt-6">
-            <FooterNavColumn title={footer.company} items={companyItems} />
-            <FooterNavColumn title={footer.support} items={supportItems} />
-            <FooterContactsColumn dictionary={dictionary} />
+
+          <div className={FOOTER_NAV_THREE_COLUMN_ROW_CLASS}>
+            <div className={FOOTER_GRID_COMPANY_SUPPORT_WRAPPER_CLASS}>
+              <FooterNavColumn title={footer.company} items={companyItems} />
+            </div>
+            <div className={FOOTER_GRID_COMPANY_SUPPORT_WRAPPER_CLASS}>
+              <FooterNavColumn title={footer.support} items={supportItems} />
+            </div>
+            <div className={FOOTER_GRID_CONTACTS_WRAPPER_CLASS}>
+              <FooterContactsColumn dictionary={dictionary} />
+            </div>
           </div>
         </div>
         <FooterCopyrightStrip dictionary={dictionary} />

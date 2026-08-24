@@ -3,8 +3,40 @@
 export const PRODUCT_CARD_RADIUS_PX = 34;
 export const PRODUCT_CARD_HEIGHT_PX = 400;
 export const PRODUCT_CARD_CUTOUT_SIZE_PX = 96;
+export const PRODUCT_CARD_CORNER_MASK_TRANSLATE_PERCENT = 24;
+export const PRODUCT_CARD_MAX_WIDTH_PX = 252;
+export const PRODUCT_CARD_PLP_MAX_WIDTH_PX = 286;
 export const PRODUCT_CARD_MAX_WIDTH_CLASS = "max-w-[252px]";
 export const PRODUCT_CARD_PLP_MAX_WIDTH_CLASS = "max-w-[286px]";
+
+export const PRODUCT_CARD_PADDING_TOP_PX = 12;
+export const PRODUCT_CARD_PADDING_X_PX = 16;
+export const PRODUCT_CARD_PADDING_TOP_CSS_VAR = "--product-card-pad-top";
+export const PRODUCT_CARD_PADDING_X_CSS_VAR = "--product-card-pad-x";
+export const PRODUCT_CARD_CART_BOTTOM_MOBILE_CSS_VAR = "--product-card-cart-bottom-mobile";
+export const PRODUCT_CARD_CART_BOTTOM_DESKTOP_CSS_VAR = "--product-card-cart-bottom-desktop";
+export const PRODUCT_CARD_CART_RIGHT_DESKTOP_CSS_VAR = "--product-card-cart-right-desktop";
+export const PRODUCT_CARD_PRICE_PAD_END_CSS_VAR = "--product-card-price-pad-end";
+
+export const PRODUCT_CARD_ACTIONS_STACK_INSET_TOP_PX = 16;
+export const PRODUCT_CARD_ACTIONS_STACK_INSET_RIGHT_PX = -8;
+export const PRODUCT_CARD_ACTIONS_STACK_OUTSET_TOP_PX = 4;
+export const PRODUCT_CARD_ACTIONS_STACK_OUTSET_RIGHT_PX = 22;
+export const PRODUCT_CARD_ACTIONS_STACK_SHIFT_LEFT_PX = 3;
+export const PRODUCT_CARD_ACTIONS_STACK_MOBILE_GRID_EXTRA_RIGHT_PX = 14;
+
+export const PRODUCT_CARD_CART_BUTTON_INSET_BOTTOM_PX = 5;
+export const PRODUCT_CARD_CART_BUTTON_INSET_RIGHT_PX = 4;
+export const PRODUCT_CARD_CART_BUTTON_SIZE_PX = 48;
+export const PRODUCT_CARD_CART_FIGMA_ICON_WIDTH_PX = 19;
+export const PRODUCT_CARD_CART_FIGMA_ICON_HEIGHT_PX = 19;
+export const PRODUCT_CARD_CART_BUTTON_SPINNER_PX = 18;
+
+export const PRODUCT_CARD_PRICE_FONT_SIZE_PX = 20;
+export const PRODUCT_CARD_PRICE_LINE_HEIGHT_PX = 28;
+export const PRODUCT_CARD_OLD_PRICE_FONT_SIZE_PX = 12;
+export const PRODUCT_CARD_PRICE_ROW_END_PADDING_PX =
+  PRODUCT_CARD_CART_BUTTON_SIZE_PX + 10;
 
 /** Brand wordmark slot — matches 3001 storefront cards. */
 export const PRODUCT_CARD_BRAND_LOGO_HEIGHT_PX = 22;
@@ -28,9 +60,7 @@ export const PRODUCT_CARD_SHELL_CLASS = "bg-marco-card";
 export const PRODUCT_CARD_INK_CLASS = "text-marco-ink";
 export const PRODUCT_CARD_WISHLIST_CLASS =
   "h-8 w-8 rounded-full bg-marco-slate text-white hover:bg-marco-slate hover:brightness-95";
-export const PRODUCT_CARD_COMPARE_ACTIVE_CLASS =
-  "h-8 w-8 rounded-full bg-marco-yellow text-marco-slate";
 export const PRODUCT_CARD_CART_CLASS =
-  "h-12 w-12 bg-marco-yellow shadow-sm hover:scale-105 hover:bg-marco-yellow hover:brightness-95";
+  "bg-marco-yellow shadow-sm hover:scale-105 hover:bg-marco-yellow hover:brightness-95 active:scale-95";
 export const PRODUCT_CARD_DISCOUNT_CLASS =
   "max-w-[88px] rounded-full bg-marco-yellow px-2 py-1 text-center text-[10px] font-bold leading-tight text-white";

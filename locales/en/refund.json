@@ -1,0 +1,50 @@
+{
+  "title": "Refund Policy",
+  "lastUpdatedLabel": "Last Updated",
+  "lastUpdated": "August 24, 2026",
+  "overview": {
+    "title": "Overview",
+    "intro": "We want you to be satisfied with every purchase. This policy explains how returns and refunds work, including timelines and eligibility requirements."
+  },
+  "eligibility": {
+    "title": "Refund Eligibility",
+    "intro": "To be eligible for a refund, please ensure that:",
+    "points": [
+      "The item is unused, in original condition and in original packaging.",
+      "The return request is submitted within 14 days of delivery, unless otherwise stated.",
+      "Proof of purchase is provided (order number or receipt).",
+      "Items marked as final sale or non-returnable are excluded."
+    ]
+  },
+  "howToReturn": {
+    "title": "How to Initiate a Return",
+    "steps": [
+      "Contact our support team with your order number and reason for return.",
+      "Receive return authorization and instructions.",
+      "Ship the item via trackable method; include all original accessories and tags.",
+      "After receiving and inspecting the item, we will confirm refund approval or denial."
+    ]
+  },
+  "method": {
+    "title": "Refund Method and Timing",
+    "points": [
+      "Approved refunds are issued to the original payment method.",
+      "Processing time is typically 5–10 business days after approval; bank times may vary.",
+      "Shipping fees are not refunded unless the return is due to our error or a defective item."
+    ]
+  },
+  "nonRefundable": {
+    "title": "Non-Refundable Items",
+    "points": [
+      "Gift cards and digital items after delivery.",
+      "Personalized or custom-made items, unless defective.",
+      "Items returned without prior authorization.",
+      "Items not in original condition, damaged or with missing parts for reasons not due to our error."
+    ]
+  },
+  "contact": {
+    "title": "Contact Us",
+    "intro": "For questions about this Refund Policy or to initiate a return, write to us at",
+    "email": "marcofurniture@mail.ru"
+  }
+}

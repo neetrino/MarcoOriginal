@@ -17,6 +17,7 @@ function node(
     title: id,
     count: 0,
     imageUrl: null,
+    bannerImageUrl: null,
     children,
   };
 }

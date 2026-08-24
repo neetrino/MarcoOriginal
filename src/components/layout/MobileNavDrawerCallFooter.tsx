@@ -158,18 +158,9 @@ function DrawerSocialRow({ dictionary }: { dictionary: Dictionary }) {
   return (
     <div className="mt-5 flex shrink-0 justify-center pb-2 pt-1 sm:mt-6">
       <HeaderSocialCircles
+        dictionary={dictionary}
         className="justify-center"
-        instagramHref={dictionary.contact.social.instagram}
-        facebookHref={dictionary.contact.social.facebook}
-        telegramHref={dictionary.contact.social.telegram}
-        whatsappHref={dictionary.contact.social.whatsapp}
-        viberHref={dictionary.contact.social.viber}
-        ariaLabel={dictionary.header.socialLinks}
-        instagramLabel="Instagram"
-        facebookLabel="Facebook"
-        telegramLabel="Telegram"
-        whatsappLabel={dictionary.header.whatsapp}
-        viberLabel={dictionary.header.viber}
+        menuPlacement="top"
       />
     </div>
   );

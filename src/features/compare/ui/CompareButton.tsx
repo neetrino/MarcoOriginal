@@ -14,6 +14,8 @@ type CompareButtonProps = {
   className?: string;
   activeClassName?: string;
   iconClassName?: string;
+  inactiveIconClassName?: string;
+  activeIconClassName?: string;
   size?: "sm" | "md";
 };
 
@@ -24,12 +26,16 @@ export function CompareButton({
   className = "",
   activeClassName = "",
   iconClassName,
+  inactiveIconClassName,
+  activeIconClassName,
   size = "md",
 }: CompareButtonProps) {
   const router = useRouter();
   const [inCompare, setInCompare] = useState(initialInCompare);
   const [pending, startTransition] = useTransition();
   const iconSize = size === "sm" ? 16 : 20;
+  const inactiveIcon = inactiveIconClassName ?? iconClassName ?? "text-gray-700";
+  const activeIcon = activeIconClassName ?? iconClassName ?? "text-gray-700";
 
   function handleClick(event: MouseEvent<HTMLButtonElement>): void {
     event.preventDefault();
@@ -61,7 +67,7 @@ export function CompareButton({
     >
       <CompareIcon
         size={iconSize}
-        className={`shrink-0 ${iconClassName ?? "text-gray-700"}`}
+        className={`shrink-0 ${inCompare ? activeIcon : inactiveIcon}`}
       />
     </button>
   );

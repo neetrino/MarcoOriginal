@@ -18,7 +18,7 @@ import {
   filledTranslationsFromDrafts,
   translationsFromDrafts,
 } from "@/features/categories/domain/category-translations";
-import { CategoryDrawerImageField } from "@/features/categories/ui/CategoryDrawerImageField";
+import { CategoryDrawerMediaFields } from "@/features/categories/ui/CategoryDrawerMediaFields";
 import { CategoryLocaleTabs } from "@/features/categories/ui/CategoryLocaleTabs";
 import { CategoryParentField } from "@/features/categories/ui/CategoryParentField";
 import {
@@ -77,6 +77,9 @@ export function AddCategoryDrawer({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [removeExistingImage, setRemoveExistingImage] = useState(false);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [removeExistingBanner, setRemoveExistingBanner] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [prevOpen, setPrevOpen] = useState(open);
@@ -99,6 +102,9 @@ export function AddCategoryDrawer({
       setImageFile(null);
       setImagePreview(category?.imageUrl ?? null);
       setRemoveExistingImage(false);
+      setBannerFile(null);
+      setBannerPreview(category?.bannerImageUrl ?? null);
+      setRemoveExistingBanner(false);
       setError(null);
     }
   }
@@ -126,6 +132,8 @@ export function AddCategoryDrawer({
     formData.set("status", status);
     if (imageFile) formData.set("image", imageFile);
     if (removeExistingImage) formData.set("removeImage", "1");
+    if (bannerFile) formData.set("bannerImage", bannerFile);
+    if (removeExistingBanner) formData.set("removeBannerImage", "1");
 
     startTransition(async () => {
       setError(null);
@@ -228,19 +236,33 @@ export function AddCategoryDrawer({
             </div>
           ) : null}
 
-          <CategoryDrawerImageField
+          <CategoryDrawerMediaFields
             copy={copy}
+            showBanner={!parentId}
             imagePreview={imagePreview}
+            bannerPreview={bannerPreview}
             disabled={isPending}
-            onFileChange={(file) => {
+            onImageFileChange={(file) => {
               setImagePreview((current) => previewFromFile(current, file));
               setImageFile(file);
               setRemoveExistingImage(false);
             }}
-            onRemove={() => {
+            onImageRemove={() => {
               setImageFile(null);
               setImagePreview((current) => previewFromFile(current, null));
               if (isEdit && category?.imageUrl) setRemoveExistingImage(true);
+            }}
+            onBannerFileChange={(file) => {
+              setBannerPreview((current) => previewFromFile(current, file));
+              setBannerFile(file);
+              setRemoveExistingBanner(false);
+            }}
+            onBannerRemove={() => {
+              setBannerFile(null);
+              setBannerPreview((current) => previewFromFile(current, null));
+              if (isEdit && category?.bannerImageUrl) {
+                setRemoveExistingBanner(true);
+              }
             }}
           />
 

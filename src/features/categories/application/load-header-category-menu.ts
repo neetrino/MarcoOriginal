@@ -46,9 +46,10 @@ function toMenuNode(
   node: CategoryTreeNode<CategoryRow>,
   countById: Map<string, number>,
   images: Map<string, string>,
+  banners: Map<string, string>,
 ): HeaderCategoryNode {
   const children = node.children.map((child) =>
-    toMenuNode(child, countById, images),
+    toMenuNode(child, countById, images, banners),
   );
   const direct = countById.get(node.id) ?? 0;
   const count = children.reduce((sum, child) => sum + child.count, direct);
@@ -58,20 +59,24 @@ function toMenuNode(
     title: node.title,
     count,
     imageUrl: images.get(node.id) ?? null,
+    bannerImageUrl: banners.get(node.id) ?? null,
     children,
   };
 }
 
 async function loadCategoryImages(
   categoryIds: readonly string[],
-): Promise<Map<string, string>> {
+): Promise<{ images: Map<string, string>; banners: Map<string, string> }> {
   const images = new Map<string, string>();
-  if (categoryIds.length === 0) return images;
+  const banners = new Map<string, string>();
+  if (categoryIds.length === 0) return { images, banners };
 
   const mediaRows = await getDb()
     .select({
       categoryId: mediaAssets.categoryId,
       objectKey: mediaAssets.objectKey,
+      role: mediaAssets.role,
+      isPrimary: mediaAssets.isPrimary,
     })
     .from(mediaAssets)
     .where(
@@ -88,10 +93,15 @@ async function loadCategoryImages(
     );
 
   for (const media of mediaRows) {
-    if (!media.categoryId || images.has(media.categoryId)) continue;
-    images.set(media.categoryId, mediaPublicUrl(media.objectKey));
+    if (!media.categoryId) continue;
+    const url = mediaPublicUrl(media.objectKey);
+    if (media.role === "COVER") {
+      if (!banners.has(media.categoryId)) banners.set(media.categoryId, url);
+      continue;
+    }
+    if (!images.has(media.categoryId)) images.set(media.categoryId, url);
   }
-  return images;
+  return { images, banners };
 }
 
 async function loadHeaderCategoryMenu(
@@ -120,7 +130,7 @@ async function loadHeaderCategoryMenu(
   }
 
   const ids = mapped.map((row) => row.id);
-  const [countRows, images] = await Promise.all([
+  const [countRows, media] = await Promise.all([
     ids.length === 0
       ? Promise.resolve([])
       : getDb()
@@ -141,7 +151,7 @@ async function loadHeaderCategoryMenu(
   }
 
   return buildCategoryTree(mapped).map((node) =>
-    toMenuNode(node, countById, images),
+    toMenuNode(node, countById, media.images, media.banners),
   );
 }
 

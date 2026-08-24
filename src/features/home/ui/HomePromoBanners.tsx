@@ -80,12 +80,12 @@ function PromoLeftCard({ tile }: { tile: PromoTile }) {
         <div className="absolute inset-0 z-[1] flex flex-col pb-5 pt-4">
           <div className="min-h-0 flex-1" />
           <div
-            className="flex shrink-0 justify-start"
+            className="pointer-events-none flex shrink-0 justify-start"
             style={{
               transform: `translate(${HOME_PROMO_LEFT_CTA_OFFSET_X_PX}px, ${HOME_PROMO_LEFT_CTA_OFFSET_Y_PX}px)`,
             }}
           >
-            <HomeBannerCta label={tile.ctaLabel} variant="yellow" />
+            <HomeBannerCta label={tile.ctaLabel} variant="yellow" decorative />
           </div>
         </div>
       </AppLink>
@@ -121,9 +121,12 @@ function PromoRightCard({ tile }: { tile: PromoTile }) {
             transform: `translate(${HOME_PROMO_RIGHT_CTA_OFFSET_X_PX}px, ${HOME_PROMO_RIGHT_CTA_OFFSET_Y_PX}px)`,
           }}
         >
-          <AppLink href={tile.href} prefetchPolicy="intent" aria-label={tile.ariaLabel}>
-            <HomeBannerCta label={tile.ctaLabel} variant="slate" />
-          </AppLink>
+          <HomeBannerCta
+            label={tile.ctaLabel}
+            variant="slate"
+            href={tile.href}
+            ariaLabel={tile.ariaLabel}
+          />
         </div>
       </div>
     </div>

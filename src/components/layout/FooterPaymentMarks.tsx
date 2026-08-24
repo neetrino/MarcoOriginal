@@ -1,49 +1,38 @@
 import Image from "next/image";
 
+import {
+  FOOTER_PAYMENT_STRIP_HEIGHT_PX,
+  FOOTER_PAYMENT_STRIP_SRC,
+  FOOTER_PAYMENT_STRIP_WIDTH_PX,
+} from "@/components/layout/site-footer.constants";
+
 type FooterPaymentMarksProps = {
   ariaLabel: string;
+  compact?: boolean;
 };
 
-const PAYMENT_MARKS = [
-  {
-    src: "/assets/payments/checkout/visa.webp",
-    alt: "Visa",
-    width: 48,
-    height: 16,
-  },
-  {
-    src: "/assets/payments/checkout/mastercard.webp",
-    alt: "Mastercard",
-    width: 32,
-    height: 20,
-  },
-  {
-    src: "/assets/payments/checkout/arca.webp",
-    alt: "ArCa",
-    width: 28,
-    height: 20,
-  },
-  {
-    src: "/assets/payments/idram.webp",
-    alt: "Idram",
-    width: 48,
-    height: 16,
-  },
-] as const;
+export function FooterPaymentMarks({
+  ariaLabel,
+  compact = true,
+}: FooterPaymentMarksProps) {
+  const containerClass = compact
+    ? "flex w-full max-w-32 justify-end sm:max-w-36"
+    : "flex w-full max-w-44 justify-end sm:max-w-48";
 
-export function FooterPaymentMarks({ ariaLabel }: FooterPaymentMarksProps) {
+  const imageClass = compact
+    ? "h-auto w-full max-h-4 object-contain object-right opacity-95 sm:max-h-[18px]"
+    : "h-auto w-full max-h-5 object-contain object-right opacity-95 sm:max-h-6";
+
   return (
-    <div className="flex shrink-0 items-center gap-2" aria-label={ariaLabel}>
-      {PAYMENT_MARKS.map((mark) => (
-        <Image
-          key={mark.alt}
-          src={mark.src}
-          alt={mark.alt}
-          width={mark.width}
-          height={mark.height}
-          className="h-4 w-auto object-contain opacity-90 sm:h-[18px]"
-        />
-      ))}
+    <div className={containerClass} aria-label={ariaLabel}>
+      <Image
+        src={FOOTER_PAYMENT_STRIP_SRC}
+        alt=""
+        width={FOOTER_PAYMENT_STRIP_WIDTH_PX}
+        height={FOOTER_PAYMENT_STRIP_HEIGHT_PX}
+        className={imageClass}
+        sizes={compact ? "(max-width: 640px) 100vw, 160px" : "(max-width: 640px) 100vw, 192px"}
+      />
     </div>
   );
 }

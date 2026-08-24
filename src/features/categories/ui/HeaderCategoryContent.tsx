@@ -7,13 +7,19 @@ import {
   headerCategoryGroups,
   type HeaderCategoryNode,
 } from "@/features/categories/domain/header-category-menu";
+import {
+  resolveHeaderCategoryPromo,
+  type HeaderCategoryPromoCopy,
+} from "@/features/categories/domain/header-category-promo";
 import { HeaderCategoryGroups } from "@/features/categories/ui/HeaderCategoryGroups";
+import { HeaderCategoryPromoBanner } from "@/features/categories/ui/HeaderCategoryPromoBanner";
 import { HEADER_CATEGORY_CONTENT_PADDING_CLASS } from "@/features/categories/ui/header-category-menu.classes";
 
 type HeaderCategoryContentProps = {
   selected: HeaderCategoryNode;
   hrefFor: (slug: string) => string;
   seeAllLabel: string;
+  promoCopy: HeaderCategoryPromoCopy;
   onNavigate: () => void;
 };
 
@@ -21,11 +27,13 @@ export function HeaderCategoryContent({
   selected,
   hrefFor,
   seeAllLabel,
+  promoCopy,
   onNavigate,
 }: HeaderCategoryContentProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const headingId = `header-mega-subcats-${selected.id}`;
   const groups = headerCategoryGroups(selected);
+  const promoKey = resolveHeaderCategoryPromo(selected.slug, selected.title);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, 0);
@@ -36,6 +44,13 @@ export function HeaderCategoryContent({
       ref={scrollRef}
       className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain bg-white pt-4 pb-6 md:pt-5 md:pb-8 ${HEADER_CATEGORY_CONTENT_PADDING_CLASS}`}
     >
+      <HeaderCategoryPromoBanner
+        promoKey={promoKey}
+        href={hrefFor(selected.slug)}
+        copy={promoCopy}
+        bannerImageUrl={selected.bannerImageUrl}
+        onNavigate={onNavigate}
+      />
       <div className="flex w-full min-w-0 flex-col gap-6 md:gap-8">
         <div className="w-full shrink-0 pt-1">
           <div className="flex flex-wrap items-center gap-2.5 md:gap-3">

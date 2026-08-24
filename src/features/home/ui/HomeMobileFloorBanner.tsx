@@ -39,8 +39,8 @@ export function HomeMobileFloorBanner({
             sizes={HOME_MOBILE_FLOOR_IMAGE_SIZES}
             className="object-cover"
           />
-          <div className="absolute inset-x-4 bottom-4">
-            <HomeBannerCta label={ctaLabel} variant="yellow" />
+          <div className="pointer-events-none absolute inset-x-4 bottom-4">
+            <HomeBannerCta label={ctaLabel} variant="yellow" decorative />
           </div>
         </AppLink>
       </div>

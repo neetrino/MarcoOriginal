@@ -1,0 +1,58 @@
+{
+  "title": "Delivery and Returns",
+  "delivery": {
+    "title": "Delivery: fast, convenient and affordable",
+    "intro": "At Marco Group, we make sure that receiving your order is just as convenient as shopping.",
+    "points": [
+      "Your order will be delivered to the address you specify within 1–3 business days.",
+      "Delivery is free within a distance of 20 km.",
+      "Each additional kilometer beyond 20 km costs 150 AMD."
+    ]
+  },
+  "returnPolicy": {
+    "title": "Return Policy",
+    "intro": "To be eligible for a return, please make sure that:",
+    "points": [
+      "The item is undamaged by the buyer, in its original condition, and in the original packaging.",
+      "The return request is submitted within 14 days of purchase, unless otherwise specified.",
+      "Proof of purchase is provided (order number or receipt).",
+      "Final sale or non-returnable items cannot be returned."
+    ]
+  },
+  "howToReturn": {
+    "title": "How to start a return",
+    "steps": [
+      "Contact our support team with your order number and return request.",
+      "Receive instructions on the return terms.",
+      "Return the item including all details provided at the time of purchase, the warranty slip, and the tags.",
+      "After we receive and inspect the item, we will confirm approval or rejection of the refund."
+    ]
+  },
+  "refund": {
+    "title": "Refund method and timing",
+    "points": [
+      "Approved refunds are issued to the original payment method.",
+      "Processing time is usually 3–5 business days after approval; bank times may vary.",
+      "Shipping fees are not refunded, except when the return is due to our error or a defective item."
+    ]
+  },
+  "nonRefundable": {
+    "title": "Non-refundable items",
+    "points": [
+      "Purchases made with gift cards.",
+      "Personalized or custom-made items, except defective items.",
+      "Items returned without prior authorization.",
+      "Items that are not in original condition, are damaged, or have missing parts, unless this is due to our error."
+    ]
+  },
+  "contact": {
+    "intro": "If you have questions about delivery or returns, please contact us through the following channels",
+    "emailLabel": "Email",
+    "email": "marcogroupelectronics@gmail.com",
+    "phoneLabel": "Phone",
+    "phone": "+374 60 500 406",
+    "hoursLabel": "Business Hours",
+    "hoursWeekdays": "Monday - Saturday 10:00 - 19:00",
+    "hoursSunday": "Sunday 10:00 - 18:00"
+  }
+}

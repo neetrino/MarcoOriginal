@@ -32,7 +32,7 @@ export function SiteHeaderTopBar({
   );
 
   return (
-    <div className="hidden border-b border-gray-200 bg-white min-[1180px]:block">
+    <div className="relative z-50 hidden border-b border-gray-200 bg-white min-[1180px]:block">
       <div
         className={`${SITE_HEADER_INNER} flex w-full min-w-0 flex-nowrap items-center gap-x-2 py-2`}
       >
@@ -46,19 +46,9 @@ export function SiteHeaderTopBar({
             />
           </div>
           <HeaderSocialCircles
+            dictionary={dictionary}
             variant="header"
             className="ml-8 min-[1367px]:ml-[54px] min-h-11 min-[1367px]:min-h-9"
-            instagramHref={dictionary.contact.social.instagram}
-            facebookHref={dictionary.contact.social.facebook}
-            telegramHref={dictionary.contact.social.telegram}
-            whatsappHref={dictionary.contact.social.whatsapp}
-            viberHref={dictionary.contact.social.viber}
-            ariaLabel={dictionary.header.socialLinks}
-            instagramLabel="Instagram"
-            facebookLabel="Facebook"
-            telegramLabel="Telegram"
-            whatsappLabel={dictionary.header.whatsapp}
-            viberLabel={dictionary.header.viber}
           />
           <div className="ml-4 min-h-0 min-w-0 flex-1" aria-hidden />
         </div>

@@ -38,7 +38,23 @@
     "choosePhone": "Choose a phone number to call",
     "chooseAddress": "Choose a store address or open the map",
     "whatsapp": "WhatsApp",
-    "viber": "Viber"
+    "viber": "Viber",
+    "socialBrands": {
+      "marcoGroup": "Marco Group",
+      "marcoElectronics": "Marco Electronics",
+      "instagramMenu": "Instagram profiles",
+      "facebookMenu": "Facebook profiles"
+    },
+    "categoryPromo": {
+      "badge": "Limited offer",
+      "cta": "SHOP NOW",
+      "furnitureHeadline": "Up to 30% off living room furniture",
+      "furnitureSubline": "Reimagine the space with our selection: quality, comfort, and modern elegance.",
+      "hardwareHeadline": "Up to 25% off furniture hardware",
+      "hardwareSubline": "Reliable details and accessories for your projects.",
+      "genericHeadline": "Special offers in this category",
+      "genericSubline": "Browse the selection and find the right option for you."
+    }
   },
   "footer": {
     "shop": "Shop",
@@ -48,6 +64,8 @@
     "legal": "Legal",
     "privacyPolicy": "Privacy Policy",
     "terms": "Terms",
+    "deliveryReturn": "Delivery & returns",
+    "refundPolicy": "Refund policy",
     "contactInfo": "Contact Information",
     "company": "Navigation",
     "support": "Support",

@@ -4,6 +4,7 @@ export type HeaderCategoryNode = {
   title: string;
   count: number;
   imageUrl: string | null;
+  bannerImageUrl: string | null;
   children: HeaderCategoryNode[];
 };
 

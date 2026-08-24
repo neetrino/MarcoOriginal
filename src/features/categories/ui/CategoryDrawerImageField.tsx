@@ -4,22 +4,27 @@ import { useRef } from "react";
 import Image from "next/image";
 
 import { ADMIN_LABEL } from "@/features/admin/ui/admin-form-classes";
-import type { Dictionary } from "@/lib/i18n/get-dictionary";
-
-type CategoriesCopy = Dictionary["admin"]["categories"];
 
 type CategoryDrawerImageFieldProps = {
-  copy: CategoriesCopy;
+  label: string;
+  uploadLabel: string;
+  changeLabel: string;
+  removeLabel: string;
   imagePreview: string | null;
   disabled: boolean;
+  previewClassName?: string;
   onFileChange: (file: File | null) => void;
   onRemove: () => void;
 };
 
 export function CategoryDrawerImageField({
-  copy,
+  label,
+  uploadLabel,
+  changeLabel,
+  removeLabel,
   imagePreview,
   disabled,
+  previewClassName = "mt-3 h-28 w-28 rounded-xl border border-gray-200 object-cover",
   onFileChange,
   onRemove,
 }: CategoryDrawerImageFieldProps) {
@@ -27,7 +32,7 @@ export function CategoryDrawerImageField({
 
   return (
     <div>
-      <span className={ADMIN_LABEL}>{copy.image}</span>
+      <span className={ADMIN_LABEL}>{label}</span>
       <div className="mt-1 flex flex-wrap items-center gap-3">
         <button
           type="button"
@@ -35,7 +40,7 @@ export function CategoryDrawerImageField({
           onClick={() => fileInputRef.current?.click()}
           className="inline-flex items-center rounded-xl border border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50"
         >
-          {imagePreview ? copy.changeImage : copy.uploadImage}
+          {imagePreview ? changeLabel : uploadLabel}
         </button>
         <input
           ref={fileInputRef}
@@ -56,7 +61,7 @@ export function CategoryDrawerImageField({
             onClick={onRemove}
             className="text-sm font-medium text-gray-600 hover:text-red-600"
           >
-            {copy.removeImage}
+            {removeLabel}
           </button>
         ) : null}
       </div>
@@ -64,9 +69,9 @@ export function CategoryDrawerImageField({
         <Image
           src={imagePreview}
           alt=""
-          width={112}
+          width={224}
           height={112}
-          className="mt-3 h-28 w-28 rounded-xl border border-gray-200 object-cover"
+          className={previewClassName}
           unoptimized={imagePreview.startsWith("blob:")}
         />
       ) : null}

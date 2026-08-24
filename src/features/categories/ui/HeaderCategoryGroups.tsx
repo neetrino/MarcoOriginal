@@ -76,14 +76,14 @@ function GroupParent({
         onClick={onNavigate}
         className={HEADER_CATEGORY_PARENT_LINK_CLASS}
       >
-        <span className="flex size-[34px] shrink-0 items-center justify-center text-marco-slate">
+        <span className="mt-0.5 flex size-[34px] shrink-0 items-center justify-center text-marco-slate">
           <SubIcon imageUrl={parent.imageUrl} />
         </span>
         <span className="min-w-0 flex-1 text-left text-sm font-bold leading-[18px] tracking-[0.14px]">
           {parent.title}
         </span>
         {parent.count > 0 ? (
-          <span className="shrink-0 whitespace-nowrap text-sm tabular-nums text-marco-slate/60">
+          <span className="mt-0.5 shrink-0 whitespace-nowrap text-sm tabular-nums text-marco-slate/60">
             ({parent.count})
           </span>
         ) : null}

@@ -75,7 +75,7 @@ function CatalogCategoryNode({
   return (
     <li className="flex flex-col gap-3">
       <div
-        className={`flex items-center gap-2 ${highlighted ? CATALOG_FILTER_ROW_SELECTED : ""}`}
+        className={`flex items-start gap-2 ${highlighted ? CATALOG_FILTER_ROW_SELECTED : ""}`}
         style={depth > 0 ? { paddingLeft: depth * 14 } : undefined}
       >
         <CatalogFilterCheckRow
@@ -130,7 +130,7 @@ function CatalogCategoryExpandButton({
       aria-expanded={open}
       aria-label={open ? collapseLabel : expandLabel}
       onClick={onToggle}
-      className="flex h-8 w-8 shrink-0 items-center justify-center text-[#5d7285] hover:text-[#314158]"
+      className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center text-[#5d7285] hover:text-[#314158]"
     >
       <ChevronDown
         className={`h-5 w-5 transition-transform ${open ? "rotate-0" : "-rotate-90"}`}

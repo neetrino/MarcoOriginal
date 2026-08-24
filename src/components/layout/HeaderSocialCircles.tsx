@@ -5,34 +5,42 @@ import {
   ViberIcon,
   WhatsAppIcon,
 } from "@/components/layout/SocialIcons";
+import { SocialBrandMenu } from "@/components/layout/SocialBrandMenu";
+import {
+  buildSocialBrandMenus,
+  type SocialBrandProfile,
+} from "@/components/layout/social-brand-profiles";
 import {
   FOOTER_SOCIAL_CIRCLE_SIZE_CLASS,
   HEADER_SOCIAL_CIRCLE_CLASS,
   HEADER_SOCIAL_CIRCLE_SIZE_CLASS,
 } from "@/components/layout/site-header-classes";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 type SocialIcon = typeof InstagramIcon;
 
-type SocialLink = {
+type DirectSocialLink = {
+  kind: "link";
   href: string;
   label: string;
   Icon: SocialIcon;
 };
 
+type BrandSocialLink = {
+  kind: "brands";
+  label: string;
+  menuLabel: string;
+  profiles: readonly SocialBrandProfile[];
+  Icon: SocialIcon;
+};
+
+type SocialItem = DirectSocialLink | BrandSocialLink;
+
 type HeaderSocialCirclesProps = {
-  instagramHref: string;
-  facebookHref: string;
-  telegramHref: string;
-  whatsappHref?: string;
-  viberHref?: string;
-  ariaLabel: string;
-  instagramLabel: string;
-  facebookLabel: string;
-  telegramLabel: string;
-  whatsappLabel?: string;
-  viberLabel?: string;
+  dictionary: Dictionary;
   className?: string;
   variant?: "header" | "compact";
+  menuPlacement?: "bottom" | "top";
 };
 
 function socialHref(href: string | undefined): string | null {
@@ -43,38 +51,110 @@ function socialHref(href: string | undefined): string | null {
   return trimmed;
 }
 
-function buildSocialLinks(props: HeaderSocialCirclesProps): SocialLink[] {
-  const links: SocialLink[] = [
-    { href: props.instagramHref, label: props.instagramLabel, Icon: InstagramIcon },
-    { href: props.facebookHref, label: props.facebookLabel, Icon: FacebookIcon },
-    { href: props.telegramHref, label: props.telegramLabel, Icon: TelegramIcon },
+function buildSocialItems(dictionary: Dictionary): SocialItem[] {
+  const menus = buildSocialBrandMenus(dictionary);
+  const social = dictionary.contact.social;
+  const items: SocialItem[] = [
+    {
+      kind: "brands",
+      label: "Instagram",
+      menuLabel: menus.instagramMenuLabel,
+      profiles: menus.instagram,
+      Icon: InstagramIcon,
+    },
+    {
+      kind: "brands",
+      label: "Facebook",
+      menuLabel: menus.facebookMenuLabel,
+      profiles: menus.facebook,
+      Icon: FacebookIcon,
+    },
+    { kind: "link", href: social.telegram, label: "Telegram", Icon: TelegramIcon },
   ];
 
-  if (props.whatsappHref && props.whatsappLabel) {
-    links.push({
-      href: props.whatsappHref,
-      label: props.whatsappLabel,
+  if (social.whatsapp) {
+    items.push({
+      kind: "link",
+      href: social.whatsapp,
+      label: dictionary.header.whatsapp,
       Icon: WhatsAppIcon,
     });
   }
 
-  if (props.viberHref && props.viberLabel) {
-    links.push({
-      href: props.viberHref,
-      label: props.viberLabel,
+  if (social.viber) {
+    items.push({
+      kind: "link",
+      href: social.viber,
+      label: dictionary.header.viber,
       Icon: ViberIcon,
     });
   }
 
-  return links;
+  return items;
+}
+
+function SocialCircleItem({
+  item,
+  iconClass,
+  surfaceClass,
+  menuPlacement,
+}: {
+  item: SocialItem;
+  iconClass: string;
+  surfaceClass: string;
+  menuPlacement: "bottom" | "top";
+}) {
+  const { Icon } = item;
+  const inner = <Icon className={iconClass} />;
+
+  if (item.kind === "brands") {
+    return (
+      <div role="listitem">
+        <SocialBrandMenu
+          label={item.menuLabel}
+          trigger={inner}
+          triggerClassName={surfaceClass}
+          profiles={item.profiles}
+          menuPlacement={menuPlacement}
+        />
+      </div>
+    );
+  }
+
+  const href = socialHref(item.href);
+  if (!href) {
+    return (
+      <span
+        role="listitem"
+        className={`${surfaceClass} opacity-40`}
+        aria-label={item.label}
+      >
+        {inner}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      role="listitem"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={surfaceClass}
+      aria-label={item.label}
+    >
+      {inner}
+    </a>
+  );
 }
 
 export function HeaderSocialCircles({
+  dictionary,
   className = "",
   variant = "compact",
-  ...props
+  menuPlacement = "bottom",
 }: HeaderSocialCirclesProps) {
-  const links = buildSocialLinks(props);
+  const items = buildSocialItems(dictionary);
   const sizeClass =
     variant === "header"
       ? HEADER_SOCIAL_CIRCLE_SIZE_CLASS
@@ -84,46 +164,23 @@ export function HeaderSocialCircles({
     variant === "header"
       ? "h-5 w-5 min-[1367px]:h-3.5 min-[1367px]:w-3.5"
       : "h-4 w-4";
+  const surfaceClass = `${HEADER_SOCIAL_CIRCLE_CLASS} ${sizeClass}`;
 
   return (
     <div
       className={`flex shrink-0 items-center ${gapClass} ${className}`}
       role="list"
-      aria-label={props.ariaLabel}
+      aria-label={dictionary.header.socialLinks}
     >
-      {links.map((link) => {
-        const href = socialHref(link.href);
-        const { Icon } = link;
-        const inner = <Icon className={iconClass} />;
-        const surfaceClass = `${HEADER_SOCIAL_CIRCLE_CLASS} ${sizeClass}`;
-
-        if (!href) {
-          return (
-            <span
-              key={link.label}
-              role="listitem"
-              className={`${surfaceClass} opacity-40`}
-              aria-label={link.label}
-            >
-              {inner}
-            </span>
-          );
-        }
-
-        return (
-          <a
-            key={link.label}
-            role="listitem"
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={surfaceClass}
-            aria-label={link.label}
-          >
-            {inner}
-          </a>
-        );
-      })}
+      {items.map((item) => (
+        <SocialCircleItem
+          key={item.label}
+          item={item}
+          iconClass={iconClass}
+          surfaceClass={surfaceClass}
+          menuPlacement={menuPlacement}
+        />
+      ))}
     </div>
   );
 }

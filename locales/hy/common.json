@@ -38,7 +38,23 @@
     "choosePhone": "Ընտրեք զանգահարելու համարը",
     "chooseAddress": "Ընտրեք խանութի հասցեն կամ բացեք քարտեզը",
     "whatsapp": "WhatsApp",
-    "viber": "Viber"
+    "viber": "Viber",
+    "socialBrands": {
+      "marcoGroup": "Marco Group",
+      "marcoElectronics": "Marco Electronics",
+      "instagramMenu": "Instagram էջեր",
+      "facebookMenu": "Facebook էջեր"
+    },
+    "categoryPromo": {
+      "badge": "Սահմանափակ առաջարկ",
+      "cta": "ԳՆԵԼ ՀԻՄԱ",
+      "furnitureHeadline": "Մինչև 30% զեղչ հյուրասենյակի կահույքի համար",
+      "furnitureSubline": "Վերաիմաստավորեք տարածքը մեր ընտրանքով՝ որակ, հարմարավետություն և ժամանակակից էլեգանտություն։",
+      "hardwareHeadline": "Մինչև 25% զեղչ կահույքի ֆուրնիտուրայի վրա",
+      "hardwareSubline": "Հուսալի մանրամասներ և աքսեսուարներ՝ ձեր նախագծերի համար։",
+      "genericHeadline": "Հատուկ առաջարկներ այս կատեգորիայում",
+      "genericSubline": "Դիտեք ընտրանին և գտեք ձեզ հարմար տարբերակը։"
+    }
   },
   "footer": {
     "shop": "Խանութ",
@@ -48,6 +64,8 @@
     "legal": "Իրավական",
     "privacyPolicy": "Գաղտնիության քաղաքականություն",
     "terms": "Օգտագործման պայմաններ",
+    "deliveryReturn": "Առաքում և վերադարձ",
+    "refundPolicy": "Վերադարձի քաղաքականություն",
     "contactInfo": "Կապի տվյալներ",
     "company": "Նավիգացիա",
     "support": "Աջակցություն",

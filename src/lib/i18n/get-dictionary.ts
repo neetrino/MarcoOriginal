@@ -9,6 +9,10 @@ import enCatalog from "@/locales/en/catalog.json";
 import enCheckout from "@/locales/en/checkout.json";
 import enCommon from "@/locales/en/common.json";
 import enContact from "@/locales/en/contact.json";
+import enDelivery from "@/locales/en/delivery.json";
+import enPrivacy from "@/locales/en/privacy.json";
+import enRefund from "@/locales/en/refund.json";
+import enTerms from "@/locales/en/terms.json";
 import enStores from "@/locales/en/stores.json";
 import enHome from "@/locales/en/home.json";
 import enProduct from "@/locales/en/product.json";
@@ -25,6 +29,10 @@ import hyCatalog from "@/locales/hy/catalog.json";
 import hyCheckout from "@/locales/hy/checkout.json";
 import hyCommon from "@/locales/hy/common.json";
 import hyContact from "@/locales/hy/contact.json";
+import hyDelivery from "@/locales/hy/delivery.json";
+import hyPrivacy from "@/locales/hy/privacy.json";
+import hyRefund from "@/locales/hy/refund.json";
+import hyTerms from "@/locales/hy/terms.json";
 import hyStores from "@/locales/hy/stores.json";
 import hyHome from "@/locales/hy/home.json";
 import hyProduct from "@/locales/hy/product.json";
@@ -41,6 +49,10 @@ import ruCatalog from "@/locales/ru/catalog.json";
 import ruCheckout from "@/locales/ru/checkout.json";
 import ruCommon from "@/locales/ru/common.json";
 import ruContact from "@/locales/ru/contact.json";
+import ruDelivery from "@/locales/ru/delivery.json";
+import ruPrivacy from "@/locales/ru/privacy.json";
+import ruRefund from "@/locales/ru/refund.json";
+import ruTerms from "@/locales/ru/terms.json";
 import ruStores from "@/locales/ru/stores.json";
 import ruHome from "@/locales/ru/home.json";
 import ruProduct from "@/locales/ru/product.json";
@@ -52,6 +64,10 @@ type LocaleNamespaces = {
   common: typeof hyCommon;
   home: typeof hyHome;
   contact: typeof hyContact;
+  deliveryReturn: typeof hyDelivery;
+  privacy: typeof hyPrivacy;
+  terms: typeof hyTerms;
+  refundPolicy: typeof hyRefund;
   stores: typeof hyStores;
   about: typeof hyAbout;
   admin: typeof hyAdmin;
@@ -74,6 +90,10 @@ function buildDictionary(namespaces: LocaleNamespaces) {
     footer: namespaces.common.footer,
     home: namespaces.home,
     contact: namespaces.contact,
+    deliveryReturn: namespaces.deliveryReturn,
+    privacy: namespaces.privacy,
+    terms: namespaces.terms,
+    refundPolicy: namespaces.refundPolicy,
     stores: namespaces.stores,
     about: namespaces.about,
     admin: namespaces.admin,
@@ -94,6 +114,10 @@ const dictionaries = {
     common: hyCommon,
     home: hyHome,
     contact: hyContact,
+    deliveryReturn: hyDelivery,
+    privacy: hyPrivacy,
+    terms: hyTerms,
+    refundPolicy: hyRefund,
     stores: hyStores,
     about: hyAbout,
     admin: hyAdmin,
@@ -111,6 +135,10 @@ const dictionaries = {
     common: enCommon,
     home: enHome,
     contact: enContact,
+    deliveryReturn: enDelivery,
+    privacy: enPrivacy,
+    terms: enTerms,
+    refundPolicy: enRefund,
     stores: enStores,
     about: enAbout,
     admin: enAdmin,
@@ -128,6 +156,10 @@ const dictionaries = {
     common: ruCommon,
     home: ruHome,
     contact: ruContact,
+    deliveryReturn: ruDelivery,
+    privacy: ruPrivacy,
+    terms: ruTerms,
+    refundPolicy: ruRefund,
     stores: ruStores,
     about: ruAbout,
     admin: ruAdmin,

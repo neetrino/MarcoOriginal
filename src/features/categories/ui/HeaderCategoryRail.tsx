@@ -66,14 +66,14 @@ function RailRow({
           : HEADER_CATEGORY_ROOT_IDLE_CLASS
       }`}
     >
-      <span className="flex size-10 shrink-0 items-center justify-center p-1 text-marco-slate">
+      <span className="mt-1 flex size-10 shrink-0 items-center justify-center p-1 text-marco-slate">
         <RailIcon imageUrl={category.imageUrl} />
       </span>
-      <span className="min-w-0 flex-1 py-2 pr-1 text-left break-words whitespace-normal [overflow-wrap:anywhere]">
+      <span className="min-w-0 flex-1 pt-2 pb-1 pr-1 text-left break-words whitespace-normal [overflow-wrap:anywhere]">
         {category.title}
       </span>
       <ChevronRight
-        className="size-[18px] shrink-0 self-center text-marco-slate/55 md:size-5"
+        className="mt-2 size-[18px] shrink-0 self-start text-marco-slate/55 md:size-5"
         strokeWidth={2}
         aria-hidden
       />

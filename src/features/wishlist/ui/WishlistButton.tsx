@@ -17,6 +17,8 @@ type WishlistButtonProps = {
   className?: string;
   activeClassName?: string;
   iconClassName?: string;
+  inactiveIconClassName?: string;
+  activeIconClassName?: string;
   size?: "sm" | "md";
 };
 
@@ -29,12 +31,20 @@ export function WishlistButton({
   className = "",
   activeClassName = "",
   iconClassName,
+  inactiveIconClassName,
+  activeIconClassName,
   size = "md",
 }: WishlistButtonProps) {
   const router = useRouter();
   const [inWishlist, setInWishlist] = useState(initialInWishlist);
   const [pending, startTransition] = useTransition();
   const iconClass = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  const inactiveIcon =
+    inactiveIconClassName ??
+    (iconClassName ? `fill-none ${iconClassName}` : "fill-transparent text-gray-700");
+  const activeIcon =
+    activeIconClassName ??
+    (iconClassName ? `fill-current ${iconClassName}` : "fill-red-500 text-red-500");
 
   function handleClick(event: MouseEvent<HTMLButtonElement>): void {
     event.preventDefault();
@@ -76,13 +86,8 @@ export function WishlistButton({
       }`}
     >
       <Heart
-        className={`${iconClass} ${
-          inWishlist
-            ? iconClassName
-              ? `fill-current ${iconClassName}`
-              : "fill-red-500 text-red-500"
-            : `fill-transparent ${iconClassName ?? "text-gray-700"}`
-        }`}
+        className={`${iconClass} ${inWishlist ? activeIcon : inactiveIcon}`}
+        strokeWidth={2}
         aria-hidden
       />
     </button>

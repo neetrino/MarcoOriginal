@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 import { AppLink } from "@/components/ui/AppLink";
 import { AddToCartButton } from "@/features/cart/ui/AddToCartButton";
@@ -7,8 +8,20 @@ import type { ProductTag } from "@/db/schema";
 import { ProductCardBrand } from "@/features/products/ui/ProductCardBrand";
 import { ProductWarrantyBadge } from "@/features/products/ui/ProductCardMeta";
 import {
+  PRODUCT_CARD_ACTIONS_STACK_INSET_RIGHT_PX,
+  PRODUCT_CARD_ACTIONS_STACK_INSET_TOP_PX,
+  PRODUCT_CARD_ACTIONS_STACK_MOBILE_GRID_EXTRA_RIGHT_PX,
+  PRODUCT_CARD_ACTIONS_STACK_OUTSET_RIGHT_PX,
+  PRODUCT_CARD_ACTIONS_STACK_OUTSET_TOP_PX,
+  PRODUCT_CARD_ACTIONS_STACK_SHIFT_LEFT_PX,
+  PRODUCT_CARD_CART_BOTTOM_DESKTOP_CSS_VAR,
+  PRODUCT_CARD_CART_BOTTOM_MOBILE_CSS_VAR,
+  PRODUCT_CARD_CART_BUTTON_INSET_BOTTOM_PX,
+  PRODUCT_CARD_CART_BUTTON_INSET_RIGHT_PX,
   PRODUCT_CARD_CART_CLASS,
-  PRODUCT_CARD_COMPARE_ACTIVE_CLASS,
+  PRODUCT_CARD_CART_MOBILE_BOTTOM_PX,
+  PRODUCT_CARD_CART_RIGHT_DESKTOP_CSS_VAR,
+  PRODUCT_CARD_CORNER_MASK_TRANSLATE_PERCENT,
   PRODUCT_CARD_CUTOUT_SIZE_PX,
   PRODUCT_CARD_DISCOUNT_CLASS,
   PRODUCT_CARD_HEIGHT_PX,
@@ -19,6 +32,15 @@ import {
   PRODUCT_CARD_MOBILE_NOTCH_HEIGHT_PX,
   PRODUCT_CARD_MOBILE_NOTCH_TOP_RADIUS_PX,
   PRODUCT_CARD_MOBILE_NOTCH_WIDTH_PX,
+  PRODUCT_CARD_OLD_PRICE_FONT_SIZE_PX,
+  PRODUCT_CARD_PADDING_TOP_CSS_VAR,
+  PRODUCT_CARD_PADDING_TOP_PX,
+  PRODUCT_CARD_PADDING_X_CSS_VAR,
+  PRODUCT_CARD_PADDING_X_PX,
+  PRODUCT_CARD_PRICE_FONT_SIZE_PX,
+  PRODUCT_CARD_PRICE_LINE_HEIGHT_PX,
+  PRODUCT_CARD_PRICE_PAD_END_CSS_VAR,
+  PRODUCT_CARD_PRICE_ROW_END_PADDING_PX,
   PRODUCT_CARD_PRICE_TO_BRAND_GAP_PX,
   PRODUCT_CARD_RADIUS_PX,
   PRODUCT_CARD_SHELL_CLASS,
@@ -48,6 +70,8 @@ export type ProductCardItem = {
   tags?: readonly ProductTag[];
 };
 
+type ProductCardLayout = "default" | "mobileGrid";
+
 type ProductCardProps = {
   product: ProductCardItem;
   locale: Locale;
@@ -57,6 +81,7 @@ type ProductCardProps = {
   isSignedIn: boolean;
   priority?: boolean;
   maxWidthClassName?: string;
+  layout?: ProductCardLayout;
 };
 
 export function ProductCard({
@@ -68,11 +93,28 @@ export function ProductCard({
   isSignedIn,
   priority = false,
   maxWidthClassName = PRODUCT_CARD_MAX_WIDTH_CLASS,
+  layout = "default",
 }: ProductCardProps) {
   const radius = PRODUCT_CARD_RADIUS_PX;
+  const cornerTranslatePx = Math.round(
+    (PRODUCT_CARD_CUTOUT_SIZE_PX * PRODUCT_CARD_CORNER_MASK_TRANSLATE_PERCENT) /
+      100,
+  );
+
+  const shellStyle = {
+    [PRODUCT_CARD_PADDING_X_CSS_VAR]: `${PRODUCT_CARD_PADDING_X_PX}px`,
+    [PRODUCT_CARD_PADDING_TOP_CSS_VAR]: `${PRODUCT_CARD_PADDING_TOP_PX}px`,
+    [PRODUCT_CARD_CART_BOTTOM_MOBILE_CSS_VAR]: `${PRODUCT_CARD_CART_MOBILE_BOTTOM_PX}px`,
+    [PRODUCT_CARD_CART_BOTTOM_DESKTOP_CSS_VAR]: `${PRODUCT_CARD_CART_BUTTON_INSET_BOTTOM_PX}px`,
+    [PRODUCT_CARD_CART_RIGHT_DESKTOP_CSS_VAR]: `${PRODUCT_CARD_CART_BUTTON_INSET_RIGHT_PX}px`,
+    [PRODUCT_CARD_PRICE_PAD_END_CSS_VAR]: `${PRODUCT_CARD_PRICE_ROW_END_PADDING_PX}px`,
+  } as CSSProperties;
 
   return (
-    <div className={`relative z-10 min-w-0 w-full ${maxWidthClassName}`}>
+    <div
+      className={`relative z-10 min-w-0 w-full font-sans hover:z-30 focus-within:z-30 max-md:[--product-card-pad-x:0px] max-md:[--product-card-pad-top:0px] ${maxWidthClassName}`}
+      style={shellStyle}
+    >
       <article
         className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden ${PRODUCT_CARD_SHELL_CLASS}`}
         style={{ height: PRODUCT_CARD_HEIGHT_PX, borderRadius: radius }}
@@ -84,7 +126,7 @@ export function ProductCard({
           style={{ borderRadius: radius }}
           aria-label={product.title}
         />
-        <ProductCardCutouts />
+        <ProductCardCutouts cornerTranslatePx={cornerTranslatePx} />
         <ProductCardBody product={product} priority={priority} />
       </article>
       <ProductCardActions
@@ -94,12 +136,17 @@ export function ProductCard({
         compareLabel={compareLabel}
         addToCartLabel={addToCartLabel}
         isSignedIn={isSignedIn}
+        layout={layout}
       />
     </div>
   );
 }
 
-function ProductCardCutouts() {
+function ProductCardCutouts({
+  cornerTranslatePx,
+}: {
+  cornerTranslatePx: number;
+}) {
   return (
     <>
       <span
@@ -108,7 +155,7 @@ function ProductCardCutouts() {
         style={{
           width: PRODUCT_CARD_CUTOUT_SIZE_PX,
           height: PRODUCT_CARD_CUTOUT_SIZE_PX,
-          transform: "translate(23px, 23px)",
+          transform: `translate(${cornerTranslatePx}px, ${cornerTranslatePx}px)`,
         }}
       />
       <span
@@ -206,16 +253,23 @@ function ProductCardBody({
         ) : null}
         <div className="mt-auto w-full min-w-0">
           <div
-            className="min-w-0 max-md:pr-0 md:pr-14"
+            className="min-w-0 max-md:pr-0 md:[padding-right:var(--product-card-price-pad-end)]"
             style={{ marginBottom: PRODUCT_CARD_PRICE_TO_BRAND_GAP_PX }}
           >
             <p
-              className={`whitespace-nowrap text-xl font-black ${PRODUCT_CARD_INK_CLASS}`}
+              className={`whitespace-nowrap font-black ${PRODUCT_CARD_INK_CLASS}`}
+              style={{
+                fontSize: PRODUCT_CARD_PRICE_FONT_SIZE_PX,
+                lineHeight: `${PRODUCT_CARD_PRICE_LINE_HEIGHT_PX}px`,
+              }}
             >
               {product.priceFormatted}
             </p>
             {product.compareAtFormatted ? (
-              <p className="text-xs text-gray-400 line-through">
+              <p
+                className="text-gray-400 line-through"
+                style={{ fontSize: PRODUCT_CARD_OLD_PRICE_FONT_SIZE_PX }}
+              >
                 {product.compareAtFormatted}
               </p>
             ) : null}
@@ -237,10 +291,28 @@ function ProductCardActions({
   compareLabel,
   addToCartLabel,
   isSignedIn,
+  layout,
 }: Omit<ProductCardProps, "priority" | "maxWidthClassName">) {
+  const topOffsetPx =
+    PRODUCT_CARD_ACTIONS_STACK_INSET_TOP_PX -
+    PRODUCT_CARD_ACTIONS_STACK_OUTSET_TOP_PX;
+  const rightOffsetPx =
+    PRODUCT_CARD_ACTIONS_STACK_INSET_RIGHT_PX -
+    PRODUCT_CARD_ACTIONS_STACK_OUTSET_RIGHT_PX +
+    PRODUCT_CARD_ACTIONS_STACK_SHIFT_LEFT_PX +
+    (layout === "mobileGrid"
+      ? PRODUCT_CARD_ACTIONS_STACK_MOBILE_GRID_EXTRA_RIGHT_PX
+      : 0);
+
   return (
     <>
-      <div className="absolute top-4 right-2 z-50 flex flex-col items-end gap-2 max-md:right-3.5">
+      <div
+        className="absolute z-50 flex flex-col items-end gap-2"
+        style={{
+          top: `calc(var(${PRODUCT_CARD_PADDING_TOP_CSS_VAR}, ${PRODUCT_CARD_PADDING_TOP_PX}px) + ${topOffsetPx}px)`,
+          right: `calc(var(${PRODUCT_CARD_PADDING_X_CSS_VAR}, ${PRODUCT_CARD_PADDING_X_PX}px) + ${rightOffsetPx}px)`,
+        }}
+      >
         <WishlistButton
           locale={locale}
           productId={product.id}
@@ -249,7 +321,8 @@ function ProductCardActions({
           label={wishlistLabel}
           size="sm"
           className={PRODUCT_CARD_WISHLIST_CLASS}
-          iconClassName="text-white"
+          inactiveIconClassName="fill-none text-white"
+          activeIconClassName="fill-red-500 text-red-500"
         />
         <CompareButton
           productId={product.id}
@@ -257,8 +330,8 @@ function ProductCardActions({
           label={compareLabel}
           size="sm"
           className={PRODUCT_CARD_WISHLIST_CLASS}
-          activeClassName={PRODUCT_CARD_COMPARE_ACTIVE_CLASS}
-          iconClassName="text-current"
+          inactiveIconClassName="text-white"
+          activeIconClassName="text-marco-yellow"
         />
         {product.discountPercent != null ? (
           <span className={PRODUCT_CARD_DISCOUNT_CLASS}>
@@ -266,16 +339,18 @@ function ProductCardActions({
           </span>
         ) : null}
       </div>
-      <div className="absolute bottom-[-26px] left-1/2 z-30 -translate-x-1/2 md:right-1 md:bottom-1 md:left-auto md:translate-x-0">
-        <AddToCartButton
-          productId={product.id}
-          label={addToCartLabel}
-          disabled={!product.inStock}
-          size="sm"
-          imageUrl={product.imageUrl}
-          className={PRODUCT_CARD_CART_CLASS}
-          iconClassName="text-white"
-        />
+      <div className="pointer-events-none absolute max-md:z-50 max-md:bottom-[var(--product-card-cart-bottom-mobile)] max-md:left-1/2 max-md:right-auto max-md:-translate-x-1/2 md:z-30 md:bottom-[var(--product-card-cart-bottom-desktop)] md:left-auto md:right-[var(--product-card-cart-right-desktop)] md:translate-x-0">
+        <div className="pointer-events-auto">
+          <AddToCartButton
+            productId={product.id}
+            label={addToCartLabel}
+            disabled={!product.inStock}
+            size="sm"
+            iconVariant="figma"
+            imageUrl={product.imageUrl}
+            className={PRODUCT_CARD_CART_CLASS}
+          />
+        </div>
       </div>
     </>
   );

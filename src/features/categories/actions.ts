@@ -6,7 +6,12 @@ import { z } from "zod";
 
 import { getDb } from "@/db/client";
 import { categories, type TranslationsJson } from "@/db/schema";
-import { persistCategoryImage, removeCategoryImage } from "@/features/categories/application/persist-category-media";
+import {
+  persistCategoryBannerImage,
+  persistCategoryImage,
+  removeCategoryBannerImage,
+  removeCategoryImage,
+} from "@/features/categories/application/persist-category-media";
 import { isInvalidCategoryParent } from "@/features/categories/domain/category-tree";
 import { requireAdmin } from "@/lib/auth/policies";
 import { invalidateProductsCache } from "@/lib/cache/invalidate-public";
@@ -274,6 +279,8 @@ async function persistDrawerImage(
 ): Promise<Result<{ id: string }>> {
   const image = formData.get("image");
   const removeImage = formData.get("removeImage") === "1";
+  const bannerImage = formData.get("bannerImage");
+  const removeBannerImage = formData.get("removeBannerImage") === "1";
 
   if (image instanceof File && image.size > 0) {
     const mediaResult = await persistCategoryImage(categoryId, image);
@@ -282,6 +289,15 @@ async function persistDrawerImage(
     }
   } else if (removeImage) {
     await removeCategoryImage(categoryId);
+  }
+
+  if (bannerImage instanceof File && bannerImage.size > 0) {
+    const mediaResult = await persistCategoryBannerImage(categoryId, bannerImage);
+    if (mediaResult.error) {
+      return err("VALIDATION_ERROR", mediaResult.error);
+    }
+  } else if (removeBannerImage) {
+    await removeCategoryBannerImage(categoryId);
   }
 
   revalidateCategories(locale);

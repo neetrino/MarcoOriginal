@@ -21,6 +21,7 @@ export type AdminCategoryListItem = {
   parentTitle: string | null;
   sortOrder: number;
   imageUrl: string | null;
+  bannerImageUrl: string | null;
   childCount: number;
   translations: TranslationsJson;
 };
@@ -50,11 +51,14 @@ export async function listAdminCategories(
   }
 
   const images = new Map<string, string>();
+  const banners = new Map<string, string>();
   if (rows.length > 0) {
     const mediaRows = await getDb()
       .select({
         categoryId: mediaAssets.categoryId,
         objectKey: mediaAssets.objectKey,
+        role: mediaAssets.role,
+        isPrimary: mediaAssets.isPrimary,
       })
       .from(mediaAssets)
       .where(
@@ -70,9 +74,13 @@ export async function listAdminCategories(
       );
 
     for (const media of mediaRows) {
-      if (!media.categoryId || images.has(media.categoryId)) continue;
-      if (!byId.has(media.categoryId)) continue;
-      images.set(media.categoryId, mediaPublicUrl(media.objectKey));
+      if (!media.categoryId || !byId.has(media.categoryId)) continue;
+      const url = mediaPublicUrl(media.objectKey);
+      if (media.role === "COVER") {
+        if (!banners.has(media.categoryId)) banners.set(media.categoryId, url);
+        continue;
+      }
+      if (!images.has(media.categoryId)) images.set(media.categoryId, url);
     }
   }
 
@@ -92,6 +100,7 @@ export async function listAdminCategories(
       parentTitle,
       sortOrder: row.sortOrder,
       imageUrl: images.get(row.id) ?? null,
+      bannerImageUrl: banners.get(row.id) ?? null,
       childCount: childCount.get(row.id) ?? 0,
       translations: row.translations,
     };

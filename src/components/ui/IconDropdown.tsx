@@ -12,8 +12,13 @@ type IconDropdownProps = {
   trigger: React.ReactNode | ((open: boolean) => React.ReactNode);
   children: React.ReactNode;
   triggerClassName?: string;
+  className?: string;
   /** Where the menu opens relative to the trigger. Default: below. */
   menuPlacement?: "bottom" | "top";
+  /** Horizontal alignment of the menu relative to the trigger. Default: right. */
+  menuAlign?: "left" | "right";
+  /** Replaces the default menu surface classes. */
+  menuSurfaceClass?: string;
   /** Open on pointer hover (click still toggles; needed for touch). */
   openOnHover?: boolean;
 };
@@ -21,19 +26,34 @@ type IconDropdownProps = {
 const DEFAULT_TRIGGER_CLASS =
   "inline-flex h-11 items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 pr-3 text-gray-800 shadow-sm transition-colors hover:border-gray-300";
 
+const DEFAULT_MENU_SURFACE_CLASS =
+  "w-full overflow-hidden rounded-2xl border border-gray-100 bg-white py-1";
+
 export function IconDropdown({
   label,
   trigger,
   children,
   triggerClassName,
+  className = "",
   menuPlacement = "bottom",
+  menuAlign = "right",
+  menuSurfaceClass = DEFAULT_MENU_SURFACE_CLASS,
   openOnHover = false,
 }: IconDropdownProps) {
   const [open, setOpen] = useState(false);
+  const [canAnimateReveal, setCanAnimateReveal] = useState(false);
   const elevated = useHoldFlag(open, DROPDOWN_ANIMATION_MS);
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuId = useId();
+
+  useEffect(() => {
+    if (!open || canAnimateReveal) return;
+    const frame = window.requestAnimationFrame(() => {
+      setCanAnimateReveal(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [open, canAnimateReveal]);
 
   function clearCloseTimer(): void {
     if (closeTimerRef.current !== null) {
@@ -91,7 +111,7 @@ export function IconDropdown({
   return (
     <div
       ref={rootRef}
-      className={elevated ? "relative z-[210]" : "relative z-0"}
+      className={`${elevated ? "relative z-[210]" : "relative z-0"} ${className}`}
       onMouseEnter={openOnHover ? openMenu : undefined}
       onMouseLeave={openOnHover ? scheduleClose : undefined}
     >
@@ -108,12 +128,17 @@ export function IconDropdown({
       </button>
 
       <div
-        className={`absolute right-0 z-[220] grid w-max transition-[grid-template-rows,opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] ${placementOpen} ${placementGap} ${
+        className={`absolute z-[220] grid w-max transition-[grid-template-rows,opacity,transform] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          menuAlign === "left" ? "left-0" : "right-0"
+        } ${placementOpen} ${placementGap} ${
           open
             ? "translate-y-0 grid-rows-[1fr] opacity-100"
             : `pointer-events-none grid-rows-[0fr] opacity-0 ${placementClosedTransform}`
         }`}
-        style={{ transitionDuration: `${DROPDOWN_ANIMATION_MS}ms` }}
+        style={{
+          transitionDuration:
+            canAnimateReveal || !open ? `${DROPDOWN_ANIMATION_MS}ms` : "0ms",
+        }}
         aria-hidden={!open}
       >
         <div className="min-h-0 overflow-hidden">
@@ -121,7 +146,7 @@ export function IconDropdown({
             id={menuId}
             role="menu"
             aria-label={label}
-            className="w-full overflow-hidden rounded-2xl border border-gray-100 bg-white py-1"
+            className={menuSurfaceClass}
           >
             <div
               className="flex w-full flex-col"

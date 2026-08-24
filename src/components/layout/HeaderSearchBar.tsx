@@ -6,6 +6,7 @@ import {
 } from "@/components/layout/site-header-classes";
 import { AppLink } from "@/components/ui/AppLink";
 import { HeaderCategoriesDrawer } from "@/features/categories/ui/HeaderCategoriesDrawer";
+import type { HeaderCategoryPromoCopy } from "@/features/categories/domain/header-category-promo";
 import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -14,6 +15,7 @@ type HeaderSearchBarProps = {
   categoriesLabel: string;
   closeLabel: string;
   seeAllLabel: string;
+  promoCopy: HeaderCategoryPromoCopy;
   placeholder: string;
   submitLabel: string;
   categories: readonly HeaderCategoryNode[];
@@ -24,6 +26,7 @@ export function HeaderSearchBar({
   categoriesLabel,
   closeLabel,
   seeAllLabel,
+  promoCopy,
   placeholder,
   submitLabel,
   categories,
@@ -38,6 +41,7 @@ export function HeaderSearchBar({
             categories: categoriesLabel,
             close: closeLabel,
             seeAll: seeAllLabel,
+            promo: promoCopy,
           }}
           triggerClassName={HEADER_CATEGORIES_PILL_CLASS}
         />
