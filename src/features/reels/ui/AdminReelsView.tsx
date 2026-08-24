@@ -21,6 +21,7 @@ import type {
   AdminReelListItem,
   AdminReelsStats,
 } from "@/features/reels/application/queries";
+import { reelThumbnailSrc } from "@/features/reels/domain/reel-rules";
 import { ReelDrawer } from "@/features/reels/ui/ReelDrawer";
 import { ReelPreviewDialog } from "@/features/reels/ui/ReelPreviewDialog";
 
@@ -181,7 +182,7 @@ function AdminReelRow({
         <div className="h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
           {reel.videoUrl ? (
             <video
-              src={reel.videoUrl}
+              src={reelThumbnailSrc(reel.videoUrl)}
               className="h-full w-full object-cover"
               muted
               playsInline

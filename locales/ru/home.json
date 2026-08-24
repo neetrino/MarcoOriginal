@@ -15,5 +15,11 @@
   "closeReel": "Закрыть",
   "viewAll": "Смотреть ещё",
   "emptyFeatured": "Пока нет рекомендуемых товаров.",
-  "emptyReels": "Пока нет reels."
+  "emptyReels": "Пока нет reels.",
+  "appBannerSection": "Мобильное приложение — скачать",
+  "appBannerAlt": "Скачайте мобильное приложение",
+  "promoLeftAria": "Специальное предложение",
+  "promoRightAria": "Марко — промо-зона",
+  "promoLeftCta": "КУПИТЬ СЕЙЧАС",
+  "promoRightCta": "ЕЩЁ"
 }

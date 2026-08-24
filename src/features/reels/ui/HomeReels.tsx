@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 
 import { incrementReelViewAction } from "@/features/reels/application/manage-reels";
 import type { StorefrontReel } from "@/features/reels/application/queries";
+import { reelThumbnailSrc } from "@/features/reels/domain/reel-rules";
 import { chunkItems } from "@/features/home/paginate";
 import { HomePaginationDots } from "@/features/home/ui/HomePaginationDots";
 import { HomeSectionHeading } from "@/features/home/ui/HomeSectionHeading";
@@ -12,6 +13,8 @@ import { HOME_PAGE_SHELL_CLASS } from "@/features/home/ui/home-section-classes";
 import {
   HOME_RAIL_TO_DOTS_GAP_PX,
   HOME_REELS_LABEL_FONT_SIZE_PX,
+  HOME_REELS_MOBILE_RAIL_BLEED_LEFT_PX,
+  HOME_REELS_MOBILE_TILE_BASIS_CSS,
   HOME_REELS_TITLE_TO_RAIL_GAP_PX,
 } from "@/features/home/ui/home-section.constants";
 import { useIsMaxMd } from "@/features/home/ui/use-is-max-md";
@@ -58,7 +61,10 @@ export function HomeReels({
   }
 
   return (
-    <section className="bg-white py-8 sm:py-10" aria-labelledby="home-reels-heading">
+    <section
+      className="mt-4 bg-white py-8 sm:mt-6 sm:py-10 md:mt-8"
+      aria-labelledby="home-reels-heading"
+    >
       <div className={HOME_PAGE_SHELL_CLASS}>
         <div style={{ marginBottom: HOME_REELS_TITLE_TO_RAIL_GAP_PX }}>
           <HomeSectionHeading
@@ -135,8 +141,12 @@ function HomeReelsPagedRail({
     <div
       ref={scrollerRef}
       onScroll={onScroll}
-      className="flex min-w-0 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      style={{ scrollSnapType: "x mandatory" }}
+      className="flex min-w-0 overflow-x-auto pt-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] max-md:-ml-[var(--reels-mobile-rail-bleed)] [&::-webkit-scrollbar]:hidden"
+      style={{
+        scrollSnapType: "x mandatory",
+        ["--reels-mobile-tile-basis" as string]: HOME_REELS_MOBILE_TILE_BASIS_CSS,
+        ["--reels-mobile-rail-bleed" as string]: `${HOME_REELS_MOBILE_RAIL_BLEED_LEFT_PX}px`,
+      }}
     >
       {pages.map((page, pageIndex) => (
         <div
@@ -174,13 +184,13 @@ function HomeReelTile({
       type="button"
       title={reel.title}
       onClick={() => onOpen(reel)}
-      className="group flex min-w-0 flex-1 flex-col items-center gap-2.5 text-center transition-transform duration-200 hover:-translate-y-0.5 md:min-w-[148px] md:flex-none"
+      className="group flex min-w-0 shrink-0 flex-col items-center gap-2.5 text-center transition-transform duration-200 hover:-translate-y-0.5 max-md:flex-[0_0_var(--reels-mobile-tile-basis)] md:min-w-[148px]"
       aria-label={`${playLabel}: ${reel.title}`}
     >
       <div className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-full border border-gray-200 bg-marco-gray shadow-[0_6px_16px_rgba(0,0,0,0.08)] transition-shadow group-hover:shadow-[0_12px_26px_rgba(0,0,0,0.18)] md:h-32 md:w-32">
         <video
-          src={reel.videoUrl}
-          className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          src={reelThumbnailSrc(reel.videoUrl)}
+          className="absolute inset-0 h-full w-full object-cover object-center transition duration-300 group-hover:scale-105"
           muted
           playsInline
           preload="metadata"
@@ -188,7 +198,9 @@ function HomeReelTile({
         />
       </div>
       <span
-        className="hidden w-full font-medium text-marco-slate md:block md:whitespace-nowrap"
+        className={`w-full max-w-full font-medium text-marco-slate md:whitespace-nowrap ${
+          twoWords ? "max-md:leading-snug" : "max-md:truncate"
+        }`}
         style={{ fontSize: HOME_REELS_LABEL_FONT_SIZE_PX, lineHeight: "21px" }}
       >
         {twoWords ? (

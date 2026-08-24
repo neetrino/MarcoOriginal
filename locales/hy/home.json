@@ -15,5 +15,11 @@
   "closeReel": "Փակել",
   "viewAll": "Տեսնել ավելին",
   "emptyFeatured": "Ընտրված ապրանքներ դեռ չկան։",
-  "emptyReels": "Ռիլլեր դեռ չկան։"
+  "emptyReels": "Ռիլլեր դեռ չկան։",
+  "appBannerSection": "Բջջային հավելված — ներբեռնում",
+  "appBannerAlt": "Ներբեռնեք բջջային հավելվածը",
+  "promoLeftAria": "Հատուկ առաջարկ",
+  "promoRightAria": "Մարքո — պրոմո տարածք",
+  "promoLeftCta": "ԳՆԵԼ ՀԻՄԱ",
+  "promoRightCta": "ԱՎԵԼԻՆ"
 }

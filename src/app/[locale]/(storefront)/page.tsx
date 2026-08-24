@@ -6,6 +6,7 @@ import { listActiveHeroSlides } from "@/features/hero/application/queries";
 import { mapProductCards } from "@/features/products/map-product-cards";
 import { HomeBrands } from "@/features/home/ui/HomeBrands";
 import { HomeFeaturedProducts } from "@/features/home/ui/HomeFeaturedProducts";
+import { HomeFloorBanners } from "@/features/home/ui/HomeFloorBanners";
 import { HomeHero } from "@/features/home/ui/HomeHero";
 import { listActiveStorefrontReels } from "@/features/reels/application/queries";
 import { HomeReels } from "@/features/reels/ui/HomeReels";
@@ -141,6 +142,18 @@ export default async function HomePage({ params }: HomePageProps) {
         previousPageLabel={dictionary.catalog.previousPage}
         nextPageLabel={dictionary.catalog.nextPage}
         brands={brands}
+      />
+      <HomeFloorBanners
+        locale={locale}
+        slides={heroSlides}
+        copy={{
+          appBannerSection: dictionary.home.appBannerSection,
+          appBannerAlt: dictionary.home.appBannerAlt,
+          promoLeftAria: dictionary.home.promoLeftAria,
+          promoRightAria: dictionary.home.promoRightAria,
+          promoLeftCta: dictionary.home.promoLeftCta,
+          promoRightCta: dictionary.home.promoRightCta,
+        }}
       />
     </div>
   );

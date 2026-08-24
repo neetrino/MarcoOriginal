@@ -12,7 +12,7 @@ import {
   productCategories,
   products,
 } from "@/db/schema";
-import { loadProductBrandLogoUrls } from "@/features/products/application/load-product-brand-logos";
+import { loadProductBrandMarks } from "@/features/products/application/load-product-brand-logos";
 import { parseProductTags } from "@/features/products/domain/product-presentation";
 import type {
   CatalogPricePresence,
@@ -69,6 +69,7 @@ function toCatalogProduct(
     },
     imageUrl,
     brandLogoUrl: null,
+    brandName: null,
     warrantyYears: product.warrantyYears,
     tags: parseProductTags(product.tags),
   };
@@ -115,7 +116,7 @@ async function withProductImages(
   locale: Locale,
 ): Promise<CatalogProduct[]> {
   const productIds = rows.map((row) => row.id);
-  const [images, prices, logos] = await Promise.all([
+  const [images, prices, brandMarks] = await Promise.all([
     loadPrimaryProductImages(productIds),
     resolveProductPrices(
       rows.map((row) => ({
@@ -124,7 +125,7 @@ async function withProductImages(
         compareAtAmount: row.compareAtAmount,
       })),
     ),
-    loadProductBrandLogoUrls(productIds),
+    loadProductBrandMarks(productIds, locale),
   ]);
 
   return rows
@@ -137,9 +138,11 @@ async function withProductImages(
       if (!base) return null;
 
       const resolved = prices.get(product.id);
+      const brand = brandMarks.get(product.id);
       return {
         ...base,
-        brandLogoUrl: logos.get(product.id) ?? null,
+        brandLogoUrl: brand?.logoUrl ?? null,
+        brandName: brand?.name ?? null,
         listPriceAmount: resolved?.listAmount ?? product.priceAmount,
         priceAmount: resolved?.unitAmount ?? product.priceAmount,
         compareAtAmount: resolved?.compareAtAmount ?? null,

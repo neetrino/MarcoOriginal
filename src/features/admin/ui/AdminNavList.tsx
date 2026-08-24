@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 
 import {
@@ -14,6 +15,7 @@ import {
   adminNavGroupToggleClass,
   adminNavIconClass,
   adminNavItemClass,
+  adminNavSeparatorClass,
 } from "@/features/admin/ui/admin-nav-classes";
 import { useAdminProductsSubnavExpanded } from "@/features/admin/ui/useAdminProductsSubnavExpanded";
 
@@ -64,10 +66,9 @@ export function AdminNavList({
         }
 
         const isActive = isAdminTabActive(tab.href, pathname, locale);
-
-        if (tab.id === "products" && !collapsed) {
-          return (
-            <div key={tab.id} className={adminNavGroupClass(isActive)}>
+        const row =
+          tab.id === "products" && !collapsed ? (
+            <div className={adminNavGroupClass(isActive)}>
               <Link
                 href={tab.href}
                 title={tab.label}
@@ -104,26 +105,31 @@ export function AdminNavList({
                 </svg>
               </button>
             </div>
+          ) : (
+            <Link
+              href={tab.href}
+              title={tab.label}
+              onClick={onNavigate}
+              className={adminNavItemClass({
+                active: isActive,
+                collapsed,
+                isSubCategory: tab.isSubCategory,
+              })}
+            >
+              <span className={adminNavIconClass(isActive)}>{tab.icon}</span>
+              {collapsed ? null : (
+                <span className="min-w-0 truncate">{tab.label}</span>
+              )}
+            </Link>
           );
-        }
 
         return (
-          <Link
-            key={tab.id}
-            href={tab.href}
-            title={tab.label}
-            onClick={onNavigate}
-            className={adminNavItemClass({
-              active: isActive,
-              collapsed,
-              isSubCategory: tab.isSubCategory,
-            })}
-          >
-            <span className={adminNavIconClass(isActive)}>{tab.icon}</span>
-            {collapsed ? null : (
-              <span className="min-w-0 truncate">{tab.label}</span>
-            )}
-          </Link>
+          <Fragment key={tab.id}>
+            {row}
+            {tab.separatorAfter ? (
+              <div className={adminNavSeparatorClass} aria-hidden />
+            ) : null}
+          </Fragment>
         );
       })}
     </>

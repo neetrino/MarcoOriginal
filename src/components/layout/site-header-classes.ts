@@ -18,7 +18,7 @@ export const HEADER_MOBILE_ROUND_CONTROL_CLASS =
   "flex shrink-0 items-center justify-center rounded-full bg-marco-slate p-2.5 text-white shadow-sm transition-[opacity,filter] hover:opacity-95 active:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-slate/25";
 
 export const HEADER_CATEGORIES_PILL_CLASS =
-  "hidden h-10 shrink-0 items-center justify-center rounded-[89px] bg-marco-slate px-4 text-xs font-medium text-white transition-[opacity,filter] hover:opacity-95 active:opacity-90 min-[1180px]:inline-flex min-[1180px]:w-[11.5rem]";
+  "hidden h-10 shrink-0 items-center justify-between gap-1 rounded-[89px] bg-marco-slate px-4 text-xs font-medium text-white transition-[opacity,filter] hover:opacity-95 active:opacity-90 min-[1180px]:inline-flex min-[1180px]:w-[11.5rem]";
 
 export const HEADER_SEARCH_SUBMIT_CLASS =
   "flex h-10 w-[7.375rem] shrink-0 items-center justify-center rounded-[89px] bg-marco-yellow px-3 text-xs font-semibold text-marco-slate transition-[filter] hover:brightness-95 active:brightness-90";

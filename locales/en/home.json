@@ -15,5 +15,11 @@
   "closeReel": "Close",
   "viewAll": "View more",
   "emptyFeatured": "No featured products yet.",
-  "emptyReels": "No reels yet."
+  "emptyReels": "No reels yet.",
+  "appBannerSection": "Mobile app download",
+  "appBannerAlt": "Download the mobile app",
+  "promoLeftAria": "Featured promo",
+  "promoRightAria": "MARCO — promotional area",
+  "promoLeftCta": "SHOP NOW",
+  "promoRightCta": "MORE"
 }

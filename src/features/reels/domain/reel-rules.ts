@@ -8,6 +8,15 @@ export type ReelTranslations = Partial<Record<Locale, ReelLocaleCopy>>;
 
 export const UNTITLED_REEL_TITLE = "Untitled";
 
+/** Media fragment so browsers paint an opening frame on poster-less reel videos. */
+export const REEL_VIDEO_FRAME_FRAGMENT = "#t=0.1" as const;
+
+/** Thumbnail `src` for a reel video — seeks past a blank first frame. */
+export function reelThumbnailSrc(videoUrl: string): string {
+  if (videoUrl.includes("#")) return videoUrl;
+  return `${videoUrl}${REEL_VIDEO_FRAME_FRAGMENT}`;
+}
+
 /** Picks the best available reel title for a locale with fallbacks. */
 export function resolveReelTranslation(
   translations: ReelTranslations,

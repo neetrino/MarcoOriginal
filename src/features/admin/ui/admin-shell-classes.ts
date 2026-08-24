@@ -9,9 +9,6 @@ export const ADMIN_SIDEBAR_ASIDE =
 export const ADMIN_SIDEBAR_NAV =
   "flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-y-contain py-4";
 
-export const ADMIN_SIDEBAR_FOOTER =
-  "shrink-0 border-t border-gray-200 p-3";
-
 /** Desktop: viewport-height shell so only the main column scrolls; sidebar stays fixed. */
 export const ADMIN_PAGE_SHELL =
   "flex min-h-screen flex-col bg-marco-gray lg:h-dvh lg:max-h-dvh lg:flex-row lg:overflow-hidden";

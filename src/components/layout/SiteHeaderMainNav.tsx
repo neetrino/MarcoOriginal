@@ -3,6 +3,7 @@ import { HeaderSearchBar } from "@/components/layout/HeaderSearchBar";
 import { LocaleCurrencySwitcher } from "@/components/layout/LocaleCurrencySwitcher";
 import { SITE_HEADER_INNER } from "@/components/layout/site-header-classes";
 import { CartDrawer } from "@/features/cart/ui/CartDrawer";
+import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
 import { CompareHeaderLink } from "@/features/compare/ui/CompareHeaderLink";
 import { WishlistHeaderLink } from "@/features/wishlist/ui/WishlistHeaderLink";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
@@ -19,6 +20,7 @@ type SiteHeaderMainNavProps = {
   cartTotalFormatted: string;
   wishlistCount: number;
   compareCount: number;
+  categories: readonly HeaderCategoryNode[];
 };
 
 export function SiteHeaderMainNav({
@@ -30,6 +32,7 @@ export function SiteHeaderMainNav({
   cartTotalFormatted,
   wishlistCount,
   compareCount,
+  categories,
 }: SiteHeaderMainNavProps) {
   return (
     <header className="relative z-40 border-b border-gray-200 bg-white">
@@ -38,8 +41,11 @@ export function SiteHeaderMainNav({
           <HeaderSearchBar
             locale={locale}
             categoriesLabel={dictionary.nav.categories}
+            closeLabel={dictionary.nav.closeMenu}
+            seeAllLabel={dictionary.nav.seeAllSubcategories}
             placeholder={dictionary.header.searchPlaceholder}
             submitLabel={dictionary.header.searchSubmit}
+            categories={categories}
           />
 
           <div className="hidden shrink-0 items-center gap-1 min-[1180px]:flex">

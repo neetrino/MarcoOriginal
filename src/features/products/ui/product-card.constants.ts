@@ -6,8 +6,16 @@ export const PRODUCT_CARD_CUTOUT_SIZE_PX = 96;
 export const PRODUCT_CARD_MAX_WIDTH_CLASS = "max-w-[252px]";
 export const PRODUCT_CARD_PLP_MAX_WIDTH_CLASS = "max-w-[286px]";
 
-export const PRODUCT_CARD_BRAND_LOGO_HEIGHT_PX = 24;
-export const PRODUCT_CARD_BRAND_LOGO_MAX_WIDTH_PX = 72;
+/** Brand wordmark slot — matches 3001 storefront cards. */
+export const PRODUCT_CARD_BRAND_LOGO_HEIGHT_PX = 22;
+export const PRODUCT_CARD_BRAND_LOGO_HEIGHT_DESKTOP_PX = 28;
+export const PRODUCT_CARD_BRAND_LOGO_MAX_WIDTH_PX = 96;
+export const PRODUCT_CARD_BRAND_LOGO_MAX_WIDTH_DESKTOP_PX = 108;
+export const PRODUCT_CARD_PRICE_TO_BRAND_GAP_PX = 33;
+export const PRODUCT_CARD_BRAND_LOGO_SLOT_CLASS =
+  "flex min-h-[22px] max-w-[96px] items-center overflow-visible md:min-h-7 md:max-w-[108px]";
+export const PRODUCT_CARD_BRAND_LOGO_BOX_CLASS =
+  "relative h-[22px] w-full max-w-[96px] shrink-0 md:h-7 md:max-w-[108px]";
 export const PRODUCT_CARD_IMAGE_WELL_HEIGHT_PX = 177;
 export const PRODUCT_CARD_IMAGE_TO_TEXT_GAP_PX = 31;
 export const PRODUCT_CARD_MOBILE_NOTCH_WIDTH_PX = 76;

@@ -45,3 +45,5 @@ export function adminNavGroupToggleClass(active: boolean): string {
     ? "shrink-0 border-l border-marco-slate/20 px-2 py-2.5 text-marco-slate hover:bg-black/5"
     : "shrink-0 border-l border-gray-200 px-2 py-2.5 text-marco-slate/60 hover:bg-white hover:text-marco-ink";
 }
+
+export const adminNavSeparatorClass = "mx-3 my-2 border-t border-gray-200";

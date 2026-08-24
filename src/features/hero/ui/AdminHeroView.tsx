@@ -14,10 +14,16 @@ import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 import { saveHeroSlideImageAction } from "@/features/hero/application/manage-hero-image";
 import {
   pickHeroLayout,
+  pickHomeFloorBanners,
   type HeroLayoutSlotKey,
+  type HomeFloorSlotKey,
 } from "@/features/hero/domain/hero-layout";
 import type { HeroMediaRole } from "@/features/hero/domain/hero-media-role";
 import type { AdminHeroSlideListItem } from "@/features/hero/application/queries";
+import {
+  AdminHeroDesktopFloorSections,
+  AdminHeroMobileFloorSection,
+} from "@/features/hero/ui/AdminHeroFloorSections";
 import {
   HERO_DESKTOP_PREVIEW_CLASS,
   HERO_DESKTOP_RADIUS_CLASS,
@@ -35,8 +41,10 @@ type AdminHeroViewProps = {
   slides: AdminHeroSlideListItem[];
 };
 
+type BannerUploadSlot = HeroLayoutSlotKey | HomeFloorSlotKey | "mobile" | "floorMobile";
+
 type UploadingTarget = {
-  slot: HeroLayoutSlotKey | "mobile";
+  slot: BannerUploadSlot;
 } | null;
 
 function roleForTab(tab: HeroBannerPlatformTab): HeroMediaRole {
@@ -48,6 +56,7 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
   const copy = getAdminCopy(locale).hero;
   const common = getAdminCopy(locale).common;
   const layout = pickHeroLayout(slides);
+  const floor = pickHomeFloorBanners(slides);
   const [activeTab, setActiveTab] = useState<HeroBannerPlatformTab>("desktop");
   const [uploading, setUploading] = useState<UploadingTarget>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -60,7 +69,7 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
 
   function runUpload(
     slide: AdminHeroSlideListItem | null,
-    slot: HeroLayoutSlotKey | "mobile",
+    slot: BannerUploadSlot,
     file: File,
   ): void {
     if (!slide) return;
@@ -151,6 +160,22 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
               </div>
             </div>
           </Card>
+          <Card className="border border-gray-100 bg-white/95 p-4 shadow-sm sm:p-6">
+            <AdminHeroDesktopFloorSections
+              copy={copy}
+              floor={floor}
+              isBusy={isBusy}
+              uploadingSlot={
+                uploading &&
+                (uploading.slot === "appDownload" ||
+                  uploading.slot === "promoLeft" ||
+                  uploading.slot === "promoRight")
+                  ? uploading.slot
+                  : null
+              }
+              onUpload={runUpload}
+            />
+          </Card>
         </div>
       ) : (
         <div
@@ -178,6 +203,17 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
               previewClassName={HERO_MOBILE_PREVIEW_CLASS}
               previewRadiusClassName={HERO_MOBILE_RADIUS_CLASS}
               onUpload={(file) => runUpload(layout.leftTop, "mobile", file)}
+            />
+          </Card>
+          <Card className="border border-gray-100 bg-white/95 p-4 shadow-sm sm:p-6">
+            <AdminHeroMobileFloorSection
+              copy={copy}
+              floor={floor}
+              isBusy={isBusy}
+              uploadingSlot={
+                uploading?.slot === "floorMobile" ? "floorMobile" : null
+              }
+              onUpload={runUpload}
             />
           </Card>
         </div>

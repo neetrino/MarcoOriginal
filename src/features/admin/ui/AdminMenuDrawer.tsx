@@ -1,13 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 import { HEADER_MOBILE_ROUND_CONTROL_CLASS } from "@/components/layout/site-header-classes";
 import { SideSheet } from "@/components/ui/SideSheet";
 import { AdminBrandMark } from "@/features/admin/ui/AdminBrandMark";
 import { AdminNavList } from "@/features/admin/ui/AdminNavList";
-import { ADMIN_STOREFRONT_LINK_CLASS } from "@/features/admin/ui/admin-surface-classes";
 import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 
 type AdminMenuDrawerProps = {
@@ -74,16 +72,6 @@ export function AdminMenuDrawer({ locale, pathname }: AdminMenuDrawerProps) {
               onNavigate={close}
             />
           </nav>
-
-          <div className="border-t border-gray-200 bg-white p-3">
-            <Link
-              href={`/${locale}`}
-              onClick={close}
-              className={ADMIN_STOREFRONT_LINK_CLASS}
-            >
-              {nav.viewStorefront}
-            </Link>
-          </div>
         </div>
       </SideSheet>
     </div>

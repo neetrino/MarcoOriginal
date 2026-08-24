@@ -29,6 +29,7 @@
 | NAV-004 | Currency switch-ը փոխում է display preference-ը, ոչ base price-ը։ |
 | NAV-005 | Mobile navigation-ը drawer է՝ focus trap, Escape close, focus restore և accessible labels-ով։ |
 | NAV-006 | Cart count-ը authoritative cart item quantity summary է, ոչ client-only fake state։ |
+| NAV-007 | Desktop header «Կատեգորիաներ»-ը բացում է left mega drawer (90% width, backdrop, Escape close)՝ root rail + subcategory groups, catalog `category` filter href-ներով։ |
 
 ### 2.2 Footer և static pages
 
@@ -40,7 +41,7 @@
 
 | ID | Պահանջ / acceptance criteria |
 |---|---|
-| HOME-001 | `/{locale}` page-ը պարունակում է Header, Hero, Featured Products, short About, CTA և Footer։ |
+| HOME-001 | `/{locale}` page-ը պարունակում է Header, Hero, Featured Products, Brands, App download banner, Promo banners և Footer։ |
 | HOME-002 | Hero query-ն վերադարձնում է միայն active slide-երը sort order-ով և locale translation-ով։ |
 | HOME-003 | Slide-ը ունի desktop/mobile media; responsive `<picture>`/image behavior-ը ճիշտ asset-ն է ընտրում։ |
 | HOME-004 | Hero action URL-ը validation է անցնում; internal URL-ը render է լինում `Link`-ով։ |
@@ -183,7 +184,7 @@
 
 ### 9.1 Shell
 
-- Responsive left sidebar՝ Home, Dashboard, Home Hero, Orders, Products, Categories, Brand, Coupons, Discounts, Users, Messages, Analytics, Delivery, Blog, Settings։
+- Responsive left sidebar՝ Home, Dashboard, Home Hero, Orders, Products (Categories, Brands, Attributes), Coupons, Discounts, Users, Reels, Messages, Analytics, Delivery, Blog, Settings։
 - Home-ը locale-aware storefront home link է։
 - Desktop sidebar-ը collapsible է, mobile-ը focus-managed drawer։
 
@@ -216,6 +217,7 @@
 
 - List + create/edit/delete/archive/active toggle/reorder։
 - Fields՝ desktop/mobile media, multilingual title/subtitle/button label, button URL, sort order, active։
+- Fixed homepage slots՝ Home hero (3 tiles), App download banner, Promo banners (left/right), mobile floor banner։
 - Media upload-ը R2 lifecycle-ով է; reorder-ը atomic կամ conflict-safe է։
 - Public home cache/tag-ը invalid է դառնում publish-affecting mutation-ից հետո։
 

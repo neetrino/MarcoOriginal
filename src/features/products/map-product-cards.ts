@@ -39,6 +39,7 @@ export function mapProductCards(
       discountPercent: product.discountPercent,
       imageUrl: product.imageUrl,
       brandLogoUrl: product.brandLogoUrl,
+      brandName: product.brandName,
       inStock: product.stockOnHand > 0,
       inWishlist: wishlistIds.has(product.id),
       inCompare: compareIds.has(product.id),

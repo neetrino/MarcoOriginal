@@ -29,6 +29,3 @@ export const ADMIN_PAGINATION_LINK_CLASS =
 
 export const ADMIN_BACK_LINK_CLASS =
   "font-medium text-marco-slate hover:underline";
-
-export const ADMIN_STOREFRONT_LINK_CLASS =
-  "flex w-full items-center justify-center gap-2 rounded-xl border border-marco-yellow bg-marco-yellow px-3 py-2.5 text-sm font-medium text-marco-slate transition-[filter] hover:brightness-95";

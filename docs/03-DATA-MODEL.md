@@ -212,7 +212,7 @@ Direct unexplained stock overwrite չի թույլատրվում։
 
 ### 7.1 `hero_slides`
 
-`translations JSONB`՝ locale title/subtitle/button label, validated button URL, sort order, active և timestamps։ Desktop/mobile assets-ը resolve են լինում `media_assets.hero_slide_id + role`-ով։
+`translations JSONB`՝ locale title/subtitle/button label, validated button URL, sort order, active և timestamps։ Desktop/mobile assets-ը resolve են լինում `media_assets.hero_slide_id + role`-ով։ Reserved rows cover homepage hero tiles, app download banner, և promo banners։
 
 ### 7.2 `blog_posts`
 

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { AdminBrandMark } from "@/features/admin/ui/AdminBrandMark";
@@ -10,11 +9,9 @@ import { AdminSidebarBrand } from "@/features/admin/ui/AdminSidebarBrand";
 import { useAdminSidebarCollapse } from "@/features/admin/ui/AdminSidebarCollapseContext";
 import {
   ADMIN_SIDEBAR_ASIDE,
-  ADMIN_SIDEBAR_FOOTER,
   ADMIN_SIDEBAR_MOBILE_BAR,
   ADMIN_SIDEBAR_NAV,
 } from "@/features/admin/ui/admin-shell-classes";
-import { ADMIN_STOREFRONT_LINK_CLASS } from "@/features/admin/ui/admin-surface-classes";
 import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 
 type AdminSidebarProps = {
@@ -45,13 +42,6 @@ export function AdminSidebar({ locale }: AdminSidebarProps) {
             collapsed={collapsed}
           />
         </nav>
-        {collapsed ? null : (
-          <div className={ADMIN_SIDEBAR_FOOTER}>
-            <Link href={`/${locale}`} className={ADMIN_STOREFRONT_LINK_CLASS}>
-              {nav.viewStorefront}
-            </Link>
-          </div>
-        )}
       </aside>
     </>
   );

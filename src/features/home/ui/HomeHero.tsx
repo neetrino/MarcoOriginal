@@ -1,7 +1,10 @@
 import Image from "next/image";
 
 import { AppLink } from "@/components/ui/AppLink";
-import { pickHeroLayout } from "@/features/hero/domain/hero-layout";
+import {
+  isHomeFloorSlotId,
+  pickHeroLayout,
+} from "@/features/hero/domain/hero-layout";
 import type { StorefrontHeroSlide } from "@/features/hero/application/queries";
 import { HomeHeroMobileCarousel } from "@/features/home/ui/HomeHeroMobileCarousel";
 
@@ -24,6 +27,7 @@ function collectMobileHeroImages(slides: StorefrontHeroSlide[]): string[] {
   const urls: string[] = [];
   const seen = new Set<string>();
   for (const slide of slides) {
+    if (isHomeFloorSlotId(slide.id)) continue;
     const url = slide.mobileImageUrl ?? slide.desktopImageUrl;
     if (!url || seen.has(url)) continue;
     seen.add(url);

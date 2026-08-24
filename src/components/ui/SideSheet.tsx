@@ -31,6 +31,9 @@ type SideSheetProps = {
   backdropBlur?: boolean;
   /** Replaces the default white rounded panel surface. */
   surfaceClassName?: string;
+  /** Replaces the default circle-close classes. */
+  closeClassName?: string;
+  closeAriaLabel?: string;
 };
 
 /**
@@ -48,6 +51,8 @@ export function SideSheet({
   closeVariant = "circle",
   backdropBlur = false,
   surfaceClassName,
+  closeClassName,
+  closeAriaLabel = "Close",
 }: SideSheetProps) {
   const mounted = useIsClient();
   const { rendered, exiting, finishExit } = useExitPresence(
@@ -135,7 +140,7 @@ export function SideSheet({
             ? "bg-black/50 backdrop-blur-[1px]"
             : "bg-black/40"
         } ${backdropClass}`}
-        aria-label="Close"
+        aria-label={closeAriaLabel}
         onClick={onClose}
       />
       <div
@@ -151,7 +156,7 @@ export function SideSheet({
                 ? "rounded-l-full rounded-r-none"
                 : "rounded-r-full rounded-l-none"
             }`}
-            aria-label="Close"
+            aria-label={closeAriaLabel}
           >
             <CloseChevron className="h-4 w-4" strokeWidth={2.5} />
           </button>
@@ -159,12 +164,15 @@ export function SideSheet({
           <button
             type="button"
             onClick={onClose}
-            className={`absolute top-5 ${closePosition} z-10 flex h-10 w-10 shrink-0 items-center justify-center bg-gray-900 text-white transition-colors hover:bg-black ${
-              isRight
-                ? "rounded-l-full rounded-r-none"
-                : "rounded-r-full rounded-l-none"
-            }`}
-            aria-label="Close"
+            className={
+              closeClassName ??
+              `absolute top-5 ${closePosition} z-10 flex h-10 w-10 shrink-0 items-center justify-center bg-gray-900 text-white transition-colors hover:bg-black ${
+                isRight
+                  ? "rounded-l-full rounded-r-none"
+                  : "rounded-r-full rounded-l-none"
+              }`
+            }
+            aria-label={closeAriaLabel}
           >
             <X className="h-4 w-4" strokeWidth={2.5} />
           </button>

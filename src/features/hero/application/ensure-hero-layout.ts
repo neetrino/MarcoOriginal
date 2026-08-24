@@ -2,13 +2,13 @@ import "server-only";
 
 import { heroSlides } from "@/db/schema";
 import { getDb } from "@/db/client";
-import { HERO_LAYOUT_SLOTS } from "@/features/hero/domain/hero-layout";
+import { ALL_HOME_BANNER_SLOTS } from "@/features/hero/domain/hero-layout";
 
-/** Ensures the three homepage hero tiles exist so admin can upload into a fixed grid. */
+/** Ensures homepage hero and floor banner slots exist for admin uploads. */
 export async function ensureHeroLayoutSlides(): Promise<void> {
   const db = getDb();
 
-  for (const slot of HERO_LAYOUT_SLOTS) {
+  for (const slot of ALL_HOME_BANNER_SLOTS) {
     const copy = { title: slot.title };
     await db
       .insert(heroSlides)

@@ -10,6 +10,7 @@ import {
   SITE_HEADER_INNER,
 } from "@/components/layout/site-header-classes";
 import { getCartHeaderSummary } from "@/features/cart/get-cart-drawer-view";
+import { getHeaderCategoryMenu } from "@/features/categories/application/load-header-category-menu";
 import { getCompareCount } from "@/features/compare/queries";
 import { getWishlistCount } from "@/features/wishlist/queries";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -41,12 +42,14 @@ async function SiteHeaderMainNavAsync({
   currency,
   dictionary,
 }: SiteHeaderProps) {
-  const [user, cartSummary, wishlistCount, compareCount] = await Promise.all([
-    getCurrentUser(),
-    getCartHeaderSummary(locale, currency),
-    getWishlistCount(),
-    getCompareCount(),
-  ]);
+  const [user, cartSummary, wishlistCount, compareCount, categories] =
+    await Promise.all([
+      getCurrentUser(),
+      getCartHeaderSummary(locale, currency),
+      getWishlistCount(),
+      getCompareCount(),
+      getHeaderCategoryMenu(locale),
+    ]);
 
   return (
     <SiteHeaderMainNav
@@ -58,6 +61,7 @@ async function SiteHeaderMainNavAsync({
       cartTotalFormatted={cartSummary.totalFormatted}
       wishlistCount={wishlistCount}
       compareCount={compareCount}
+      categories={categories}
     />
   );
 }

@@ -216,6 +216,21 @@ async function seed(): Promise<void> {
     { id: seedIds.heroHome, title: "Left, top", sortOrder: 0 },
     { id: seedIds.heroHomeBottom, title: "Left, bottom", sortOrder: 1 },
     { id: seedIds.heroHomeRight, title: "Right column", sortOrder: 2 },
+    {
+      id: seedIds.heroAppDownload,
+      title: "App download banner",
+      sortOrder: 10,
+    },
+    {
+      id: seedIds.heroPromoLeft,
+      title: "Promo banner, left",
+      sortOrder: 11,
+    },
+    {
+      id: seedIds.heroPromoRight,
+      title: "Promo banner, right",
+      sortOrder: 12,
+    },
   ] as const;
 
   for (const slot of heroSlotSeed) {

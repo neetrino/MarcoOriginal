@@ -1,6 +1,7 @@
 "use client";
 
 import type { StorefrontReel } from "@/features/reels/application/queries";
+import { reelThumbnailSrc } from "@/features/reels/domain/reel-rules";
 
 type ReelsGridTileProps = {
   reel: StorefrontReel;
@@ -25,7 +26,7 @@ export function ReelsGridTile({
       className="group relative block aspect-[9/16] w-full overflow-hidden bg-zinc-900 outline-none transition-transform duration-200 hover:scale-[1.015] focus-visible:z-[1] focus-visible:ring-2 focus-visible:ring-marco-ink/80 focus-visible:ring-offset-2"
     >
       <video
-        src={reel.videoUrl}
+        src={reelThumbnailSrc(reel.videoUrl)}
         className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.03]"
         muted
         playsInline

@@ -5,30 +5,51 @@ import {
   HEADER_SEARCH_SUBMIT_CLASS,
 } from "@/components/layout/site-header-classes";
 import { AppLink } from "@/components/ui/AppLink";
+import { HeaderCategoriesDrawer } from "@/features/categories/ui/HeaderCategoriesDrawer";
+import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
 import type { Locale } from "@/lib/i18n/config";
 
 type HeaderSearchBarProps = {
   locale: Locale;
   categoriesLabel: string;
+  closeLabel: string;
+  seeAllLabel: string;
   placeholder: string;
   submitLabel: string;
+  categories: readonly HeaderCategoryNode[];
 };
 
 export function HeaderSearchBar({
   locale,
   categoriesLabel,
+  closeLabel,
+  seeAllLabel,
   placeholder,
   submitLabel,
+  categories,
 }: HeaderSearchBarProps) {
   return (
     <div className="flex min-w-0 flex-1 items-center gap-x-[22px]">
-      <AppLink
-        href={`/${locale}/products`}
-        prefetchPolicy="intent"
-        className={HEADER_CATEGORIES_PILL_CLASS}
-      >
-        {categoriesLabel}
-      </AppLink>
+      {categories.length > 0 ? (
+        <HeaderCategoriesDrawer
+          locale={locale}
+          categories={categories}
+          copy={{
+            categories: categoriesLabel,
+            close: closeLabel,
+            seeAll: seeAllLabel,
+          }}
+          triggerClassName={HEADER_CATEGORIES_PILL_CLASS}
+        />
+      ) : (
+        <AppLink
+          href={`/${locale}/products`}
+          prefetchPolicy="intent"
+          className={HEADER_CATEGORIES_PILL_CLASS}
+        >
+          {categoriesLabel}
+        </AppLink>
+      )}
 
       <form
         action={`/${locale}/products`}

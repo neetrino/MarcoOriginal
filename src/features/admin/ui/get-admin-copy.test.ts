@@ -26,7 +26,9 @@ describe("getAdminCopy", () => {
     const en = getAdminMenuItems("en");
     const ru = getAdminMenuItems("ru");
 
+    expect(hy.find((item) => item.id === "home")?.label).toBe("Գլխավոր էջ");
     expect(hy.find((item) => item.id === "dashboard")?.label).toBe("Վահանակ");
+    expect(hy.find((item) => item.id === "hero")?.label).toBe("Գլխավոր բաններ");
     expect(en.find((item) => item.id === "orders")?.label).toBe("Orders");
     expect(ru.find((item) => item.id === "settings")?.label).toBe("Настройки");
   });
