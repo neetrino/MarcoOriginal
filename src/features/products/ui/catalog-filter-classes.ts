@@ -22,7 +22,7 @@ export const CATALOG_CHECKBOX_BOX =
 export const CATALOG_FILTER_LIST = "flex max-h-[18rem] flex-col gap-3 overflow-y-auto pr-2.5";
 
 export const CATALOG_FILTER_ROW_SELECTED =
-  "rounded-full bg-marco-yellow/95 py-1 pl-1 pr-2";
+  "rounded-full bg-marco-gray py-1 pl-1 pr-2";
 
 export const CATALOG_PRICE_TITLE =
   "shrink-0 text-sm font-semibold leading-6 tracking-[-0.31px] text-marco-slate lg:text-base";
@@ -65,7 +65,7 @@ export const CATALOG_MOBILE_FILTER_BUTTON =
   "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-[#dedede] bg-white px-4 text-sm font-semibold text-marco-slate transition-colors hover:bg-marco-gray/50";
 
 export const CATALOG_SORT_TRIGGER =
-  "flex h-10 w-auto max-w-full shrink-0 items-center gap-1.5 rounded-full border border-solid border-[#dedede] bg-white px-3 text-sm font-normal leading-normal text-marco-ink transition-colors hover:bg-marco-gray/50";
+  "flex h-10 w-auto max-w-full shrink-0 items-center gap-1.5 rounded-full border border-solid border-[#dedede] bg-white px-3 text-sm font-normal leading-normal text-marco-black/80 transition-colors hover:bg-marco-gray/50";
 
 export const CATALOG_PRICE_PRESENCE_GROUP =
   "flex h-10 min-h-10 shrink-0 items-stretch overflow-hidden rounded-full border border-solid border-marco-ink/20 bg-white";
@@ -81,15 +81,15 @@ export function catalogPricePresenceSegmentClass(
     ? "min-w-[112px] gap-1.5 px-4 text-sm"
     : "min-w-0 flex-1 gap-1 px-2 text-xs sm:px-4 sm:text-sm";
   const tone = active
-    ? "bg-marco-yellow text-marco-ink"
-    : "bg-white text-marco-slate/60 hover:bg-marco-gray/50";
-  return `inline-flex items-center justify-center whitespace-nowrap font-semibold border-r border-marco-ink/15 last:border-r-0 ${size} ${tone}`;
+    ? "bg-marco-gray text-marco-slate"
+    : "bg-white text-marco-black/80 hover:bg-marco-gray/50";
+  return `inline-flex items-center justify-center whitespace-nowrap font-semibold border-r border-marco-black/15 last:border-r-0 ${size} ${tone}`;
 }
 
 export function catalogViewToggleSegmentClass(active: boolean): string {
   const tone = active
-    ? "bg-marco-yellow text-marco-ink"
-    : "bg-white text-marco-ink/70 hover:bg-marco-gray/50";
+    ? "bg-marco-gray text-marco-slate"
+    : "bg-white text-marco-black/70 hover:bg-marco-gray/50";
   return `inline-flex min-w-[44px] flex-1 items-center justify-center px-3 border-r border-[#dedede] last:border-r-0 ${tone}`;
 }
 

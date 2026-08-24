@@ -28,6 +28,8 @@ type HomeProductRailProps = {
   headingId: string;
   locale: Locale;
   title: string;
+  titleHighlight?: string;
+  titleRest?: string;
   viewAllLabel: string;
   viewAllHref: string;
   emptyLabel: string;
@@ -46,6 +48,8 @@ export function HomeProductRail({
   headingId,
   locale,
   title,
+  titleHighlight,
+  titleRest,
   viewAllLabel,
   viewAllHref,
   emptyLabel,
@@ -75,6 +79,8 @@ export function HomeProductRail({
           <HomeSectionHeading
             id={headingId}
             title={title}
+            titleHighlight={titleHighlight}
+            titleRest={titleRest}
             prevLabel={previousPageLabel}
             nextLabel={nextPageLabel}
             onPrev={() => activeRail.scrollToPage(activeRail.activePage - 1)}

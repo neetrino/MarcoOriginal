@@ -3,6 +3,8 @@
   "subtitle": "Multilingual storefront is live.",
   "cta": "Browse products",
   "featuredTitle": "Special offers",
+  "featuredTitleHighlight": "Special",
+  "featuredTitleRest": " offers",
   "newArrivalsTitle": "New arrivals",
   "emptyNewArrivals": "No new products yet.",
   "brandsTitle": "Brands",

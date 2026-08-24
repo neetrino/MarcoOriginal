@@ -57,9 +57,9 @@ export const PRODUCT_CARD_CART_MOBILE_BOTTOM_PX = -26;
 export const PRODUCT_CARD_RAIL_MOBILE_PADDING_BOTTOM_PX = 32;
 
 export const PRODUCT_CARD_SHELL_CLASS = "bg-marco-card";
-export const PRODUCT_CARD_INK_CLASS = "text-marco-ink";
+export const PRODUCT_CARD_INK_CLASS = "product-card-price font-black";
 export const PRODUCT_CARD_WISHLIST_CLASS =
-  "h-8 w-8 rounded-full bg-marco-slate text-white hover:bg-marco-slate hover:brightness-95";
+  "flex h-8 w-8 items-center justify-center rounded-full bg-marco-slate text-white shadow-sm transition-[filter] hover:brightness-95 active:brightness-90";
 export const PRODUCT_CARD_CART_CLASS =
   "bg-marco-yellow shadow-sm hover:scale-105 hover:bg-marco-yellow hover:brightness-95 active:scale-95";
 export const PRODUCT_CARD_DISCOUNT_CLASS =

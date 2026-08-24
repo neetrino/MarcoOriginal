@@ -194,7 +194,7 @@ function GalleryChrome({
   return (
     <>
       {discountPercent != null ? (
-        <div className="absolute top-4 right-4 z-10 flex h-14 w-14 items-center justify-center rounded-full bg-marco-yellow text-sm font-bold text-marco-ink shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+        <div className="absolute top-4 right-4 z-10 flex h-14 w-14 items-center justify-center rounded-full bg-marco-yellow text-sm font-bold text-marco-black shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
           -{discountPercent}%
         </div>
       ) : null}

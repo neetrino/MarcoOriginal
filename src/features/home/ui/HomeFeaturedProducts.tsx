@@ -6,6 +6,8 @@ type HomeFeaturedProductsProps = {
   headingId: string;
   locale: Locale;
   title: string;
+  titleHighlight?: string;
+  titleRest?: string;
   viewAllLabel: string;
   viewAllHref: string;
   emptyLabel: string;

@@ -121,6 +121,8 @@ export default async function HomePage({ params }: HomePageProps) {
         {...productRail}
         headingId="home-special-offers"
         title={dictionary.home.featuredTitle}
+        titleHighlight={dictionary.home.featuredTitleHighlight}
+        titleRest={dictionary.home.featuredTitleRest}
         emptyLabel={dictionary.home.emptyFeatured}
         products={featuredCards}
       />

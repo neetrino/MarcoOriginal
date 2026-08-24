@@ -108,7 +108,7 @@ export function ProductPurchaseControls({
           initialInCompare={inCompare}
           label={compareLabel}
           className="size-12 rounded-xl border-2 border-gray-200 bg-white text-marco-ink"
-          activeClassName="size-12 rounded-xl border-2 border-marco-yellow bg-marco-yellow text-marco-ink"
+          activeClassName="size-12 rounded-xl border-2 border-marco-yellow bg-marco-yellow text-marco-black"
           iconClassName="text-current"
         />
         <WishlistButton
@@ -125,7 +125,7 @@ export function ProductPurchaseControls({
           type="button"
           disabled={disabled || pending}
           onClick={handleAdd}
-          className={`inline-flex shrink-0 items-center gap-1.5 bg-marco-yellow px-4 text-left text-sm font-bold text-marco-ink transition-[filter,transform] hover:-translate-y-0.5 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 ${PDP_BUY_CTA_HEIGHT_CLASS} ${PDP_BUY_CTA_RADIUS_CLASS}`}
+          className={`inline-flex shrink-0 items-center gap-1.5 bg-marco-yellow px-4 text-left text-sm font-bold text-marco-black transition-[filter,transform] hover:-translate-y-0.5 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 ${PDP_BUY_CTA_HEIGHT_CLASS} ${PDP_BUY_CTA_RADIUS_CLASS}`}
         >
           <span
             className={`${PDP_BUY_CTA_LABEL_MAX_WIDTH_CLASS} truncate whitespace-nowrap pl-1`}

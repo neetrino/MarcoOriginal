@@ -29,10 +29,12 @@ describe("catalog filter classes", () => {
     expect(catalogFilterCheckIconClass("filled")).toContain("text-white");
   });
 
-  it("highlights active toolbar pills in marco yellow", () => {
-    expect(catalogPricePresenceSegmentClass(true, true)).toContain("bg-marco-yellow");
-    expect(catalogPricePresenceSegmentClass(false, true)).toContain("text-marco-slate/60");
-    expect(catalogViewToggleSegmentClass(true)).toContain("bg-marco-yellow");
-    expect(catalogViewToggleSegmentClass(false)).not.toContain("bg-marco-yellow");
+  it("highlights active toolbar pills in light gray", () => {
+    expect(catalogPricePresenceSegmentClass(true, true)).toContain("bg-marco-gray");
+    expect(catalogPricePresenceSegmentClass(true, true)).toContain("text-marco-slate");
+    expect(catalogPricePresenceSegmentClass(false, true)).toContain("text-marco-black/80");
+    expect(catalogViewToggleSegmentClass(true)).toContain("bg-marco-gray");
+    expect(catalogViewToggleSegmentClass(true)).toContain("text-marco-slate");
+    expect(catalogViewToggleSegmentClass(false)).toContain("bg-white");
   });
 });

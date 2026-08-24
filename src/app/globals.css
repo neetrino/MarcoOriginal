@@ -3,17 +3,19 @@
 :root {
   --background: #ffffff;
   --foreground: #181111;
-  --muted: #2f4b5d;
+  --muted: #3f5466;
   --border: #e5e7eb;
   --accent: #181111;
   --accent-foreground: #ffffff;
   --radius: 15px;
+  --marco-anthracite: #383838;
   --marco-yellow: #ffca03;
-  --marco-slate: #2f4b5d;
+  --marco-slate: #3f5466;
   --marco-gray: #f4f4f4;
   --marco-footer: #f2f2f2;
   --marco-ink: #181111;
   --marco-card: #f6f6f6;
+  --text-on-yellow: var(--marco-slate);
 }
 
 @theme inline {
@@ -45,6 +47,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, sans-serif;
+}
+
+/** Product card main price — true black in light mode (3001 `.product-card-price`). */
+.product-card-price {
+  color: #000000;
 }
 
 @layer base {
