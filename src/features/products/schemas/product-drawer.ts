@@ -8,11 +8,13 @@ import {
   PRODUCT_TAG_TYPES,
   PRODUCT_WARRANTY_YEARS,
 } from "@/features/products/domain/product-presentation";
+import { PRODUCT_TYPES } from "@/features/products/domain/product-type";
 import {
   MAX_PRODUCT_SPECS,
   MAX_SPEC_TITLE_LENGTH,
   MAX_SPEC_VALUE_LENGTH,
 } from "@/features/products/domain/product-specs";
+import { VARIANT_DISCOUNT_TYPES } from "@/features/products/domain/variant-discount";
 
 const productTagSchema = z
   .object({
@@ -49,35 +51,92 @@ const productTagSchema = z
     }
   });
 
-export const productUpsertSchema = z.object({
+const productVariantSchema = z.object({
+  id: z.string().uuid().optional(),
+  key: z.string().trim().min(1).max(64),
   sku: z.string().trim().min(1).max(120),
-  title: z.string().trim().min(1).max(200),
-  slug: z.string().trim().min(1).max(200),
-  description: z.string().trim().max(8000).optional(),
   priceAmount: z.number().int().nonnegative(),
+  discountType: z.enum(VARIANT_DISCOUNT_TYPES).nullable(),
+  discountValue: z.number().int().nonnegative(),
+  discountStartsAt: z.coerce.date().nullable(),
+  discountEndsAt: z.coerce.date().nullable(),
   compareAtAmount: z.number().int().nonnegative().nullable(),
-  categoryIds: z.array(z.string().uuid()),
-  brandIds: z.array(z.string().uuid()).default([]),
-  status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
-  salesClass: z.enum(PRODUCT_SALES_CLASSES),
-  warrantyYears: z.number().int().refine(
-    (value): value is (typeof PRODUCT_WARRANTY_YEARS)[number] =>
-      (PRODUCT_WARRANTY_YEARS as readonly number[]).includes(value),
-    { message: "Warranty must be 0, 1, 2, or 3 years." },
-  ),
-  tags: z.array(productTagSchema).max(MAX_PRODUCT_TAGS),
-  specifications: z
-    .array(
-      z.object({
-        id: z.string().trim().min(1).max(64).optional(),
-        title: z.string().trim().max(MAX_SPEC_TITLE_LENGTH),
-        value: z.string().trim().max(MAX_SPEC_VALUE_LENGTH),
-      }),
-    )
-    .max(MAX_PRODUCT_SPECS),
-  primaryExistingId: z.string().uuid().nullable(),
-  primaryNewIndex: z.number().int().nullable(),
-  removeImageIds: z.array(z.string().uuid()),
+  attributeValueIds: z.array(z.string().uuid()).min(1),
+  removeImageId: z.string().uuid().nullable(),
+  existingImageId: z.string().uuid().nullable(),
 });
+
+export const productUpsertSchema = z
+  .object({
+    productType: z.enum(PRODUCT_TYPES),
+    sku: z.string().trim().min(1).max(120),
+    title: z.string().trim().min(1).max(200),
+    slug: z.string().trim().min(1).max(200),
+    description: z.string().trim().max(8000).optional(),
+    priceAmount: z.number().int().nonnegative(),
+    compareAtAmount: z.number().int().nonnegative().nullable(),
+    categoryIds: z.array(z.string().uuid()),
+    brandIds: z.array(z.string().uuid()).default([]),
+    status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
+    salesClass: z.enum(PRODUCT_SALES_CLASSES),
+    warrantyYears: z.number().int().refine(
+      (value): value is (typeof PRODUCT_WARRANTY_YEARS)[number] =>
+        (PRODUCT_WARRANTY_YEARS as readonly number[]).includes(value),
+      { message: "Warranty must be 0, 1, 2, or 3 years." },
+    ),
+    tags: z.array(productTagSchema).max(MAX_PRODUCT_TAGS),
+    specifications: z
+      .array(
+        z.object({
+          id: z.string().trim().min(1).max(64).optional(),
+          title: z.string().trim().max(MAX_SPEC_TITLE_LENGTH),
+          value: z.string().trim().max(MAX_SPEC_VALUE_LENGTH),
+        }),
+      )
+      .max(MAX_PRODUCT_SPECS),
+    primaryExistingId: z.string().uuid().nullable(),
+    primaryNewIndex: z.number().int().nullable(),
+    removeImageIds: z.array(z.string().uuid()),
+    selectedAttributeIds: z.array(z.string().uuid()).default([]),
+    /** SIMPLE product attribute value picks (one value per selected attribute). */
+    attributeValueIds: z.array(z.string().uuid()).default([]),
+    variants: z.array(productVariantSchema).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.productType === "SIMPLE") return;
+
+    if (data.variants.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Variable products require at least one variant.",
+        path: ["variants"],
+      });
+      return;
+    }
+
+    const skuSet = new Set<string>();
+    for (const [index, variant] of data.variants.entries()) {
+      const normalizedSku = variant.sku.toLowerCase();
+      if (skuSet.has(normalizedSku)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Variant SKUs must be unique.",
+          path: ["variants", index, "sku"],
+        });
+      }
+      skuSet.add(normalizedSku);
+
+      if (
+        variant.compareAtAmount != null &&
+        variant.compareAtAmount < variant.priceAmount
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Compare-at price must be greater than or equal to price.",
+          path: ["variants", index, "compareAtAmount"],
+        });
+      }
+    }
+  });
 
 export type ProductUpsertInput = z.infer<typeof productUpsertSchema>;

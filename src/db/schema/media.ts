@@ -16,6 +16,7 @@ import {
   attributeValues,
   brands,
   categories,
+  productVariants,
   products,
 } from "@/db/schema/catalog";
 import {
@@ -48,6 +49,10 @@ export const mediaAssets = pgTable(
     productId: uuid("product_id").references(() => products.id, {
       onDelete: "restrict",
     }),
+    productVariantId: uuid("product_variant_id").references(
+      () => productVariants.id,
+      { onDelete: "restrict" },
+    ),
     categoryId: uuid("category_id").references(() => categories.id, {
       onDelete: "restrict",
     }),
@@ -73,12 +78,16 @@ export const mediaAssets = pgTable(
   (table) => [
     uniqueIndex("media_assets_object_key_uidx").on(table.objectKey),
     index("media_assets_product_idx").on(table.productId),
+    index("media_assets_product_variant_idx").on(table.productVariantId),
     index("media_assets_category_idx").on(table.categoryId),
     index("media_assets_brand_idx").on(table.brandId),
     index("media_assets_hero_idx").on(table.heroSlideId),
     index("media_assets_blog_idx").on(table.blogPostId),
     index("media_assets_reel_idx").on(table.reelId),
     index("media_assets_attribute_value_idx").on(table.attributeValueId),
+    uniqueIndex("media_assets_product_variant_uidx")
+      .on(table.productVariantId)
+      .where(sql`${table.productVariantId} IS NOT NULL`),
     uniqueIndex("media_assets_product_primary_uidx")
       .on(table.productId)
       .where(sql`${table.productId} IS NOT NULL AND ${table.isPrimary} = true`),
@@ -113,6 +122,7 @@ export const mediaAssets = pgTable(
       sql`(
         (${table.uploadStatus} = 'PENDING'
           AND ${table.productId} IS NULL
+          AND ${table.productVariantId} IS NULL
           AND ${table.categoryId} IS NULL
           AND ${table.brandId} IS NULL
           AND ${table.heroSlideId} IS NULL
@@ -122,6 +132,7 @@ export const mediaAssets = pgTable(
         OR (${table.role} = 'BRANDING' AND ${table.purpose} IS NOT NULL)
         OR (
           (${table.productId} IS NOT NULL)::int
+          + (${table.productVariantId} IS NOT NULL)::int
           + (${table.categoryId} IS NOT NULL)::int
           + (${table.brandId} IS NOT NULL)::int
           + (${table.heroSlideId} IS NOT NULL)::int

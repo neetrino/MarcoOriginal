@@ -1,5 +1,5 @@
-export const DEFAULT_PRODUCT_STOCK = 1000;
-export const PRODUCT_RESTOCK_AT = 100;
+export const DEFAULT_PRODUCT_STOCK = 10_000;
+export const PRODUCT_RESTOCK_AT = 1_000;
 
 /**
  * After a sale, refill to the default quantity when remaining stock

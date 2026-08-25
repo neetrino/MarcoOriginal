@@ -10,6 +10,7 @@ describe("parseCatalogSearchParams", () => {
       categorySlugs: [],
       brandSlugs: [],
       colorHexes: [],
+      attributeValueIds: [],
       minPrice: null,
       maxPrice: null,
       sort: "default",
@@ -23,6 +24,10 @@ describe("parseCatalogSearchParams", () => {
         category: ["hoods", "ovens,hoods"],
         brand: "lex",
         color: ["#FFCA03", "000000"],
+        attr: [
+          "11111111-1111-1111-1111-111111111111",
+          "22222222-2222-2222-2222-222222222222,bad",
+        ],
         minPrice: "7",
         maxPrice: "4975",
         page: "2",
@@ -34,6 +39,10 @@ describe("parseCatalogSearchParams", () => {
       categorySlugs: ["hoods", "ovens"],
       brandSlugs: ["lex"],
       colorHexes: ["ffca03", "000000"],
+      attributeValueIds: [
+        "11111111-1111-1111-1111-111111111111",
+        "22222222-2222-2222-2222-222222222222",
+      ],
       minPrice: 7,
       maxPrice: 4975,
       sort: "price-asc",
@@ -47,6 +56,7 @@ describe("parseCatalogSearchParams", () => {
         minPrice: "90",
         maxPrice: "10",
         color: "red",
+        attr: "not-a-uuid",
         page: "0",
       }),
     ).toEqual({
@@ -54,6 +64,7 @@ describe("parseCatalogSearchParams", () => {
       categorySlugs: [],
       brandSlugs: [],
       colorHexes: [],
+      attributeValueIds: [],
       minPrice: 10,
       maxPrice: 90,
       sort: "default",
@@ -70,6 +81,7 @@ describe("catalogHref", () => {
         categorySlugs: [],
         brandSlugs: [],
         colorHexes: [],
+        attributeValueIds: [],
         minPrice: null,
         maxPrice: null,
         sort: "default",
@@ -84,14 +96,15 @@ describe("catalogHref", () => {
         page: 2,
         categorySlugs: ["hoods"],
         brandSlugs: ["lex"],
-        colorHexes: ["000000"],
+        colorHexes: [],
+        attributeValueIds: ["11111111-1111-1111-1111-111111111111"],
         minPrice: 7,
         maxPrice: 4975,
         sort: "name-desc",
         pricePresence: "without",
       }),
     ).toBe(
-      "/hy/products?category=hoods&brand=lex&color=000000&minPrice=7&maxPrice=4975&sort=name-desc&pricePresence=without&page=2",
+      "/hy/products?category=hoods&brand=lex&attr=11111111-1111-1111-1111-111111111111&minPrice=7&maxPrice=4975&sort=name-desc&pricePresence=without&page=2",
     );
   });
 });

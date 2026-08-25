@@ -7,6 +7,7 @@ import { ChevronDown, X } from "lucide-react";
 
 import { ADMIN_LABEL } from "@/features/admin/ui/admin-form-classes";
 import type { AdminAttributeValue } from "@/features/attributes/domain/attribute-admin-model";
+import { AttributeValueSwatch } from "@/features/attributes/ui/AttributeValueSwatch";
 import type { AdminAttributesCopy } from "@/features/attributes/ui/admin-attributes-copy";
 import {
   addAttributeValueImageAction,
@@ -56,7 +57,7 @@ export function AttributeValueRow({
   return (
     <li className="rounded-2xl border border-gray-200 bg-white">
       <div className="flex items-center gap-3 px-3 py-2.5">
-        <ValueSwatch value={value} />
+        <AttributeValueSwatch value={value} />
         <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">
           {value.title}
         </span>
@@ -189,31 +190,3 @@ export function AttributeValueRow({
   );
 }
 
-function ValueSwatch({ value }: { value: AdminAttributeValue }) {
-  if (value.imageUrl) {
-    return (
-      <span className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full border border-gray-200">
-        <Image
-          src={value.imageUrl}
-          alt=""
-          fill
-          sizes="24px"
-          className="object-cover"
-        />
-      </span>
-    );
-  }
-
-  if (value.colorHex) {
-    return (
-      <span
-        className="h-6 w-6 shrink-0 rounded-full border border-gray-200"
-        style={{ backgroundColor: value.colorHex }}
-      />
-    );
-  }
-
-  return (
-    <span className="h-6 w-6 shrink-0 rounded-full border border-dashed border-gray-300" />
-  );
-}

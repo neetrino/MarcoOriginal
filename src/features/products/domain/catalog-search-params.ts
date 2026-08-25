@@ -16,6 +16,7 @@ export type CatalogSearchParams = {
   categorySlugs: string[];
   brandSlugs: string[];
   colorHexes: string[];
+  attributeValueIds: string[];
   minPrice: number | null;
   maxPrice: number | null;
   sort: CatalogSort;
@@ -27,6 +28,7 @@ export const EMPTY_CATALOG_SEARCH: CatalogSearchParams = {
   categorySlugs: [],
   brandSlugs: [],
   colorHexes: [],
+  attributeValueIds: [],
   minPrice: null,
   maxPrice: null,
   sort: DEFAULT_CATALOG_SORT,
@@ -76,6 +78,14 @@ function parseColorHexes(value: RawSearchValue): string[] {
   return uniqueLimited(hexes, CATALOG_MAX_SELECTED_VALUES);
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function parseAttributeValueIds(value: RawSearchValue): string[] {
+  const ids = readList(value).filter((id) => UUID_RE.test(id));
+  return uniqueLimited(ids, CATALOG_MAX_SELECTED_VALUES);
+}
+
 function parseOptionalInt(value: RawSearchValue): number | null {
   const raw = Array.isArray(value) ? value[0] : value;
   if (raw == null || raw.trim() === "") return null;
@@ -106,6 +116,7 @@ export function parseCatalogSearchParams(
     categorySlugs: parseSlugs(searchParams.category),
     brandSlugs: parseSlugs(searchParams.brand),
     colorHexes: parseColorHexes(searchParams.color),
+    attributeValueIds: parseAttributeValueIds(searchParams.attr),
     minPrice,
     maxPrice,
     sort: parseCatalogSort(searchParams.sort),

@@ -6,6 +6,7 @@ import type {
   AdminCategoryOption,
   AdminProductListItem,
 } from "@/features/products/application/list-admin-products";
+import type { AdminAttributeListItem } from "@/features/attributes/domain/attribute-admin-model";
 import type { AdminProductsQueryState } from "@/features/products/domain/admin-products-query";
 import { AdminProductsFilters } from "@/features/products/ui/AdminProductsFilters";
 import { AdminProductsTable } from "@/features/products/ui/AdminProductsTable";
@@ -21,6 +22,7 @@ type AdminProductsViewProps = {
   products: AdminProductListItem[];
   categories: AdminCategoryOption[];
   brands: readonly { id: string; title: string }[];
+  attributes: readonly AdminAttributeListItem[];
   filters: AdminProductsQueryState;
   total: number;
   totalPages: number;
@@ -31,6 +33,7 @@ export function AdminProductsView({
   products,
   categories,
   brands,
+  attributes,
   filters,
   total,
   totalPages,
@@ -104,6 +107,7 @@ export function AdminProductsView({
         product={editingProduct}
         categories={categories}
         brands={brands}
+        attributes={attributes}
       />
     </>
   );

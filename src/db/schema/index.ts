@@ -7,6 +7,8 @@ export {
   categories,
   productBrands,
   productCategories,
+  productVariantAttributeValues,
+  productVariants,
   products,
   PRODUCT_TAG_TYPES,
   PRODUCT_WARRANTY_YEARS,

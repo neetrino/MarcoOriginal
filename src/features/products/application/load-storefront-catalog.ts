@@ -2,8 +2,10 @@ import "server-only";
 
 import { getCatalogFacets } from "@/features/products/application/load-catalog-facets";
 import {
+  attributeValueIdsForColorHexes,
   collectBrandIdsForSlugs,
   collectCategoryIdsForSlugs,
+  groupSelectedAttributeValueIds,
   type CatalogFacets,
 } from "@/features/products/domain/catalog-filters";
 import {
@@ -50,6 +52,26 @@ function toDisplayBounds(
   );
 }
 
+function mergeAttributeValueIds(
+  filters: CatalogSearchParams,
+  facets: CatalogFacets,
+): string[] {
+  const fromAttr = filters.attributeValueIds;
+  const fromColors = attributeValueIdsForColorHexes(
+    facets.attributes,
+    filters.colorHexes,
+  );
+  if (fromColors.length === 0) return fromAttr;
+  const seen = new Set(fromAttr);
+  const merged = [...fromAttr];
+  for (const id of fromColors) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    merged.push(id);
+  }
+  return merged;
+}
+
 function toProductFilter(
   filters: CatalogSearchParams,
   facets: CatalogFacets,
@@ -62,6 +84,11 @@ function toProductFilter(
     filters.categorySlugs,
   );
   const brandIds = collectBrandIdsForSlugs(facets.brands, filters.brandSlugs);
+  const attributeValueIds = mergeAttributeValueIds(filters, facets);
+  const attributeValueIdGroups = groupSelectedAttributeValueIds(
+    facets.attributes,
+    attributeValueIds,
+  );
   const hasPrice =
     priceBounds != null &&
     (filters.minPrice != null || filters.maxPrice != null);
@@ -75,7 +102,12 @@ function toProductFilter(
         )
       : null;
 
-  if (categoryIds.length === 0 && brandIds.length === 0 && amdRange == null) {
+  if (
+    categoryIds.length === 0 &&
+    brandIds.length === 0 &&
+    attributeValueIdGroups.length === 0 &&
+    amdRange == null
+  ) {
     return {
       sort: filters.sort,
       pricePresence: filters.pricePresence,
@@ -84,6 +116,7 @@ function toProductFilter(
   return {
     categoryIds,
     brandIds,
+    attributeValueIdGroups,
     minPriceAmd: amdRange?.minAmd,
     maxPriceAmd: amdRange?.maxAmd,
     sort: filters.sort,
@@ -106,7 +139,14 @@ export async function loadStorefrontCatalog(
   const price = priceBounds
     ? normalizeSelectedPriceRange(parsed.minPrice, parsed.maxPrice, priceBounds)
     : { minPrice: null, maxPrice: null };
-  const filters: CatalogSearchParams = { ...parsed, ...price };
+  const attributeValueIds = mergeAttributeValueIds(parsed, facets);
+  const filters: CatalogSearchParams = {
+    ...parsed,
+    ...price,
+    attributeValueIds,
+    // Prefer attr ids; drop legacy color once resolved into attr.
+    colorHexes: [],
+  };
   const listFilter = toProductFilter(
     filters,
     facets,

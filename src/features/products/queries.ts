@@ -10,6 +10,8 @@ import {
   mediaAssets,
   productBrands,
   productCategories,
+  productVariantAttributeValues,
+  productVariants,
   products,
 } from "@/db/schema";
 import { loadProductBrandMarks } from "@/features/products/application/load-product-brand-logos";
@@ -160,6 +162,8 @@ const activeCatalogWhere = and(
 export type CatalogListFilter = {
   categoryIds?: readonly string[];
   brandIds?: readonly string[];
+  /** Attribute value id groups: AND across groups, OR within a group. */
+  attributeValueIdGroups?: readonly (readonly string[])[];
   minPriceAmd?: number;
   maxPriceAmd?: number;
   sort?: CatalogSort;
@@ -185,6 +189,28 @@ function catalogOrderBy(locale: Locale, sort?: CatalogSort) {
     default:
       return desc(products.createdAt);
   }
+}
+
+function productMatchesAnyAttributeValueIds(valueIds: readonly string[]) {
+  const ids = [...valueIds];
+  const onSimple = or(
+    ...ids.map(
+      (id) =>
+        sql`${products.attributeValueIds} @> ${JSON.stringify([id])}::jsonb`,
+    ),
+  )!;
+  const onVariant = inArray(
+    products.id,
+    getDb()
+      .select({ id: productVariants.productId })
+      .from(productVariants)
+      .innerJoin(
+        productVariantAttributeValues,
+        eq(productVariantAttributeValues.variantId, productVariants.id),
+      )
+      .where(inArray(productVariantAttributeValues.attributeValueId, ids)),
+  );
+  return or(onSimple, onVariant)!;
 }
 
 function catalogListWhere(filter?: CatalogListFilter) {
@@ -213,6 +239,12 @@ function catalogListWhere(filter?: CatalogListFilter) {
       ),
     );
   }
+  if (filter?.attributeValueIdGroups) {
+    for (const group of filter.attributeValueIdGroups) {
+      if (group.length === 0) continue;
+      conditions.push(productMatchesAnyAttributeValueIds(group));
+    }
+  }
   if (filter?.minPriceAmd != null) {
     conditions.push(gte(products.priceAmount, filter.minPriceAmd));
   }
@@ -231,9 +263,14 @@ function catalogFilterCacheKey(filter?: CatalogListFilter): string {
   if (!filter) return "";
   const categoryKey = [...(filter.categoryIds ?? [])].sort().join(",");
   const brandKey = [...(filter.brandIds ?? [])].sort().join(",");
+  const attributeKey = (filter.attributeValueIdGroups ?? [])
+    .map((group) => [...group].sort().join("+"))
+    .sort()
+    .join("|");
   return [
     categoryKey,
     brandKey,
+    attributeKey,
     filter.minPriceAmd ?? "",
     filter.maxPriceAmd ?? "",
     filter.sort ?? "",

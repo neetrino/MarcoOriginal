@@ -11,34 +11,24 @@ const MARCO_LOGO_CROP_CLASS =
 
 type AdminBrandMarkProps = {
   locale: string;
-  compact?: boolean;
   onNavigate?: () => void;
 };
 
 /**
  * Compact MARCO mark for admin chrome — same crop as the storefront logo.
  */
-export function AdminBrandMark({
-  locale,
-  compact = false,
-  onNavigate,
-}: AdminBrandMarkProps) {
+export function AdminBrandMark({ locale, onNavigate }: AdminBrandMarkProps) {
   const nav = getAdminCopy(locale).nav;
-  const frameClass = compact
-    ? "relative aspect-[83/73] h-9 w-auto overflow-hidden"
-    : "relative aspect-[83/73] h-11 w-auto overflow-hidden";
 
   return (
     <Link
       href={`/${locale}`}
       onClick={onNavigate}
-      className={`flex shrink-0 items-center rounded-xl ${
-        compact ? "justify-center p-1" : "gap-2 px-1.5 py-1"
-      } hover:bg-white`}
+      className="flex shrink-0 items-center gap-2 rounded-xl px-1.5 py-1 hover:bg-white"
       title={nav.brandTitle}
       aria-label={nav.brandTitle}
     >
-      <span className={frameClass}>
+      <span className="relative aspect-[83/73] h-11 w-auto overflow-hidden">
         <Image
           src={MARCO_LOGO_SRC}
           alt=""
@@ -48,11 +38,9 @@ export function AdminBrandMark({
           quality={75}
         />
       </span>
-      {compact ? null : (
-        <span className="min-w-0 truncate text-sm font-semibold text-marco-ink">
-          {nav.adminMark}
-        </span>
-      )}
+      <span className="min-w-0 truncate text-sm font-semibold text-marco-ink">
+        {nav.adminMark}
+      </span>
     </Link>
   );
 }

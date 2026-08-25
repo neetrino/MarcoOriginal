@@ -11,6 +11,12 @@ import {
   type ProductWarrantyYears,
 } from "@/features/products/domain/product-presentation";
 import { discountPercentFromCompareAt } from "@/features/products/domain/product-discount";
+import type { ProductType } from "@/features/products/domain/product-type";
+import { VARIABLE_PRODUCT_TYPE_DISABLED } from "@/features/products/domain/product-type";
+import {
+  createDraftProductVariant,
+  type ProductVariantDraft,
+} from "@/features/products/domain/product-variant-draft";
 import {
   createDraftProductSpec,
   slugifyProductTitle,
@@ -37,6 +43,7 @@ type DrawerProduct = Pick<
   | "warrantyYears"
   | "tags"
   | "specifications"
+  | "productType"
 >;
 
 function imagesFromProduct(product: DrawerProduct | null): ProductDraftImage[] {
@@ -52,8 +59,19 @@ function imagesFromProduct(product: DrawerProduct | null): ProductDraftImage[] {
 export function useProductDrawerForm(args: {
   product: DrawerProduct | null;
   initialCategories: AdminCategoryOption[];
+  initialProductType?: ProductType;
+  initialSelectedAttributeIds?: string[];
+  initialAttributeValueIds?: Record<string, string>;
+  initialVariants?: ProductVariantDraft[];
 }) {
-  const { product, initialCategories } = args;
+  const {
+    product,
+    initialCategories,
+    initialProductType,
+    initialSelectedAttributeIds,
+    initialAttributeValueIds,
+    initialVariants,
+  } = args;
   const [tab, setTab] = useState<ProductDrawerTab>("basics");
   const [title, setTitle] = useState(product?.title ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
@@ -66,6 +84,18 @@ export function useProductDrawerForm(args: {
     product?.categoryIds ?? [],
   );
   const [brandIds, setBrandIds] = useState<string[]>(product?.brandIds ?? []);
+  const [productType, setProductType] = useState<ProductType>(
+    initialProductType ?? product?.productType ?? "SIMPLE",
+  );
+  const [selectedAttributeIds, setSelectedAttributeIds] = useState<string[]>(
+    initialSelectedAttributeIds ?? [],
+  );
+  const [attributeValueIds, setAttributeValueIds] = useState<
+    Record<string, string>
+  >(initialAttributeValueIds ?? {});
+  const [variants, setVariants] = useState<ProductVariantDraft[]>(
+    initialVariants ?? [],
+  );
   const [priceAmount, setPriceAmount] = useState(
     product ? String(product.priceAmount) : "",
   );
@@ -99,6 +129,37 @@ export function useProductDrawerForm(args: {
   );
   const [slugTouched] = useState(product != null);
   const [error, setError] = useState<string | null>(null);
+
+  function handleProductTypeChange(next: ProductType): void {
+    if (next === "VARIABLE" && VARIABLE_PRODUCT_TYPE_DISABLED) {
+      return;
+    }
+    setProductType(next);
+    if (next === "VARIABLE" && variants.length === 0) {
+      setVariants([createDraftProductVariant()]);
+    }
+  }
+
+  function handleSelectedAttributeIdsChange(nextIds: string[]): void {
+    setSelectedAttributeIds(nextIds);
+    setAttributeValueIds((current) =>
+      Object.fromEntries(
+        Object.entries(current).filter(([attributeId]) =>
+          nextIds.includes(attributeId),
+        ),
+      ),
+    );
+    setVariants((current) =>
+      current.map((variant) => {
+        const nextAttributeValueIds = Object.fromEntries(
+          Object.entries(variant.attributeValueIds).filter(([attributeId]) =>
+            nextIds.includes(attributeId),
+          ),
+        );
+        return { ...variant, attributeValueIds: nextAttributeValueIds };
+      }),
+    );
+  }
 
   function handleImagesChange(next: ProductDraftImage[]): void {
     const nextKeys = new Set(next.map((image) => image.key));
@@ -137,6 +198,16 @@ export function useProductDrawerForm(args: {
     setCategoryIds,
     brandIds,
     setBrandIds,
+    productType,
+    setProductType,
+    handleProductTypeChange,
+    selectedAttributeIds,
+    setSelectedAttributeIds,
+    handleSelectedAttributeIdsChange,
+    attributeValueIds,
+    setAttributeValueIds,
+    variants,
+    setVariants,
     priceAmount,
     setPriceAmount,
     discountPercent,

@@ -17,9 +17,24 @@ export type CatalogColorFacet = {
   hex: string;
 };
 
+export type CatalogAttributeValueFacet = {
+  id: string;
+  title: string;
+  colorHex: string | null;
+};
+
+export type CatalogAttributeFacet = {
+  id: string;
+  key: string;
+  title: string;
+  values: CatalogAttributeValueFacet[];
+};
+
 export type CatalogFacets = {
   categories: CatalogCategoryFacet[];
   brands: CatalogBrandFacet[];
+  attributes: CatalogAttributeFacet[];
+  /** Derived color swatches from attribute values that have a hex. */
   colors: CatalogColorFacet[];
   minPriceAmd: number | null;
   maxPriceAmd: number | null;
@@ -78,4 +93,43 @@ export function categoryHasSelectedDescendant(
   return node.children.some((child) =>
     categoryHasSelectedDescendant(child, slugs),
   );
+}
+
+/**
+ * Groups selected attribute value ids by attribute.
+ * Empty groups are omitted. Used for AND-across / OR-within filtering.
+ */
+export function groupSelectedAttributeValueIds(
+  attributes: readonly CatalogAttributeFacet[],
+  selectedValueIds: readonly string[],
+): string[][] {
+  if (selectedValueIds.length === 0) return [];
+  const wanted = new Set(selectedValueIds);
+  const groups: string[][] = [];
+  for (const attribute of attributes) {
+    const matched = attribute.values
+      .map((value) => value.id)
+      .filter((id) => wanted.has(id));
+    if (matched.length > 0) groups.push(matched);
+  }
+  return groups;
+}
+
+/** Resolves legacy `color` hex query values to attribute value ids. */
+export function attributeValueIdsForColorHexes(
+  attributes: readonly CatalogAttributeFacet[],
+  hexes: readonly string[],
+): string[] {
+  if (hexes.length === 0) return [];
+  const wanted = new Set(
+    hexes.map((hex) => hex.replace(/^#/, "").toLowerCase()),
+  );
+  const ids: string[] = [];
+  for (const attribute of attributes) {
+    for (const value of attribute.values) {
+      const hex = value.colorHex?.replace(/^#/, "").toLowerCase();
+      if (hex && wanted.has(hex)) ids.push(value.id);
+    }
+  }
+  return ids;
 }

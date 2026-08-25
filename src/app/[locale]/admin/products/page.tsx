@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { listAdminBrands } from "@/features/brands/application/list-admin-brands";
+import { listAdminAttributes } from "@/features/attributes/application/list-admin-attributes";
 import {
   listAdminCategoryOptions,
   listAdminProducts,
@@ -57,10 +58,12 @@ export default async function AdminProductsPage({
   });
 
   const filters = parsed.success ? parsed.data : FALLBACK_FILTERS;
-  const [{ rows, total, pageSize }, categories, brands] = await Promise.all([
+  const [{ rows, total, pageSize }, categories, brands, attributes] =
+    await Promise.all([
     listAdminProducts(locale, filters),
     listAdminCategoryOptions(locale),
     listAdminBrands(locale),
+    listAdminAttributes(locale),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -71,6 +74,7 @@ export default async function AdminProductsPage({
         products={rows}
         categories={categories}
         brands={brands}
+        attributes={attributes}
         filters={filters}
         total={total}
         totalPages={totalPages}

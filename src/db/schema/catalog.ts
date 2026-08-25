@@ -8,6 +8,7 @@ import {
   jsonb,
   pgTable,
   text,
+  timestamp,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -20,8 +21,10 @@ import {
 } from "@/db/schema/columns";
 import {
   categoryStatusEnum,
+  discountTypeEnum,
   productSalesClassEnum,
   productStatusEnum,
+  productTypeEnum,
 } from "@/db/schema/enums";
 
 export const PRODUCT_TAG_TYPES = ["TEXT", "PERCENT"] as const;
@@ -73,8 +76,14 @@ export const products = pgTable(
     isFeatured: boolean("is_featured").notNull().default(false),
     isUpcoming: boolean("is_upcoming").notNull().default(false),
     salesClass: productSalesClassEnum("sales_class").notNull().default("RETAIL"),
+    productType: productTypeEnum("product_type").notNull().default("SIMPLE"),
     warrantyYears: integer("warranty_years").notNull().default(0),
     tags: jsonb("tags").$type<ProductTag[]>().notNull().default(sql`'[]'::jsonb`),
+    /** Selected attribute value IDs for SIMPLE products (e.g. color). */
+    attributeValueIds: jsonb("attribute_value_ids")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     badgeTranslations: jsonb("badge_translations").$type<
       Partial<Record<"hy" | "en" | "ru", string>>
     >(),
@@ -235,6 +244,69 @@ export const productCategories = pgTable(
     uniqueIndex("product_categories_primary_uidx")
       .on(table.productId)
       .where(sql`${table.isPrimary} = true`),
+  ],
+);
+
+export const productVariants = pgTable(
+  "product_variants",
+  {
+    id: idColumn(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    sku: text("sku").notNull(),
+    priceAmount: integer("price_amount").notNull(),
+    compareAtAmount: integer("compare_at_amount"),
+    discountType: discountTypeEnum("discount_type"),
+    discountValue: integer("discount_value"),
+    discountStartsAt: timestamp("discount_starts_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+    discountEndsAt: timestamp("discount_ends_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+    stockOnHand: integer("stock_on_hand").notNull().default(0),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: createdAtColumn(),
+    updatedAt: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("product_variants_sku_uidx").on(table.sku),
+    index("product_variants_product_idx").on(table.productId),
+    check("product_variants_price_nonneg_chk", sql`${table.priceAmount} >= 0`),
+    check(
+      "product_variants_compare_nonneg_chk",
+      sql`${table.compareAtAmount} IS NULL OR ${table.compareAtAmount} >= 0`,
+    ),
+    check(
+      "product_variants_stock_nonneg_chk",
+      sql`${table.stockOnHand} >= 0`,
+    ),
+  ],
+);
+
+export const productVariantAttributeValues = pgTable(
+  "product_variant_attribute_values",
+  {
+    id: idColumn(),
+    variantId: uuid("variant_id")
+      .notNull()
+      .references(() => productVariants.id, { onDelete: "cascade" }),
+    attributeValueId: uuid("attribute_value_id")
+      .notNull()
+      .references(() => attributeValues.id, { onDelete: "restrict" }),
+    createdAt: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("product_variant_attribute_values_uidx").on(
+      table.variantId,
+      table.attributeValueId,
+    ),
+    index("product_variant_attribute_values_value_idx").on(
+      table.attributeValueId,
+    ),
   ],
 );
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import { getDb } from "@/db/client";
@@ -18,6 +18,7 @@ import {
   type CategoryTreeNode,
 } from "@/features/categories/domain/category-tree";
 import type {
+  CatalogAttributeFacet,
   CatalogBrandFacet,
   CatalogCategoryFacet,
   CatalogColorFacet,
@@ -145,28 +146,80 @@ async function loadBrandFacets(locale: Locale): Promise<CatalogBrandFacet[]> {
   return facets;
 }
 
-async function loadColorFacets(): Promise<CatalogColorFacet[]> {
-  const rows = await getDb()
+async function loadAttributeFacets(
+  locale: Locale,
+): Promise<{ attributes: CatalogAttributeFacet[]; colors: CatalogColorFacet[] }> {
+  const attributeRows = await getDb()
+    .select({
+      id: attributes.id,
+      key: attributes.key,
+      translations: attributes.translations,
+    })
+    .from(attributes)
+    .where(isNull(attributes.deletedAt))
+    .orderBy(asc(attributes.sortOrder), asc(attributes.createdAt));
+
+  if (attributeRows.length === 0) {
+    return { attributes: [], colors: [] };
+  }
+
+  const valueRows = await getDb()
     .select({
       id: attributeValues.id,
+      attributeId: attributeValues.attributeId,
+      translations: attributeValues.translations,
       colorHex: attributeValues.colorHex,
     })
     .from(attributeValues)
-    .innerJoin(attributes, eq(attributes.id, attributeValues.attributeId))
     .where(
-      and(isNull(attributes.deletedAt), isNotNull(attributeValues.colorHex)),
+      inArray(
+        attributeValues.attributeId,
+        attributeRows.map((row) => row.id),
+      ),
     )
     .orderBy(asc(attributeValues.sortOrder), asc(attributeValues.createdAt));
 
-  const seen = new Set<string>();
-  const colors: CatalogColorFacet[] = [];
-  for (const row of rows) {
-    const hex = row.colorHex?.replace(/^#/, "").toLowerCase();
-    if (!hex || seen.has(hex)) continue;
-    seen.add(hex);
-    colors.push({ id: row.id, hex });
+  const valuesByAttribute = new Map<
+    string,
+    CatalogAttributeFacet["values"]
+  >();
+  for (const row of valueRows) {
+    const translation = translationFor(row.translations, locale);
+    if (!translation) continue;
+    const list = valuesByAttribute.get(row.attributeId) ?? [];
+    list.push({
+      id: row.id,
+      title: translation.title,
+      colorHex: row.colorHex
+        ? row.colorHex.replace(/^#/, "").toLowerCase()
+        : null,
+    });
+    valuesByAttribute.set(row.attributeId, list);
   }
-  return colors;
+
+  const facets: CatalogAttributeFacet[] = [];
+  const colors: CatalogColorFacet[] = [];
+  const seenHex = new Set<string>();
+
+  for (const row of attributeRows) {
+    const translation = translationFor(row.translations, locale);
+    if (!translation) continue;
+    const values = valuesByAttribute.get(row.id) ?? [];
+    if (values.length === 0) continue;
+    facets.push({
+      id: row.id,
+      key: row.key,
+      title: translation.title,
+      values,
+    });
+    for (const value of values) {
+      if (!value.colorHex || seenHex.has(value.colorHex)) continue;
+      seenHex.add(value.colorHex);
+      colors.push({ id: value.id, hex: value.colorHex });
+    }
+  }
+
+  return { attributes: facets, colors };
 }
 
 async function loadPriceBounds(): Promise<{
@@ -188,17 +241,18 @@ async function loadPriceBounds(): Promise<{
 }
 
 async function loadCatalogFacets(locale: Locale): Promise<CatalogFacets> {
-  const [categoryTree, brandList, colorList, price] = await Promise.all([
+  const [categoryTree, brandList, attributeFacets, price] = await Promise.all([
     loadCategoryFacets(locale),
     loadBrandFacets(locale),
-    loadColorFacets(),
+    loadAttributeFacets(locale),
     loadPriceBounds(),
   ]);
 
   return {
     categories: categoryTree,
     brands: brandList,
-    colors: colorList,
+    attributes: attributeFacets.attributes,
+    colors: attributeFacets.colors,
     minPriceAmd: price.minPriceAmd,
     maxPriceAmd: price.maxPriceAmd,
   };

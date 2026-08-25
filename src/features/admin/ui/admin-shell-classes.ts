@@ -2,9 +2,9 @@
 export const ADMIN_SIDEBAR_MOBILE_BAR =
   "sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-gray-200/80 bg-white/95 px-4 py-3 backdrop-blur-sm lg:hidden";
 
-/** Width is set in `AdminSidebar` (expanded vs collapsed). */
+/** Desktop admin sidebar — fixed expanded width (`lg:w-64` in `AdminSidebar`). */
 export const ADMIN_SIDEBAR_ASIDE =
-  "hidden lg:flex lg:h-full lg:shrink-0 lg:flex-col overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-200 ease-out";
+  "hidden lg:flex lg:h-full lg:shrink-0 lg:flex-col overflow-hidden border-r border-gray-200 bg-white";
 
 export const ADMIN_SIDEBAR_NAV =
   "flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-y-contain py-4";

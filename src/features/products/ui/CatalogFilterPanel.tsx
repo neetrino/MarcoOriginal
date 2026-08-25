@@ -5,13 +5,12 @@ import {
   withPriceRange,
   withToggledBrand,
   withToggledCategory,
-  withToggledColor,
 } from "@/features/products/domain/catalog-href";
 import { normalizeSelectedPriceRange } from "@/features/products/domain/catalog-price-bounds";
 import type { CatalogSearchParams } from "@/features/products/domain/catalog-search-params";
+import { CatalogAttributeFilter } from "@/features/products/ui/CatalogAttributeFilter";
 import { CatalogBrandFilter } from "@/features/products/ui/CatalogBrandFilter";
 import { CatalogCategoryFilter } from "@/features/products/ui/CatalogCategoryFilter";
-import { CatalogColorFilter } from "@/features/products/ui/CatalogColorFilter";
 import { CatalogPriceFilter } from "@/features/products/ui/CatalogPriceFilter";
 import {
   CATALOG_FILTER_SECTION,
@@ -29,6 +28,20 @@ export type CatalogFilterCopy = {
   minPrice: string;
   maxPrice: string;
 };
+
+function withToggledAttributeValue(
+  filters: CatalogSearchParams,
+  valueId: string,
+): CatalogSearchParams {
+  const current = filters.attributeValueIds ?? [];
+  return {
+    ...filters,
+    page: 1,
+    attributeValueIds: current.includes(valueId)
+      ? current.filter((id) => id !== valueId)
+      : [...current, valueId],
+  };
+}
 
 type CatalogFilterPanelProps = {
   filters: CatalogSearchParams;
@@ -49,7 +62,7 @@ export function CatalogFilterPanel({
 }: CatalogFilterPanelProps) {
   const selectedCategories = new Set(filters.categorySlugs);
   const selectedBrands = new Set(filters.brandSlugs);
-  const selectedColors = new Set(filters.colorHexes);
+  const selectedAttributeValues = new Set(filters.attributeValueIds);
   const selectedMin = filters.minPrice ?? priceBounds?.minMajor ?? 0;
   const selectedMax = filters.maxPrice ?? priceBounds?.maxMajor ?? 0;
 
@@ -81,7 +94,9 @@ export function CatalogFilterPanel({
             maxLabel={copy.maxPrice}
             onChange={(min, max) => {
               const next = normalizeSelectedPriceRange(min, max, priceBounds);
-              onFiltersChange(withPriceRange(filters, next.minPrice, next.maxPrice));
+              onFiltersChange(
+                withPriceRange(filters, next.minPrice, next.maxPrice),
+              );
             }}
           />
         </section>
@@ -94,15 +109,18 @@ export function CatalogFilterPanel({
           onToggle={(slug) => onFiltersChange(withToggledBrand(filters, slug))}
         />
       </section>
-      <section className={CATALOG_FILTER_SECTION}>
-        <h2 className={CATALOG_FILTER_TITLE}>{copy.colors}</h2>
-        <CatalogColorFilter
-          colors={facets.colors}
-          selectedHexes={selectedColors}
-          label={copy.colors}
-          onToggle={(hex) => onFiltersChange(withToggledColor(filters, hex))}
-        />
-      </section>
+      {facets.attributes.map((attribute) => (
+        <section key={attribute.id} className={CATALOG_FILTER_SECTION}>
+          <h2 className={CATALOG_FILTER_TITLE}>{attribute.title}</h2>
+          <CatalogAttributeFilter
+            attribute={attribute}
+            selectedIds={selectedAttributeValues}
+            onToggle={(valueId) =>
+              onFiltersChange(withToggledAttributeValue(filters, valueId))
+            }
+          />
+        </section>
+      ))}
     </div>
   );
 }

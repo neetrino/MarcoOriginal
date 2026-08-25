@@ -1,10 +1,13 @@
 import type { AdminCategoryOption } from "@/features/products/application/list-admin-products";
+import type { AdminAttributeListItem } from "@/features/attributes/domain/attribute-admin-model";
 import { ProductDrawerCatalogTab } from "@/features/products/ui/ProductDrawerCatalogTab";
 import {
   ProductDrawerImages,
   type ProductDraftImage,
 } from "@/features/products/ui/ProductDrawerImages";
 import { ProductDrawerPriceTab } from "@/features/products/ui/ProductDrawerPriceTab";
+import type { ProductType } from "@/features/products/domain/product-type";
+import type { ProductVariantDraft } from "@/features/products/domain/product-variant-draft";
 import type { ProductDrawerTab } from "@/features/products/ui/ProductDrawerTabs";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
@@ -13,6 +16,11 @@ type EditorCopy = Dictionary["admin"]["productEditor"];
 type ProductDrawerRestFieldsProps = {
   tab: ProductDrawerTab;
   copy: EditorCopy;
+  attributes: readonly AdminAttributeListItem[];
+  productType: ProductType;
+  selectedAttributeIds: string[];
+  attributeValueIds: Record<string, string>;
+  variants: ProductVariantDraft[];
   images: ProductDraftImage[];
   categories: AdminCategoryOption[];
   categoryIds: string[];
@@ -22,6 +30,10 @@ type ProductDrawerRestFieldsProps = {
   discountPercent: string;
   sku: string;
   disabled: boolean;
+  onProductTypeChange: (value: ProductType) => void;
+  onSelectedAttributeIdsChange: (ids: string[]) => void;
+  onAttributeValueIdsChange: (valueIds: Record<string, string>) => void;
+  onVariantsChange: (variants: ProductVariantDraft[]) => void;
   onImagesChange: (images: ProductDraftImage[]) => void;
   onCategoryIdsChange: (ids: string[]) => void;
   onBrandIdsChange: (ids: string[]) => void;
@@ -33,6 +45,11 @@ type ProductDrawerRestFieldsProps = {
 export function ProductDrawerRestFields({
   tab,
   copy,
+  attributes,
+  productType,
+  selectedAttributeIds,
+  attributeValueIds,
+  variants,
   images,
   categories,
   categoryIds,
@@ -42,6 +59,10 @@ export function ProductDrawerRestFields({
   discountPercent,
   sku,
   disabled,
+  onProductTypeChange,
+  onSelectedAttributeIdsChange,
+  onAttributeValueIdsChange,
+  onVariantsChange,
   onImagesChange,
   onCategoryIdsChange,
   onBrandIdsChange,
@@ -75,10 +96,19 @@ export function ProductDrawerRestFields({
       <div hidden={tab !== "price"} data-drawer-tab="price">
         <ProductDrawerPriceTab
           copy={copy}
+          productType={productType}
+          attributes={attributes}
+          selectedAttributeIds={selectedAttributeIds}
+          attributeValueIds={attributeValueIds}
+          variants={variants}
           priceAmount={priceAmount}
           discountPercent={discountPercent}
           sku={sku}
           disabled={disabled}
+          onProductTypeChange={onProductTypeChange}
+          onSelectedAttributeIdsChange={onSelectedAttributeIdsChange}
+          onAttributeValueIdsChange={onAttributeValueIdsChange}
+          onVariantsChange={onVariantsChange}
           onPriceAmountChange={onPriceAmountChange}
           onDiscountPercentChange={onDiscountPercentChange}
           onSkuChange={onSkuChange}

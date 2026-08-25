@@ -8,23 +8,20 @@ import {
 
 describe("admin nav classes", () => {
   it("marks the active row with the storefront yellow pill", () => {
-    const active = adminNavItemClass({ active: true, collapsed: false });
-    const idle = adminNavItemClass({ active: false, collapsed: false });
+    const active = adminNavItemClass({ active: true });
+    const idle = adminNavItemClass({ active: false });
 
     expect(active).toContain("bg-marco-yellow");
     expect(idle).not.toContain("bg-marco-yellow");
     expect(idle).toContain("hover:bg-white");
   });
 
-  it("centers collapsed rows and indents product subpages", () => {
-    const collapsed = adminNavItemClass({ active: false, collapsed: true });
+  it("indents product subpages", () => {
     const nested = adminNavItemClass({
       active: false,
-      collapsed: false,
       isSubCategory: true,
     });
 
-    expect(collapsed).toContain("justify-center");
     expect(nested).toContain("pl-11");
   });
 

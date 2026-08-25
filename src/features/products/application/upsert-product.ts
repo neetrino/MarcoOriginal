@@ -11,6 +11,10 @@ import {
 } from "@/db/schema";
 import { persistProductMedia } from "@/features/products/application/persist-product-media";
 import {
+  summarizeVariableProduct,
+  syncProductVariants,
+} from "@/features/products/application/sync-product-variants";
+import {
   syncProductBrands,
   syncProductCategories,
 } from "@/features/products/application/sync-product-relations";
@@ -20,6 +24,7 @@ import {
   DEFAULT_PRODUCT_STOCK,
   PRODUCT_RESTOCK_AT,
 } from "@/features/products/domain/product-stock";
+import { compareAtFromVariantDiscount } from "@/features/products/domain/variant-discount";
 import {
   productUpsertSchema,
   type ProductUpsertInput,
@@ -86,6 +91,30 @@ function collectImageFiles(formData: FormData): File[] {
     .filter((entry): entry is File => entry instanceof File && entry.size > 0);
 }
 
+function normalizeProductPayload(data: ProductUpsertInput): ProductUpsertInput {
+  if (data.productType !== "VARIABLE") {
+    return data;
+  }
+
+  const variants = data.variants.map((variant) => ({
+    ...variant,
+    compareAtAmount: compareAtFromVariantDiscount(
+      variant.priceAmount,
+      variant.discountValue > 0 ? variant.discountType : null,
+      variant.discountValue,
+    ),
+  }));
+  const summary = summarizeVariableProduct(variants, data.slug);
+
+  return {
+    ...data,
+    variants,
+    sku: summary.sku,
+    priceAmount: summary.priceAmount,
+    compareAtAmount: null,
+  };
+}
+
 /** Creates a product from the admin drawer (fields + optional images). */
 export async function createProductFromDrawerAction(
   locale: string,
@@ -95,10 +124,11 @@ export async function createProductFromDrawerAction(
     return err("INVALID_LOCALE", "Invalid locale.");
   }
 
-  const data = parsePayload(formData);
-  if (!data) {
+  const parsed = parsePayload(formData);
+  if (!parsed) {
     return err("VALIDATION_ERROR", "Invalid product payload.");
   }
+  const data = normalizeProductPayload(parsed);
 
   if (
     data.compareAtAmount != null &&
@@ -113,20 +143,32 @@ export async function createProductFromDrawerAction(
   const actor = await requireAdmin(locale as Locale);
   const id = createId();
   const files = collectImageFiles(formData);
+  const initialStock =
+    data.productType === "VARIABLE"
+      ? data.variants.length * DEFAULT_PRODUCT_STOCK
+      : DEFAULT_PRODUCT_STOCK;
 
   await getDb().insert(products).values({
     id,
     sku: data.sku,
     priceAmount: data.priceAmount,
     compareAtAmount: data.compareAtAmount,
-    stockOnHand: DEFAULT_PRODUCT_STOCK,
+    stockOnHand: initialStock,
     lowStockThreshold: PRODUCT_RESTOCK_AT,
     status: data.status,
     salesClass: data.salesClass,
+    productType: data.productType,
     warrantyYears: data.warrantyYears,
     tags: parseProductTags(data.tags),
+    attributeValueIds:
+      data.productType === "SIMPLE" ? data.attributeValueIds : [],
     translations: buildTranslations(data),
   });
+
+  const variantError = await syncProductVariants(id, data, formData);
+  if (variantError) {
+    return err("VALIDATION_ERROR", variantError);
+  }
 
   const categoryError = await syncProductCategories(id, data.categoryIds);
   if (categoryError) {
@@ -141,10 +183,10 @@ export async function createProductFromDrawerAction(
   await getDb().insert(stockMovements).values({
     id: createId(),
     productId: id,
-    delta: DEFAULT_PRODUCT_STOCK,
+    delta: initialStock,
     reason: "ADMIN_ADJUSTMENT",
     actorUserId: actor.id,
-    resultingBalance: DEFAULT_PRODUCT_STOCK,
+    resultingBalance: initialStock,
   });
 
   const mediaResult = await persistProductMedia({
@@ -172,10 +214,11 @@ export async function updateProductFromDrawerAction(
     return err("INVALID_LOCALE", "Invalid locale.");
   }
 
-  const data = parsePayload(formData);
-  if (!data) {
+  const parsed = parsePayload(formData);
+  if (!parsed) {
     return err("VALIDATION_ERROR", "Invalid product payload.");
   }
+  const data = normalizeProductPayload(parsed);
 
   if (
     data.compareAtAmount != null &&
@@ -212,12 +255,20 @@ export async function updateProductFromDrawerAction(
       compareAtAmount: data.compareAtAmount,
       status: data.status || existing.status,
       salesClass: data.salesClass,
+      productType: data.productType,
       warrantyYears: data.warrantyYears,
       tags: parseProductTags(data.tags),
+      attributeValueIds:
+        data.productType === "SIMPLE" ? data.attributeValueIds : [],
       translations: buildTranslations(data),
       updatedAt: new Date(),
     })
     .where(eq(products.id, existing.id));
+
+  const variantError = await syncProductVariants(existing.id, data, formData);
+  if (variantError) {
+    return err("VALIDATION_ERROR", variantError);
+  }
 
   const categoryError = await syncProductCategories(
     existing.id,

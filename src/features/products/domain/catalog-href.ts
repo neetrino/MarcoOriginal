@@ -24,7 +24,8 @@ export function catalogHref(
   const params = new URLSearchParams();
   appendList(params, "category", filters.categorySlugs);
   appendList(params, "brand", filters.brandSlugs);
-  appendList(params, "color", filters.colorHexes);
+  appendList(params, "attr", filters.attributeValueIds ?? []);
+  appendList(params, "color", filters.colorHexes ?? []);
   if (filters.minPrice != null) {
     params.set("minPrice", String(filters.minPrice));
   }
@@ -84,6 +85,19 @@ export function withToggledColor(
     ...filters,
     page: 1,
     colorHexes: toggleValue(filters.colorHexes, hex),
+  };
+}
+
+/** Toggles an attribute value id and resets pagination. */
+export function withToggledAttributeValue(
+  filters: CatalogSearchParams,
+  valueId: string,
+): CatalogSearchParams {
+  const current = filters.attributeValueIds ?? [];
+  return {
+    ...filters,
+    page: 1,
+    attributeValueIds: toggleValue(current, valueId),
   };
 }
 

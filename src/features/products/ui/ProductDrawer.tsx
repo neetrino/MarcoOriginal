@@ -1,9 +1,11 @@
 "use client";
 
-import { useTransition, type FormEvent, type InvalidEvent } from "react";
+import { useState, useTransition, type FormEvent, type InvalidEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { SideSheet } from "@/components/ui/SideSheet";
+import type { AdminAttributeListItem } from "@/features/attributes/domain/attribute-admin-model";
+import { loadProductDrawerVariantStateAction } from "@/features/products/application/load-product-drawer-state";
 import type {
   AdminCategoryOption,
   AdminProductListItem,
@@ -18,6 +20,7 @@ import {
   parseProductSpecs,
   slugifyProductTitle,
 } from "@/features/products/domain/product-specs";
+import type { ProductVariantDraft } from "@/features/products/domain/product-variant-draft";
 import { ProductDrawerBasicsTab } from "@/features/products/ui/ProductDrawerBasicsTab";
 import { ProductDrawerDescriptionTab } from "@/features/products/ui/ProductDrawerDescriptionTab";
 import { ProductDrawerHeader } from "@/features/products/ui/ProductDrawerHeader";
@@ -48,6 +51,7 @@ type ProductDrawerProduct = Pick<
   | "warrantyYears"
   | "tags"
   | "specifications"
+  | "productType"
 >;
 
 type ProductDrawerProps = {
@@ -57,7 +61,8 @@ type ProductDrawerProps = {
   product?: ProductDrawerProduct | null;
   categories: AdminCategoryOption[];
   brands: readonly { id: string; title: string }[];
-};;
+  attributes: readonly AdminAttributeListItem[];
+};
 
 function tabFromInvalidTarget(target: EventTarget | null): ProductDrawerTab | null {
   if (!(target instanceof HTMLElement)) return null;
@@ -74,6 +79,27 @@ function tabFromInvalidTarget(target: EventTarget | null): ProductDrawerTab | nu
   return null;
 }
 
+function buildVariantPayload(variant: ProductVariantDraft) {
+  return {
+    id: variant.id,
+    key: variant.key,
+    sku: variant.sku.trim(),
+    priceAmount: Number(variant.priceAmount),
+    discountType: variant.discountValue === "0" || !variant.discountValue.trim()
+      ? null
+      : variant.discountType,
+    discountValue: Number(variant.discountValue),
+    discountStartsAt: null,
+    discountEndsAt: variant.discountEndsAt
+      ? new Date(variant.discountEndsAt)
+      : null,
+    compareAtAmount: null,
+    attributeValueIds: Object.values(variant.attributeValueIds).filter(Boolean),
+    removeImageId: variant.removeImageId,
+    existingImageId: variant.image?.existingId ?? null,
+  };
+}
+
 export function ProductDrawer({
   locale,
   open,
@@ -81,28 +107,69 @@ export function ProductDrawer({
   product = null,
   categories,
   brands,
+  attributes,
 }: ProductDrawerProps) {
   const copy = isLocale(locale)
     ? getDictionary(locale).admin.productEditor
     : getDictionary("hy").admin.productEditor;
-  const formKey = open ? (product?.id ?? "new") : "closed";
+  const [variantState, setVariantState] = useState<{
+    productType: ProductDrawerProduct["productType"];
+    selectedAttributeIds: string[];
+    attributeValueIds: Record<string, string>;
+    variants: ProductVariantDraft[];
+  } | null>(null);
+  const [variantStateReady, setVariantStateReady] = useState(!product?.id);
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevProductId, setPrevProductId] = useState(product?.id);
+
+  if (open !== prevOpen || product?.id !== prevProductId) {
+    setPrevOpen(open);
+    setPrevProductId(product?.id);
+    if (!open) {
+      setVariantState(null);
+      setVariantStateReady(!product?.id);
+    } else if (!product?.id) {
+      setVariantState(null);
+      setVariantStateReady(true);
+    } else {
+      setVariantStateReady(false);
+      void loadProductDrawerVariantStateAction(locale, product.id).then((result) => {
+        if (result.ok) {
+          setVariantState(result.value);
+        }
+        setVariantStateReady(true);
+      });
+    }
+  }
+
+  const formKey = open
+    ? `${product?.id ?? "new"}-${variantStateReady ? "ready" : "loading"}`
+    : "closed";
 
   return (
     <SideSheet
       open={open}
       onClose={onClose}
       ariaLabel={copy.title}
-      panelClassName="w-[min(100%,80rem)]"
+      panelClassName="w-[min(100%,80vw)]"
     >
-      <ProductDrawerForm
-        key={formKey}
-        locale={locale}
-        product={product}
-        categories={categories}
-        brands={brands}
-        copy={copy}
-        onClose={onClose}
-      />
+      {variantStateReady ? (
+        <ProductDrawerForm
+          key={formKey}
+          locale={locale}
+          product={product}
+          categories={categories}
+          brands={brands}
+          attributes={attributes}
+          variantState={variantState}
+          copy={copy}
+          onClose={onClose}
+        />
+      ) : (
+        <div className="flex flex-1 items-center justify-center p-8 text-sm text-slate-500">
+          {copy.saving}
+        </div>
+      )}
     </SideSheet>
   );
 }
@@ -112,6 +179,8 @@ function ProductDrawerForm({
   product,
   categories: initialCategories,
   brands,
+  attributes,
+  variantState,
   copy,
   onClose,
 }: {
@@ -119,6 +188,13 @@ function ProductDrawerForm({
   product: ProductDrawerProduct | null;
   categories: AdminCategoryOption[];
   brands: readonly { id: string; title: string }[];
+  attributes: readonly AdminAttributeListItem[];
+  variantState: {
+    productType: ProductDrawerProduct["productType"];
+    selectedAttributeIds: string[];
+    attributeValueIds: Record<string, string>;
+    variants: ProductVariantDraft[];
+  } | null;
   copy: Dictionary["admin"]["productEditor"];
   onClose: () => void;
 }) {
@@ -127,6 +203,10 @@ function ProductDrawerForm({
   const form = useProductDrawerForm({
     product,
     initialCategories,
+    initialProductType: variantState?.productType,
+    initialSelectedAttributeIds: variantState?.selectedAttributeIds,
+    initialAttributeValueIds: variantState?.attributeValueIds,
+    initialVariants: variantState?.variants,
   });
   const [isPending, startTransition] = useTransition();
 
@@ -137,23 +217,71 @@ function ProductDrawerForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
+
+    if (form.productType === "VARIABLE") {
+      if (form.selectedAttributeIds.length === 0) {
+        form.setError(copy.variableEmptyHint);
+        form.setTab("price");
+        return;
+      }
+      if (form.variants.length === 0) {
+        form.setError(copy.variableEmptyHint);
+        form.setTab("price");
+        return;
+      }
+      for (const variant of form.variants) {
+        if (!variant.sku.trim()) {
+          form.setError(copy.skuPlaceholder);
+          form.setTab("price");
+          return;
+        }
+        const missingAttribute = form.selectedAttributeIds.some(
+          (attributeId) => !variant.attributeValueIds[attributeId],
+        );
+        if (missingAttribute) {
+          form.setError(copy.variableValuePlaceholder);
+          form.setTab("price");
+          return;
+        }
+      }
+    }
+
     const newImages = form.images.filter((image) => image.file);
     const primaryImage = form.images.find((image) => image.isPrimary);
     const primaryNewIndex = primaryImage?.file
       ? newImages.findIndex((image) => image.key === primaryImage.key)
       : null;
 
+    const slugValue = form.slug.trim() || slugifyProductTitle(form.title);
+    const variantPayload =
+      form.productType === "VARIABLE"
+        ? form.variants.map(buildVariantPayload)
+        : [];
+    const leadVariant = [...variantPayload].sort(
+      (left, right) => left.priceAmount - right.priceAmount,
+    )[0];
+
     const payload = {
-      sku: form.sku.trim(),
+      productType: form.productType,
+      sku:
+        form.productType === "SIMPLE"
+          ? form.sku.trim()
+          : leadVariant?.sku ?? `V-${slugValue}`,
       title: form.title.trim(),
-      slug: form.slug.trim() || slugifyProductTitle(form.title),
+      slug: slugValue,
       description: form.description,
       specifications: parseProductSpecs(form.specifications),
-      priceAmount: Number(form.priceAmount),
-      compareAtAmount: compareAtFromDiscountPercent(
-        Number(form.priceAmount),
-        Number(form.discountPercent),
-      ),
+      priceAmount:
+        form.productType === "SIMPLE"
+          ? Number(form.priceAmount)
+          : (leadVariant?.priceAmount ?? 0),
+      compareAtAmount:
+        form.productType === "SIMPLE"
+          ? compareAtFromDiscountPercent(
+              Number(form.priceAmount),
+              Number(form.discountPercent),
+            )
+          : null,
       categoryIds: form.categoryIds,
       brandIds: form.brandIds,
       status: (product?.status === "ACTIVE" || product?.status === "ARCHIVED"
@@ -168,12 +296,26 @@ function ProductDrawerForm({
           ? primaryNewIndex
           : null,
       removeImageIds: form.removedImageIds,
+      selectedAttributeIds: form.selectedAttributeIds,
+      attributeValueIds:
+        form.productType === "SIMPLE"
+          ? form.selectedAttributeIds
+              .map((attributeId) => form.attributeValueIds[attributeId])
+              .filter((valueId): valueId is string => Boolean(valueId))
+          : [],
+      variants: variantPayload,
     };
 
     const formData = new FormData();
     formData.set("data", JSON.stringify(payload));
     for (const image of newImages) {
       if (image.file) formData.append("images", image.file);
+    }
+    for (const variant of form.variants) {
+      if (variant.image?.file) {
+        formData.append("variantImageKeys", variant.key);
+        formData.append("variantImages", variant.image.file);
+      }
     }
 
     startTransition(async () => {
@@ -259,6 +401,11 @@ function ProductDrawerForm({
             <ProductDrawerRestFields
               tab={form.tab}
               copy={copy}
+              attributes={attributes}
+              productType={form.productType}
+              selectedAttributeIds={form.selectedAttributeIds}
+              attributeValueIds={form.attributeValueIds}
+              variants={form.variants}
               images={form.images}
               categories={form.categories}
               categoryIds={form.categoryIds}
@@ -268,6 +415,10 @@ function ProductDrawerForm({
               discountPercent={form.discountPercent}
               sku={form.sku}
               disabled={isPending}
+              onProductTypeChange={form.handleProductTypeChange}
+              onSelectedAttributeIdsChange={form.handleSelectedAttributeIdsChange}
+              onAttributeValueIdsChange={form.setAttributeValueIds}
+              onVariantsChange={form.setVariants}
               onImagesChange={form.handleImagesChange}
               onCategoryIdsChange={form.setCategoryIds}
               onBrandIdsChange={form.setBrandIds}

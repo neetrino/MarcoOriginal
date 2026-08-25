@@ -54,6 +54,7 @@ export type AdminProductListItem = {
   id: string;
   sku: string;
   status: string;
+  productType: "SIMPLE" | "VARIABLE";
   priceAmount: number;
   compareAtAmount: number | null;
   stockOnHand: number;
@@ -255,6 +256,7 @@ export async function listAdminProducts(
         id: product.id,
         sku: product.sku,
         status: product.status,
+        productType: product.productType === "VARIABLE" ? "VARIABLE" : "SIMPLE",
         priceAmount: product.priceAmount,
         compareAtAmount: product.compareAtAmount,
         stockOnHand: product.stockOnHand,

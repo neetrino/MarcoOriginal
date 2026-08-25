@@ -1,20 +1,16 @@
 type AdminNavItemOptions = {
   active: boolean;
-  collapsed: boolean;
   isSubCategory?: boolean;
 };
 
 /** Desktop/mobile admin nav row — yellow active pill like the storefront. */
 export function adminNavItemClass({
   active,
-  collapsed,
   isSubCategory = false,
 }: AdminNavItemOptions): string {
-  const layout = collapsed
-    ? "justify-center px-0 py-3"
-    : isSubCategory
-      ? "gap-3 py-2.5 pr-4 pl-11"
-      : "gap-3 px-3 py-2.5";
+  const layout = isSubCategory
+    ? "gap-3 py-2.5 pr-4 pl-11"
+    : "gap-3 px-3 py-2.5";
   const tone = active
     ? "bg-marco-yellow text-marco-slate"
     : "text-marco-slate/80 hover:bg-white hover:text-marco-ink";

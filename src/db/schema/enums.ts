@@ -19,6 +19,8 @@ export const productSalesClassEnum = pgEnum("product_sales_class", [
   "WHOLESALE",
 ]);
 
+export const productTypeEnum = pgEnum("product_type", ["SIMPLE", "VARIABLE"]);
+
 export const categoryStatusEnum = pgEnum("category_status", [
   "ACTIVE",
   "ARCHIVED",

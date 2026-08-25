@@ -22,7 +22,6 @@ import { useAdminProductsSubnavExpanded } from "@/features/admin/ui/useAdminProd
 type AdminNavListProps = {
   locale: string;
   pathname: string;
-  collapsed?: boolean;
   onNavigate?: () => void;
 };
 
@@ -30,11 +29,9 @@ function isNestedVisible(
   tab: AdminMenuItem,
   pathname: string,
   locale: string,
-  collapsed: boolean,
   productsNestedExpanded: boolean,
 ): boolean {
   if (tab.parentGroupId !== "products") return true;
-  if (collapsed) return true;
   if (isAdminTabActive(tab.href, pathname, locale)) return true;
   return productsNestedExpanded;
 }
@@ -42,7 +39,6 @@ function isNestedVisible(
 export function AdminNavList({
   locale,
   pathname,
-  collapsed = false,
   onNavigate,
 }: AdminNavListProps) {
   const tabs = getAdminMenuItems(locale);
@@ -54,20 +50,14 @@ export function AdminNavList({
     <>
       {tabs.map((tab) => {
         if (
-          !isNestedVisible(
-            tab,
-            pathname,
-            locale,
-            collapsed,
-            productsNestedExpanded,
-          )
+          !isNestedVisible(tab, pathname, locale, productsNestedExpanded)
         ) {
           return null;
         }
 
         const isActive = isAdminTabActive(tab.href, pathname, locale);
         const row =
-          tab.id === "products" && !collapsed ? (
+          tab.id === "products" ? (
             <div className={adminNavGroupClass(isActive)}>
               <Link
                 href={tab.href}
@@ -112,14 +102,11 @@ export function AdminNavList({
               onClick={onNavigate}
               className={adminNavItemClass({
                 active: isActive,
-                collapsed,
                 isSubCategory: tab.isSubCategory,
               })}
             >
               <span className={adminNavIconClass(isActive)}>{tab.icon}</span>
-              {collapsed ? null : (
-                <span className="min-w-0 truncate">{tab.label}</span>
-              )}
+              <span className="min-w-0 truncate">{tab.label}</span>
             </Link>
           );
 

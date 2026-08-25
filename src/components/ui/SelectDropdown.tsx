@@ -52,6 +52,7 @@ export function SelectDropdown({
     options.find((option) => option.value === value)?.label ??
     allLabel ??
     value;
+  const isPlaceholder = value === "" && allLabel !== undefined;
 
   useEffect(() => {
     return () => {
@@ -116,7 +117,9 @@ export function SelectDropdown({
         onClick={() => setOpen((current) => !current)}
       >
         <span
-          className={fitContent ? "whitespace-nowrap" : "min-w-0 truncate"}
+          className={`${fitContent ? "whitespace-nowrap" : "min-w-0 truncate"} ${
+            isPlaceholder ? "text-slate-400" : "text-gray-900"
+          }`}
         >
           {selectedLabel}
         </span>

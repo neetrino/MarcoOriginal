@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "attribute_value_ids" jsonb DEFAULT '[]'::jsonb NOT NULL;
