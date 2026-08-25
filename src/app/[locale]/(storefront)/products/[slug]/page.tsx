@@ -93,7 +93,15 @@ export async function generateMetadata({
       description,
       type: "website",
       url: canonicalPath,
-      ...(product.imageUrl ? { images: [{ url: product.imageUrl }] } : {}),
+      images: product.imageUrl
+        ? [{ url: product.imageUrl }]
+        : [{ url: "/og.png", width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: product.imageUrl ? [product.imageUrl] : ["/og.png"],
     },
   };
 }
