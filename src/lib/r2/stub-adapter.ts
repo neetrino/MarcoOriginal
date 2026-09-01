@@ -1,6 +1,11 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import {
+  canonicalizeMediaObjectKey,
+  isAbsoluteMediaRef,
+  storageKeyFromMediaObjectKey,
+} from "@/lib/media/object-key";
 import type { ObjectStorageAdapter } from "@/lib/r2/types";
 
 /**
@@ -26,7 +31,8 @@ export function createStubObjectStorageAdapter(
       await writeFile(absolute, body);
     },
     buildPublicUrl(objectKey) {
-      const key = objectKey.replace(/^\//, "");
+      const key = canonicalizeMediaObjectKey(objectKey);
+      if (isAbsoluteMediaRef(key)) return key;
       const base = publicBaseUrl.replace(/\/$/, "");
       if (!base) {
         return `/${key}`;
@@ -34,7 +40,9 @@ export function createStubObjectStorageAdapter(
       return `${base}/${key}`;
     },
     async deleteObject(objectKey) {
-      const absolute = path.join(process.cwd(), "public", objectKey);
+      const key = storageKeyFromMediaObjectKey(objectKey);
+      if (!key) return;
+      const absolute = path.join(process.cwd(), "public", key);
       try {
         await unlink(absolute);
       } catch {

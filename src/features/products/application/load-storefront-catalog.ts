@@ -106,7 +106,8 @@ function toProductFilter(
     categoryIds.length === 0 &&
     brandIds.length === 0 &&
     attributeValueIdGroups.length === 0 &&
-    amdRange == null
+    amdRange == null &&
+    !filters.q
   ) {
     return {
       sort: filters.sort,
@@ -114,6 +115,7 @@ function toProductFilter(
     };
   }
   return {
+    q: filters.q ?? undefined,
     categoryIds,
     brandIds,
     attributeValueIdGroups,
@@ -130,12 +132,12 @@ export async function loadStorefrontCatalog(
   searchParams: Record<string, string | string[] | undefined>,
   currency: Currency,
 ): Promise<StorefrontCatalogResult> {
+  const parsed = parseCatalogSearchParams(searchParams);
   const [facets, quote] = await Promise.all([
-    getCatalogFacets(locale),
+    getCatalogFacets(locale, parsed.pricePresence),
     getCheckoutRateSnapshot(currency),
   ]);
   const priceBounds = toDisplayBounds(facets, currency, quote.rate);
-  const parsed = parseCatalogSearchParams(searchParams);
   const price = priceBounds
     ? normalizeSelectedPriceRange(parsed.minPrice, parsed.maxPrice, priceBounds)
     : { minPrice: null, maxPrice: null };

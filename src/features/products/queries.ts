@@ -20,6 +20,7 @@ import type {
   CatalogPricePresence,
   CatalogSort,
 } from "@/features/products/domain/catalog-sort";
+import { toIlikeContainsPattern } from "@/features/products/domain/catalog-text-search";
 import { parseProductSpecs } from "@/features/products/domain/product-specs";
 import { resolveProductPrices } from "@/features/promotions/application/resolve-product-prices";
 import type {
@@ -160,6 +161,8 @@ const activeCatalogWhere = and(
 );
 
 export type CatalogListFilter = {
+  /** Normalized free-text query (title + product/variant SKU). */
+  q?: string;
   categoryIds?: readonly string[];
   brandIds?: readonly string[];
   /** Attribute value id groups: AND across groups, OR within a group. */
@@ -169,6 +172,30 @@ export type CatalogListFilter = {
   sort?: CatalogSort;
   pricePresence?: CatalogPricePresence;
 };
+
+function catalogTitleMatchesQuery(pattern: string) {
+  return or(
+    sql`${products.translations}->'hy'->>'title' ILIKE ${pattern} ESCAPE '\\'`,
+    sql`${products.translations}->'en'->>'title' ILIKE ${pattern} ESCAPE '\\'`,
+    sql`${products.translations}->'ru'->>'title' ILIKE ${pattern} ESCAPE '\\'`,
+  )!;
+}
+
+function catalogTextSearchWhere(query: string) {
+  const pattern = toIlikeContainsPattern(query);
+  const variantSkuMatch = inArray(
+    products.id,
+    getDb()
+      .select({ id: productVariants.productId })
+      .from(productVariants)
+      .where(sql`${productVariants.sku} ILIKE ${pattern} ESCAPE '\\'`),
+  );
+  return or(
+    catalogTitleMatchesQuery(pattern),
+    sql`${products.sku} ILIKE ${pattern} ESCAPE '\\'`,
+    variantSkuMatch,
+  )!;
+}
 
 function catalogTitleOrderExpr(locale: Locale) {
   if (locale === "en") return sql`${products.translations}->'en'->>'title'`;
@@ -215,6 +242,9 @@ function productMatchesAnyAttributeValueIds(valueIds: readonly string[]) {
 
 function catalogListWhere(filter?: CatalogListFilter) {
   const conditions = [activeCatalogWhere];
+  if (filter?.q) {
+    conditions.push(catalogTextSearchWhere(filter.q));
+  }
   if (filter?.categoryIds && filter.categoryIds.length > 0) {
     conditions.push(
       inArray(
@@ -268,6 +298,7 @@ function catalogFilterCacheKey(filter?: CatalogListFilter): string {
     .sort()
     .join("|");
   return [
+    filter.q ?? "",
     categoryKey,
     brandKey,
     attributeKey,

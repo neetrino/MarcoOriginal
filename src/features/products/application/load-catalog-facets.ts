@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import { getDb } from "@/db/client";
@@ -13,10 +13,11 @@ import {
   products,
   type LocaleTranslation,
 } from "@/db/schema";
+import { buildCategoryTree } from "@/features/categories/domain/category-tree";
 import {
-  buildCategoryTree,
-  type CategoryTreeNode,
-} from "@/features/categories/domain/category-tree";
+  buildCategoryFacetsWithDistinctCounts,
+  pruneEmptyCategoryFacets,
+} from "@/features/products/domain/catalog-category-facet-counts";
 import type {
   CatalogAttributeFacet,
   CatalogBrandFacet,
@@ -24,6 +25,7 @@ import type {
   CatalogColorFacet,
   CatalogFacets,
 } from "@/features/products/domain/catalog-filters";
+import type { CatalogPricePresence } from "@/features/products/domain/catalog-sort";
 import {
   CACHE_TAGS,
   PUBLIC_CACHE_REVALIDATE_SECONDS,
@@ -42,6 +44,12 @@ const activeProductWhere = and(
   isNull(products.deletedAt),
 );
 
+function productPricePresenceWhere(pricePresence: CatalogPricePresence) {
+  return pricePresence === "without"
+    ? eq(products.priceAmount, 0)
+    : gt(products.priceAmount, 0);
+}
+
 function translationFor(
   translations: { hy?: LocaleTranslation; en?: LocaleTranslation; ru?: LocaleTranslation },
   locale: Locale,
@@ -49,26 +57,21 @@ function translationFor(
   return translations[locale] ?? translations.hy ?? translations.en ?? null;
 }
 
-function toCategoryFacet(
-  node: CategoryTreeNode<CategoryRow>,
-  countById: Map<string, number>,
-): CatalogCategoryFacet {
-  const children = node.children.map((child) =>
-    toCategoryFacet(child, countById),
-  );
-  const direct = countById.get(node.id) ?? 0;
-  const count = children.reduce((sum, child) => sum + child.count, direct);
-  return {
-    id: node.id,
-    slug: node.slug,
-    title: node.title,
-    count,
-    children,
-  };
+function groupProductIdsByCategory(
+  rows: readonly { categoryId: string; productId: string }[],
+): Map<string, Set<string>> {
+  const productIdsByCategoryId = new Map<string, Set<string>>();
+  for (const row of rows) {
+    const productIds = productIdsByCategoryId.get(row.categoryId) ?? new Set();
+    productIds.add(row.productId);
+    productIdsByCategoryId.set(row.categoryId, productIds);
+  }
+  return productIdsByCategoryId;
 }
 
 async function loadCategoryFacets(
   locale: Locale,
+  pricePresence: CatalogPricePresence,
 ): Promise<CatalogCategoryFacet[]> {
   const rows = await getDb()
     .select({
@@ -92,34 +95,32 @@ async function loadCategoryFacets(
     });
   }
 
-  const countRows =
+  const linkRows =
     mapped.length === 0
       ? []
       : await getDb()
           .select({
             categoryId: productCategories.categoryId,
-            count: sql<number>`count(distinct ${productCategories.productId})::int`,
+            productId: productCategories.productId,
           })
           .from(productCategories)
           .innerJoin(products, eq(products.id, productCategories.productId))
           .where(
             and(
               activeProductWhere,
+              productPricePresenceWhere(pricePresence),
               inArray(
                 productCategories.categoryId,
                 mapped.map((row) => row.id),
               ),
             ),
-          )
-          .groupBy(productCategories.categoryId);
+          );
 
-  const countById = new Map<string, number>();
-  for (const row of countRows) {
-    countById.set(row.categoryId, row.count);
-  }
-
-  return buildCategoryTree(mapped).map((node) =>
-    toCategoryFacet(node, countById),
+  return pruneEmptyCategoryFacets(
+    buildCategoryFacetsWithDistinctCounts(
+      buildCategoryTree(mapped),
+      groupProductIdsByCategory(linkRows),
+    ),
   );
 }
 
@@ -240,9 +241,12 @@ async function loadPriceBounds(): Promise<{
   };
 }
 
-async function loadCatalogFacets(locale: Locale): Promise<CatalogFacets> {
+async function loadCatalogFacets(
+  locale: Locale,
+  pricePresence: CatalogPricePresence,
+): Promise<CatalogFacets> {
   const [categoryTree, brandList, attributeFacets, price] = await Promise.all([
-    loadCategoryFacets(locale),
+    loadCategoryFacets(locale, pricePresence),
     loadBrandFacets(locale),
     loadAttributeFacets(locale),
     loadPriceBounds(),
@@ -258,11 +262,17 @@ async function loadCatalogFacets(locale: Locale): Promise<CatalogFacets> {
   };
 }
 
-/** Storefront filter facets: categories, brands, colors, and AMD price bounds. */
-export async function getCatalogFacets(locale: Locale): Promise<CatalogFacets> {
+/**
+ * Storefront filter facets: categories, brands, colors, and AMD price bounds.
+ * Category counts match the active priced/unpriced listing mode.
+ */
+export async function getCatalogFacets(
+  locale: Locale,
+  pricePresence: CatalogPricePresence,
+): Promise<CatalogFacets> {
   return unstable_cache(
-    async () => loadCatalogFacets(locale),
-    ["catalog-facets", locale],
+    async () => loadCatalogFacets(locale, pricePresence),
+    ["catalog-facets", locale, pricePresence],
     {
       tags: [CACHE_TAGS.products, CACHE_TAGS.brands],
       revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,

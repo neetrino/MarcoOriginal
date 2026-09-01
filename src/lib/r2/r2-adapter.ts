@@ -7,6 +7,11 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+import {
+  canonicalizeMediaObjectKey,
+  isAbsoluteMediaRef,
+  storageKeyFromMediaObjectKey,
+} from "@/lib/media/object-key";
 import { logger } from "@/lib/observability/logger";
 import type { ObjectStorageAdapter } from "@/lib/r2/types";
 
@@ -76,15 +81,18 @@ export function createR2ObjectStorageAdapter(
       }
     },
     buildPublicUrl(objectKey) {
-      const key = objectKey.replace(/^\//, "");
+      const key = canonicalizeMediaObjectKey(objectKey);
+      if (isAbsoluteMediaRef(key)) return key;
       return `${publicBaseUrl}/${key}`;
     },
     async deleteObject(objectKey) {
+      const key = storageKeyFromMediaObjectKey(objectKey);
+      if (!key) return;
       try {
         await client.send(
           new DeleteObjectCommand({
             Bucket: config.bucketName,
-            Key: objectKey,
+            Key: key,
           }),
         );
       } catch (error) {

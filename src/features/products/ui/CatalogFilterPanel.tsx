@@ -8,9 +8,9 @@ import {
 } from "@/features/products/domain/catalog-href";
 import { normalizeSelectedPriceRange } from "@/features/products/domain/catalog-price-bounds";
 import type { CatalogSearchParams } from "@/features/products/domain/catalog-search-params";
-import { CatalogAttributeFilter } from "@/features/products/ui/CatalogAttributeFilter";
 import { CatalogBrandFilter } from "@/features/products/ui/CatalogBrandFilter";
 import { CatalogCategoryFilter } from "@/features/products/ui/CatalogCategoryFilter";
+import { CatalogColorFilter } from "@/features/products/ui/CatalogColorFilter";
 import { CatalogPriceFilter } from "@/features/products/ui/CatalogPriceFilter";
 import {
   CATALOG_FILTER_SECTION,
@@ -62,7 +62,7 @@ export function CatalogFilterPanel({
 }: CatalogFilterPanelProps) {
   const selectedCategories = new Set(filters.categorySlugs);
   const selectedBrands = new Set(filters.brandSlugs);
-  const selectedAttributeValues = new Set(filters.attributeValueIds);
+  const selectedColors = new Set(filters.attributeValueIds);
   const selectedMin = filters.minPrice ?? priceBounds?.minMajor ?? 0;
   const selectedMax = filters.maxPrice ?? priceBounds?.maxMajor ?? 0;
 
@@ -78,6 +78,14 @@ export function CatalogFilterPanel({
           onToggle={(slug) =>
             onFiltersChange(withToggledCategory(filters, slug))
           }
+        />
+      </section>
+      <section className={CATALOG_FILTER_SECTION}>
+        <h2 className={CATALOG_FILTER_TITLE}>{copy.brands}</h2>
+        <CatalogBrandFilter
+          brands={facets.brands}
+          selectedSlugs={selectedBrands}
+          onToggle={(slug) => onFiltersChange(withToggledBrand(filters, slug))}
         />
       </section>
       {priceBounds ? (
@@ -101,26 +109,19 @@ export function CatalogFilterPanel({
           />
         </section>
       ) : null}
-      <section className={CATALOG_FILTER_SECTION}>
-        <h2 className={CATALOG_FILTER_TITLE}>{copy.brands}</h2>
-        <CatalogBrandFilter
-          brands={facets.brands}
-          selectedSlugs={selectedBrands}
-          onToggle={(slug) => onFiltersChange(withToggledBrand(filters, slug))}
-        />
-      </section>
-      {facets.attributes.map((attribute) => (
-        <section key={attribute.id} className={CATALOG_FILTER_SECTION}>
-          <h2 className={CATALOG_FILTER_TITLE}>{attribute.title}</h2>
-          <CatalogAttributeFilter
-            attribute={attribute}
-            selectedIds={selectedAttributeValues}
+      {facets.colors.length > 0 ? (
+        <section className={CATALOG_FILTER_SECTION}>
+          <h2 className={CATALOG_FILTER_TITLE}>{copy.colors}</h2>
+          <CatalogColorFilter
+            colors={facets.colors}
+            selectedIds={selectedColors}
+            label={copy.colors}
             onToggle={(valueId) =>
               onFiltersChange(withToggledAttributeValue(filters, valueId))
             }
           />
         </section>
-      ))}
+      ) : null}
     </div>
   );
 }

@@ -7,6 +7,7 @@ describe("parseCatalogSearchParams", () => {
   it("returns defaults for empty params", () => {
     expect(parseCatalogSearchParams({})).toEqual({
       page: 1,
+      q: null,
       categorySlugs: [],
       brandSlugs: [],
       colorHexes: [],
@@ -21,6 +22,7 @@ describe("parseCatalogSearchParams", () => {
   it("parses repeated and comma-separated filter values", () => {
     expect(
       parseCatalogSearchParams({
+        q: "  sofa  ",
         category: ["hoods", "ovens,hoods"],
         brand: "lex",
         color: ["#FFCA03", "000000"],
@@ -36,6 +38,7 @@ describe("parseCatalogSearchParams", () => {
       }),
     ).toEqual({
       page: 2,
+      q: "sofa",
       categorySlugs: ["hoods", "ovens"],
       brandSlugs: ["lex"],
       colorHexes: ["ffca03", "000000"],
@@ -58,9 +61,11 @@ describe("parseCatalogSearchParams", () => {
         color: "red",
         attr: "not-a-uuid",
         page: "0",
+        q: "   ",
       }),
     ).toEqual({
       page: 1,
+      q: null,
       categorySlugs: [],
       brandSlugs: [],
       colorHexes: [],
@@ -78,6 +83,7 @@ describe("catalogHref", () => {
     expect(
       catalogHref("hy", {
         page: 1,
+        q: null,
         categorySlugs: [],
         brandSlugs: [],
         colorHexes: [],
@@ -94,6 +100,7 @@ describe("catalogHref", () => {
     expect(
       catalogHref("hy", {
         page: 2,
+        q: "hood",
         categorySlugs: ["hoods"],
         brandSlugs: ["lex"],
         colorHexes: [],
@@ -104,7 +111,7 @@ describe("catalogHref", () => {
         pricePresence: "without",
       }),
     ).toBe(
-      "/hy/products?category=hoods&brand=lex&attr=11111111-1111-1111-1111-111111111111&minPrice=7&maxPrice=4975&sort=name-desc&pricePresence=without&page=2",
+      "/hy/products?q=hood&category=hoods&brand=lex&attr=11111111-1111-1111-1111-111111111111&minPrice=7&maxPrice=4975&sort=name-desc&pricePresence=without&page=2",
     );
   });
 });

@@ -21,15 +21,33 @@ describe("product presentation", () => {
   it("parses valid tags and drops empty or invalid ones", () => {
     expect(
       parseProductTags([
-        { id: "a", type: "TEXT", value: "  Նոր ապրանք  ", color: "#ffca03" },
+        {
+          id: "a",
+          type: "TEXT",
+          value: "  Նոր ապրանք  ",
+          color: "#ffca03",
+          position: "bottom-right",
+        },
         { id: "b", type: "PERCENT", value: "50", color: null },
         { id: "c", type: "PERCENT", value: "0", color: null },
         { id: "d", type: "TEXT", value: "   ", color: "red" },
         { type: "TEXT", value: "Sale" },
       ]),
     ).toEqual([
-      { id: "a", type: "TEXT", value: "Նոր ապրանք", color: "#FFCA03" },
-      { id: "b", type: "PERCENT", value: "50", color: null },
+      {
+        id: "a",
+        type: "TEXT",
+        value: "Նոր ապրանք",
+        color: "#FFCA03",
+        position: "bottom-right",
+      },
+      {
+        id: "b",
+        type: "PERCENT",
+        value: "50",
+        color: null,
+        position: "top-left",
+      },
     ]);
   });
 
@@ -42,6 +60,7 @@ describe("product presentation", () => {
         type: "PERCENT",
         value: "50",
         color: null,
+        position: "top-left",
       }),
     ).toBe("50%");
   });

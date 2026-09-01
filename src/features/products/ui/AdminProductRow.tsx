@@ -13,6 +13,7 @@ import {
   ADMIN_PRODUCTS_ROW,
   ADMIN_PRODUCTS_TD,
 } from "@/features/products/ui/admin-products.classes";
+import { formatNumericDate } from "@/lib/i18n/format-date";
 import { formatMoneyAmount } from "@/lib/money/format";
 
 type AdminProductRowProps = {
@@ -44,11 +45,7 @@ export function AdminProductRow({
   const copy = getAdminCopy(locale).products;
   const common = getAdminCopy(locale).common;
   const isActive = product.status === "ACTIVE";
-  const createdLabel = new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-  }).format(new Date(product.createdAt));
+  const createdLabel = formatNumericDate(product.createdAt, locale);
 
   return (
     <tr

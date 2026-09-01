@@ -1,10 +1,7 @@
-import {
-  ProductCard,
-  type ProductCardItem,
-} from "@/features/products/ui/ProductCard";
+import type { ProductCardItem } from "@/features/products/ui/ProductCard";
+import { CatalogProductCardSlot } from "@/features/products/ui/CatalogProductCardSlot";
 import { CATALOG_GRID } from "@/features/products/ui/catalog-filter-classes";
 import { CatalogProductGridShell } from "@/features/products/ui/CatalogProductGridShell";
-import { PRODUCT_CARD_PLP_MAX_WIDTH_CLASS } from "@/features/products/ui/product-card.constants";
 import type { Locale } from "@/lib/i18n/config";
 
 type CatalogProductGridProps = {
@@ -37,21 +34,16 @@ export function CatalogProductGrid({
   return (
     <CatalogProductGridShell fallbackClassName={gridClassName}>
       {products.map((product, index) => (
-        <div
+        <CatalogProductCardSlot
           key={product.id}
-          className="flex min-w-0 justify-center pb-7 sm:justify-end sm:pr-3 sm:pb-0 md:pr-4"
-        >
-          <ProductCard
-            product={product}
-            locale={locale}
-            wishlistLabel={wishlistLabel}
-            compareLabel={compareLabel}
-            addToCartLabel={addToCartLabel}
-            isSignedIn={isSignedIn}
-            priority={index < 4}
-            maxWidthClassName={PRODUCT_CARD_PLP_MAX_WIDTH_CLASS}
-          />
-        </div>
+          product={product}
+          locale={locale}
+          wishlistLabel={wishlistLabel}
+          compareLabel={compareLabel}
+          addToCartLabel={addToCartLabel}
+          isSignedIn={isSignedIn}
+          priority={index < 4}
+        />
       ))}
     </CatalogProductGridShell>
   );

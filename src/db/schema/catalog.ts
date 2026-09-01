@@ -30,11 +30,20 @@ import {
 export const PRODUCT_TAG_TYPES = ["TEXT", "PERCENT"] as const;
 export type ProductTagType = (typeof PRODUCT_TAG_TYPES)[number];
 
+export const PRODUCT_TAG_POSITIONS = [
+  "top-left",
+  "top-right",
+  "bottom-left",
+  "bottom-right",
+] as const;
+export type ProductTagPosition = (typeof PRODUCT_TAG_POSITIONS)[number];
+
 export type ProductTag = {
   id: string;
   type: ProductTagType;
   value: string;
   color: string | null;
+  position: ProductTagPosition;
 };
 
 export const PRODUCT_WARRANTY_YEARS = [0, 1, 2, 3] as const;

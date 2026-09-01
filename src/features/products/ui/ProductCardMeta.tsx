@@ -1,8 +1,8 @@
 import { ShieldCheck } from "lucide-react";
 
-import type { ProductTag } from "@/db/schema";
+import type { ProductTag, ProductTagPosition } from "@/db/schema";
 import {
-  contrastTextOnHex,
+  PRODUCT_TAG_POSITIONS,
   productTagLabel,
 } from "@/features/products/domain/product-presentation";
 import {
@@ -12,28 +12,100 @@ import {
 
 type ProductCardTagsProps = {
   tags: readonly ProductTag[];
+  className?: string;
+  /** Replaces default `top-2` on the top-left stack (cards: sit below warranty). */
+  topLeftClassName?: string;
+  /** Replaces default `top-2` on the top-right stack (PDP/cards: sit below badges/actions). */
+  topRightClassName?: string;
 };
 
-export function ProductCardTags({ tags }: ProductCardTagsProps) {
+function tagFallbackClasses(tag: ProductTag): string {
+  if (tag.type === "PERCENT") return "bg-red-600 text-white";
+
+  const value = tag.value.toLowerCase();
+  if (value.includes("new") || value.includes("նոր") || value.includes("нов")) {
+    return "bg-green-600 text-white";
+  }
+  if (value.includes("hot") || value.includes("տաք") || value.includes("хит")) {
+    return "bg-orange-600 text-white";
+  }
+  if (
+    value.includes("sale") ||
+    value.includes("զեղչ") ||
+    value.includes("скид")
+  ) {
+    return "bg-red-600 text-white";
+  }
+
+  return "bg-blue-600 text-white";
+}
+
+function cornerPositionClasses(
+  position: ProductTagPosition,
+  options: {
+    topLeftClassName?: string;
+    topRightClassName?: string;
+  },
+): string {
+  switch (position) {
+    case "top-left":
+      return `${options.topLeftClassName ?? "top-2"} left-2 items-start`;
+    case "top-right":
+      return `${options.topRightClassName ?? "top-2"} right-2 items-end`;
+    case "bottom-left":
+      return "bottom-2 left-2 items-start";
+    case "bottom-right":
+      return "bottom-2 right-2 items-end";
+  }
+}
+
+/** Corner-stacked product labels, matching marco.am ProductLabels layout. */
+export function ProductCardTags({
+  tags,
+  className = "z-20",
+  topLeftClassName,
+  topRightClassName,
+}: ProductCardTagsProps) {
   if (tags.length === 0) return null;
 
   return (
-    <ul className="flex flex-col items-start gap-1">
-      {tags.map((tag) => {
-        const background = tag.color ?? "#FFCA03";
-        const color = contrastTextOnHex(background);
+    <div className={`pointer-events-none absolute inset-0 ${className}`}>
+      {PRODUCT_TAG_POSITIONS.map((position) => {
+        const tagsForPosition = tags.filter((tag) => tag.position === position);
+        if (tagsForPosition.length === 0) return null;
+
         return (
-          <li key={tag.id}>
-            <span
-              className="inline-flex rounded-md px-2 py-0.5 text-xs font-semibold"
-              style={{ backgroundColor: background, color }}
-            >
-              {productTagLabel(tag)}
-            </span>
-          </li>
+          <div
+            key={position}
+            className={`absolute flex flex-col gap-1 ${cornerPositionClasses(position, {
+              topLeftClassName,
+              topRightClassName,
+            })}`}
+          >
+            {tagsForPosition.map((tag) => {
+              const hasCustomColor = Boolean(tag.color);
+              return (
+                <span
+                  key={tag.id}
+                  className={`inline-flex rounded-md px-3 py-1.5 text-sm font-semibold shadow-sm ${
+                    hasCustomColor
+                      ? "text-marco-black"
+                      : tagFallbackClasses(tag)
+                  }`}
+                  style={
+                    hasCustomColor
+                      ? { backgroundColor: tag.color ?? undefined }
+                      : undefined
+                  }
+                >
+                  {productTagLabel(tag)}
+                </span>
+              );
+            })}
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
 }
 
@@ -131,4 +203,3 @@ export function ProductWarrantyBadge({
     </p>
   );
 }
-

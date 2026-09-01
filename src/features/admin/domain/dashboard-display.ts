@@ -1,5 +1,6 @@
 import { isCurrency } from "@/lib/money/currency";
 import { formatMoneyAmount } from "@/lib/money/format";
+import { formatNumericDate } from "@/lib/i18n/format-date";
 
 const UNKNOWN_INITIAL = "U";
 
@@ -21,7 +22,7 @@ export function getDashboardInitials(name: string): string {
 
 /** Locale-aware short date for dashboard lists. */
 export function formatDashboardDate(value: Date, locale: string): string {
-  return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(value);
+  return formatNumericDate(value, locale);
 }
 
 /** Formats a stored minor-unit amount for dashboard cards. */

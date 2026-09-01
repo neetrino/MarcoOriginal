@@ -150,7 +150,7 @@ function GalleryMain({
           alt={selected.alt || title}
           fill
           sizes="(max-width: 768px) 100vw, 420px"
-          className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           priority
         />
       ) : (
@@ -198,9 +198,10 @@ function GalleryChrome({
           -{discountPercent}%
         </div>
       ) : null}
-      <div className="pointer-events-none absolute inset-0 z-20 p-2">
-        <ProductCardTags tags={tags} />
-      </div>
+      <ProductCardTags
+        tags={tags}
+        topRightClassName={discountPercent != null ? "top-20" : undefined}
+      />
       {showZoom ? (
         <button
           type="button"
