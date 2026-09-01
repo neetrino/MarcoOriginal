@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import { getDb } from "@/db/client";
@@ -14,7 +14,10 @@ import {
   type LocaleTranslation,
 } from "@/db/schema";
 import { buildCategoryTree } from "@/features/categories/domain/category-tree";
-import { buildCategoryFacetsWithDistinctCounts } from "@/features/products/domain/catalog-category-facet-counts";
+import {
+  buildCategoryFacetsWithDistinctCounts,
+  pruneEmptyCategoryFacets,
+} from "@/features/products/domain/catalog-category-facet-counts";
 import type {
   CatalogAttributeFacet,
   CatalogBrandFacet,
@@ -22,6 +25,7 @@ import type {
   CatalogColorFacet,
   CatalogFacets,
 } from "@/features/products/domain/catalog-filters";
+import type { CatalogPricePresence } from "@/features/products/domain/catalog-sort";
 import {
   CACHE_TAGS,
   PUBLIC_CACHE_REVALIDATE_SECONDS,
@@ -39,6 +43,12 @@ const activeProductWhere = and(
   eq(products.status, "ACTIVE"),
   isNull(products.deletedAt),
 );
+
+function productPricePresenceWhere(pricePresence: CatalogPricePresence) {
+  return pricePresence === "without"
+    ? eq(products.priceAmount, 0)
+    : gt(products.priceAmount, 0);
+}
 
 function translationFor(
   translations: { hy?: LocaleTranslation; en?: LocaleTranslation; ru?: LocaleTranslation },
@@ -61,6 +71,7 @@ function groupProductIdsByCategory(
 
 async function loadCategoryFacets(
   locale: Locale,
+  pricePresence: CatalogPricePresence,
 ): Promise<CatalogCategoryFacet[]> {
   const rows = await getDb()
     .select({
@@ -97,6 +108,7 @@ async function loadCategoryFacets(
           .where(
             and(
               activeProductWhere,
+              productPricePresenceWhere(pricePresence),
               inArray(
                 productCategories.categoryId,
                 mapped.map((row) => row.id),
@@ -104,9 +116,11 @@ async function loadCategoryFacets(
             ),
           );
 
-  return buildCategoryFacetsWithDistinctCounts(
-    buildCategoryTree(mapped),
-    groupProductIdsByCategory(linkRows),
+  return pruneEmptyCategoryFacets(
+    buildCategoryFacetsWithDistinctCounts(
+      buildCategoryTree(mapped),
+      groupProductIdsByCategory(linkRows),
+    ),
   );
 }
 
@@ -227,9 +241,12 @@ async function loadPriceBounds(): Promise<{
   };
 }
 
-async function loadCatalogFacets(locale: Locale): Promise<CatalogFacets> {
+async function loadCatalogFacets(
+  locale: Locale,
+  pricePresence: CatalogPricePresence,
+): Promise<CatalogFacets> {
   const [categoryTree, brandList, attributeFacets, price] = await Promise.all([
-    loadCategoryFacets(locale),
+    loadCategoryFacets(locale, pricePresence),
     loadBrandFacets(locale),
     loadAttributeFacets(locale),
     loadPriceBounds(),
@@ -245,11 +262,17 @@ async function loadCatalogFacets(locale: Locale): Promise<CatalogFacets> {
   };
 }
 
-/** Storefront filter facets: categories, brands, colors, and AMD price bounds. */
-export async function getCatalogFacets(locale: Locale): Promise<CatalogFacets> {
+/**
+ * Storefront filter facets: categories, brands, colors, and AMD price bounds.
+ * Category counts match the active priced/unpriced listing mode.
+ */
+export async function getCatalogFacets(
+  locale: Locale,
+  pricePresence: CatalogPricePresence,
+): Promise<CatalogFacets> {
   return unstable_cache(
-    async () => loadCatalogFacets(locale),
-    ["catalog-facets", locale],
+    async () => loadCatalogFacets(locale, pricePresence),
+    ["catalog-facets", locale, pricePresence],
     {
       tags: [CACHE_TAGS.products, CACHE_TAGS.brands],
       revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,

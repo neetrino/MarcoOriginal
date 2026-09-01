@@ -20,6 +20,19 @@ export function buildCategoryFacetsWithDistinctCounts(
   return nodes.map((node) => toFacet(node, productIdsByCategoryId).facet);
 }
 
+/** Drops category nodes with no matching products in the current listing mode. */
+export function pruneEmptyCategoryFacets(
+  nodes: readonly CatalogCategoryFacet[],
+): CatalogCategoryFacet[] {
+  const pruned: CatalogCategoryFacet[] = [];
+  for (const node of nodes) {
+    const children = pruneEmptyCategoryFacets(node.children);
+    if (node.count <= 0 && children.length === 0) continue;
+    pruned.push({ ...node, children });
+  }
+  return pruned;
+}
+
 function toFacet(
   node: CategoryTreeNode<CategoryFacetSource>,
   productIdsByCategoryId: ReadonlyMap<string, ReadonlySet<string>>,

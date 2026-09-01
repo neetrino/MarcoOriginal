@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { buildCategoryTree } from "@/features/categories/domain/category-tree";
-import { buildCategoryFacetsWithDistinctCounts } from "@/features/products/domain/catalog-category-facet-counts";
+import {
+  buildCategoryFacetsWithDistinctCounts,
+  pruneEmptyCategoryFacets,
+} from "@/features/products/domain/catalog-category-facet-counts";
 
 describe("buildCategoryFacetsWithDistinctCounts", () => {
   const rows = [
@@ -60,5 +63,44 @@ describe("buildCategoryFacetsWithDistinctCounts", () => {
     if (!leaf) return;
 
     expect(leaf.count).toBe(2);
+  });
+});
+
+describe("pruneEmptyCategoryFacets", () => {
+  it("removes zero-count leaves and empty parents", () => {
+    const pruned = pruneEmptyCategoryFacets([
+      {
+        id: "priced",
+        slug: "priced",
+        title: "Priced",
+        count: 2,
+        children: [],
+      },
+      {
+        id: "empty-root",
+        slug: "empty-root",
+        title: "Empty",
+        count: 0,
+        children: [
+          {
+            id: "empty-child",
+            slug: "empty-child",
+            title: "Empty child",
+            count: 0,
+            children: [],
+          },
+        ],
+      },
+    ]);
+
+    expect(pruned).toEqual([
+      {
+        id: "priced",
+        slug: "priced",
+        title: "Priced",
+        count: 2,
+        children: [],
+      },
+    ]);
   });
 });
