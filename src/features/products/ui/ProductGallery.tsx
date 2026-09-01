@@ -150,7 +150,7 @@ function GalleryMain({
           alt={selected.alt || title}
           fill
           sizes="(max-width: 768px) 100vw, 420px"
-          className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           priority
         />
       ) : (

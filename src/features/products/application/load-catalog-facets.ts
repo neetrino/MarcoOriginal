@@ -13,10 +13,8 @@ import {
   products,
   type LocaleTranslation,
 } from "@/db/schema";
-import {
-  buildCategoryTree,
-  type CategoryTreeNode,
-} from "@/features/categories/domain/category-tree";
+import { buildCategoryTree } from "@/features/categories/domain/category-tree";
+import { buildCategoryFacetsWithDistinctCounts } from "@/features/products/domain/catalog-category-facet-counts";
 import type {
   CatalogAttributeFacet,
   CatalogBrandFacet,
@@ -49,22 +47,16 @@ function translationFor(
   return translations[locale] ?? translations.hy ?? translations.en ?? null;
 }
 
-function toCategoryFacet(
-  node: CategoryTreeNode<CategoryRow>,
-  countById: Map<string, number>,
-): CatalogCategoryFacet {
-  const children = node.children.map((child) =>
-    toCategoryFacet(child, countById),
-  );
-  const direct = countById.get(node.id) ?? 0;
-  const count = children.reduce((sum, child) => sum + child.count, direct);
-  return {
-    id: node.id,
-    slug: node.slug,
-    title: node.title,
-    count,
-    children,
-  };
+function groupProductIdsByCategory(
+  rows: readonly { categoryId: string; productId: string }[],
+): Map<string, Set<string>> {
+  const productIdsByCategoryId = new Map<string, Set<string>>();
+  for (const row of rows) {
+    const productIds = productIdsByCategoryId.get(row.categoryId) ?? new Set();
+    productIds.add(row.productId);
+    productIdsByCategoryId.set(row.categoryId, productIds);
+  }
+  return productIdsByCategoryId;
 }
 
 async function loadCategoryFacets(
@@ -92,13 +84,13 @@ async function loadCategoryFacets(
     });
   }
 
-  const countRows =
+  const linkRows =
     mapped.length === 0
       ? []
       : await getDb()
           .select({
             categoryId: productCategories.categoryId,
-            count: sql<number>`count(distinct ${productCategories.productId})::int`,
+            productId: productCategories.productId,
           })
           .from(productCategories)
           .innerJoin(products, eq(products.id, productCategories.productId))
@@ -110,16 +102,11 @@ async function loadCategoryFacets(
                 mapped.map((row) => row.id),
               ),
             ),
-          )
-          .groupBy(productCategories.categoryId);
+          );
 
-  const countById = new Map<string, number>();
-  for (const row of countRows) {
-    countById.set(row.categoryId, row.count);
-  }
-
-  return buildCategoryTree(mapped).map((node) =>
-    toCategoryFacet(node, countById),
+  return buildCategoryFacetsWithDistinctCounts(
+    buildCategoryTree(mapped),
+    groupProductIdsByCategory(linkRows),
   );
 }
 

@@ -25,6 +25,7 @@ import {
   PRODUCT_CARD_CUTOUT_SIZE_PX,
   PRODUCT_CARD_DISCOUNT_CLASS,
   PRODUCT_CARD_HEIGHT_PX,
+  PRODUCT_CARD_IMAGE_RADIUS_PX,
   PRODUCT_CARD_IMAGE_TO_TEXT_GAP_PX,
   PRODUCT_CARD_IMAGE_WELL_HEIGHT_PX,
   PRODUCT_CARD_INK_CLASS,
@@ -44,6 +45,8 @@ import {
   PRODUCT_CARD_PRICE_TO_BRAND_GAP_PX,
   PRODUCT_CARD_RADIUS_PX,
   PRODUCT_CARD_SHELL_CLASS,
+  PRODUCT_CARD_TITLE_BLOCK_HEIGHT_PX,
+  PRODUCT_CARD_TITLE_TO_PRICE_GAP_PX,
   PRODUCT_CARD_WISHLIST_CLASS,
 } from "@/features/products/ui/product-card.constants";
 import { WishlistButton } from "@/features/wishlist/ui/WishlistButton";
@@ -206,8 +209,11 @@ function ProductCardMedia({
 }) {
   return (
     <div
-      className="relative z-20 w-full min-h-0 overflow-hidden max-md:rounded-none md:rounded-[19px]"
-      style={{ height: PRODUCT_CARD_IMAGE_WELL_HEIGHT_PX }}
+      className="relative z-20 w-full min-h-0 overflow-hidden"
+      style={{
+        height: PRODUCT_CARD_IMAGE_WELL_HEIGHT_PX,
+        borderRadius: PRODUCT_CARD_IMAGE_RADIUS_PX,
+      }}
       data-cart-fly-source
     >
       {product.imageUrl ? (
@@ -215,8 +221,8 @@ function ProductCardMedia({
           src={product.imageUrl}
           alt=""
           fill
-          sizes="(max-width: 768px) 42vw, 286px"
-          className="object-contain max-md:object-cover max-md:object-center"
+          sizes="(max-width: 768px) 42vw, 306px"
+          className="object-cover object-center"
           priority={priority}
         />
       ) : (
@@ -243,37 +249,45 @@ function ProductCardBody({
         className="flex min-h-0 w-full flex-1 flex-col max-md:px-4"
         style={{ marginTop: PRODUCT_CARD_IMAGE_TO_TEXT_GAP_PX }}
       >
-        <h3 className="line-clamp-2 text-left text-[14px] font-bold leading-5 text-marco-slate">
-          {product.title}
-        </h3>
-        {product.skuLine ? (
-          <p className="mt-0.5 truncate text-left text-[11px] leading-4 text-marco-slate">
-            {product.skuLine}
-          </p>
-        ) : null}
-        <div className="mt-auto w-full min-w-0">
-          <div
-            className="min-w-0 max-md:pr-0 md:[padding-right:var(--product-card-price-pad-end)]"
-            style={{ marginBottom: PRODUCT_CARD_PRICE_TO_BRAND_GAP_PX }}
-          >
-            <p
-              className={`whitespace-nowrap font-black ${PRODUCT_CARD_INK_CLASS}`}
-              style={{
-                fontSize: PRODUCT_CARD_PRICE_FONT_SIZE_PX,
-                lineHeight: `${PRODUCT_CARD_PRICE_LINE_HEIGHT_PX}px`,
-              }}
-            >
-              {product.priceFormatted}
+        <div
+          className="shrink-0"
+          style={{ height: PRODUCT_CARD_TITLE_BLOCK_HEIGHT_PX }}
+        >
+          <h3 className="line-clamp-2 text-left text-[14px] font-bold leading-5 text-marco-slate">
+            {product.title}
+          </h3>
+          {product.skuLine ? (
+            <p className="mt-0.5 truncate text-left text-[11px] leading-4 text-marco-slate">
+              {product.skuLine}
             </p>
-            {product.compareAtFormatted ? (
-              <p
-                className="text-gray-400 line-through"
-                style={{ fontSize: PRODUCT_CARD_OLD_PRICE_FONT_SIZE_PX }}
-              >
-                {product.compareAtFormatted}
-              </p>
-            ) : null}
-          </div>
+          ) : null}
+        </div>
+        <div
+          className="min-w-0 shrink-0 max-md:pr-0 md:[padding-right:var(--product-card-price-pad-end)]"
+          style={{ marginTop: PRODUCT_CARD_TITLE_TO_PRICE_GAP_PX }}
+        >
+          <p
+            className={`whitespace-nowrap font-black ${PRODUCT_CARD_INK_CLASS}`}
+            style={{
+              fontSize: PRODUCT_CARD_PRICE_FONT_SIZE_PX,
+              lineHeight: `${PRODUCT_CARD_PRICE_LINE_HEIGHT_PX}px`,
+            }}
+          >
+            {product.priceFormatted}
+          </p>
+          {product.compareAtFormatted ? (
+            <p
+              className="text-gray-400 line-through"
+              style={{ fontSize: PRODUCT_CARD_OLD_PRICE_FONT_SIZE_PX }}
+            >
+              {product.compareAtFormatted}
+            </p>
+          ) : null}
+        </div>
+        <div
+          className="mt-auto w-full min-w-0 shrink-0"
+          style={{ paddingTop: PRODUCT_CARD_PRICE_TO_BRAND_GAP_PX }}
+        >
           <ProductCardBrand
             logoUrl={product.brandLogoUrl}
             name={product.brandName}
