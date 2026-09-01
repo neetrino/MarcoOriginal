@@ -20,6 +20,11 @@ import {
   HOME_RAIL_TO_DOTS_GAP_PX,
   HOME_TITLE_TO_RAIL_GAP_PX,
 } from "@/features/home/ui/home-section.constants";
+import {
+  PRODUCT_CARD_MOBILE_GRID_COLUMN_GAP_PX,
+  PRODUCT_CARD_MOBILE_RAIL_PAGE_GAP_PX,
+  PRODUCT_CARD_RAIL_MOBILE_PADDING_BOTTOM_PX,
+} from "@/features/products/ui/product-card.constants";
 import { useIsMaxMd } from "@/features/home/ui/use-is-max-md";
 import { useSnapCarousel } from "@/features/home/ui/use-snap-carousel";
 import type { Locale } from "@/lib/i18n/config";
@@ -223,31 +228,46 @@ function ProductSnapPages({
   cardProps,
   priorityCount,
 }: ProductSnapPagesProps) {
+  const isMobileGrid = cardLayout === "mobileGrid";
+  const pageGapPx = isMobileGrid
+    ? PRODUCT_CARD_MOBILE_RAIL_PAGE_GAP_PX
+    : HOME_PRODUCT_CARD_GAP_PX;
+  const columnGapPx = isMobileGrid
+    ? PRODUCT_CARD_MOBILE_GRID_COLUMN_GAP_PX
+    : HOME_PRODUCT_CARD_GAP_PX;
+
   return (
     <div
       ref={scrollerRef}
       onScroll={onScroll}
-      className={`${HOME_SCROLLER_CLASS} max-md:pb-8`}
+      className={HOME_SCROLLER_CLASS}
       style={{
-        gap: HOME_PRODUCT_CARD_GAP_PX,
+        gap: pageGapPx,
         scrollSnapType: "x mandatory",
+        paddingBottom: isMobileGrid
+          ? PRODUCT_CARD_RAIL_MOBILE_PADDING_BOTTOM_PX
+          : undefined,
       }}
     >
       {pages.map((page, pageIndex) => (
         <div
           key={`home-products-page-${pageIndex}`}
-          className="grid min-w-full shrink-0 snap-start"
+          className="grid min-h-0 w-full max-w-full shrink-0 grow-0 basis-full snap-start snap-always justify-items-stretch"
           style={{
             gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-            gap: HOME_PRODUCT_CARD_GAP_PX,
+            columnGap: columnGapPx,
+            rowGap: 0,
           }}
         >
           {page.map((product, slotIndex) => (
-            <div key={product.id} className="flex min-w-0 justify-center">
+            <div key={product.id} className="flex min-h-0 w-full min-w-0">
               <ProductCard
                 product={product}
                 priority={pageIndex === 0 && slotIndex < priorityCount}
                 layout={cardLayout}
+                maxWidthClassName={
+                  isMobileGrid ? "max-w-none" : undefined
+                }
                 {...cardProps}
               />
             </div>

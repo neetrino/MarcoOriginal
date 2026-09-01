@@ -1,7 +1,9 @@
 import {
+  PRODUCT_TAG_POSITIONS,
   PRODUCT_TAG_TYPES,
   PRODUCT_WARRANTY_YEARS,
   type ProductTag,
+  type ProductTagPosition,
   type ProductTagType,
   type ProductWarrantyYears,
 } from "@/db/schema";
@@ -12,11 +14,14 @@ export type ProductSalesClass = (typeof PRODUCT_SALES_CLASSES)[number];
 export const MAX_PRODUCT_TAGS = 8;
 export const MAX_TAG_VALUE_LENGTH = 40;
 export const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
+export const DEFAULT_PRODUCT_TAG_POSITION: ProductTagPosition = "top-left";
 
 export {
+  PRODUCT_TAG_POSITIONS,
   PRODUCT_TAG_TYPES,
   PRODUCT_WARRANTY_YEARS,
   type ProductTag,
+  type ProductTagPosition,
   type ProductTagType,
   type ProductWarrantyYears,
 };
@@ -33,6 +38,12 @@ export function isProductWarrantyYears(
 
 export function isProductTagType(value: string): value is ProductTagType {
   return (PRODUCT_TAG_TYPES as readonly string[]).includes(value);
+}
+
+export function isProductTagPosition(
+  value: string,
+): value is ProductTagPosition {
+  return (PRODUCT_TAG_POSITIONS as readonly string[]).includes(value);
 }
 
 export function isHexColor(value: string): boolean {
@@ -74,11 +85,16 @@ export function parseProductTags(value: unknown): ProductTag[] {
     }
     const parsedValue = parseTagValue(entry.type, entry.value);
     if (!parsedValue) continue;
+    const position =
+      typeof entry.position === "string" && isProductTagPosition(entry.position)
+        ? entry.position
+        : DEFAULT_PRODUCT_TAG_POSITION;
     tags.push({
       id: entry.id,
       type: entry.type,
       value: parsedValue,
       color: parseTagColor(entry.color),
+      position,
     });
   }
   return tags;
@@ -104,5 +120,6 @@ export function createDraftProductTag(): ProductTag {
     type: "TEXT",
     value: "",
     color: null,
+    position: DEFAULT_PRODUCT_TAG_POSITION,
   };
 }

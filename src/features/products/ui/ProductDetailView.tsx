@@ -1,5 +1,6 @@
 import { AppLink } from "@/components/ui/AppLink";
 
+import { resolveDisplayDiscountPercent } from "@/features/products/domain/product-discount";
 import { parseProductSpecs } from "@/features/products/domain/product-specs";
 import { catalogHref } from "@/features/products/domain/catalog-href";
 import { EMPTY_CATALOG_SEARCH } from "@/features/products/domain/catalog-search-params";
@@ -54,7 +55,7 @@ export function ProductDetailView({
           images={product.images}
           title={product.translation.title}
           tags={product.tags}
-          discountPercent={product.discountPercent}
+          discountPercent={resolveDisplayDiscountPercent(product)}
           labels={{
             fullscreenImage: labels.fullscreenImage,
             previousImage: labels.previousImage,

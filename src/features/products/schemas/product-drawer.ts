@@ -1,10 +1,12 @@
 import { z } from "zod";
 
 import {
+  DEFAULT_PRODUCT_TAG_POSITION,
   HEX_COLOR_PATTERN,
   MAX_PRODUCT_TAGS,
   MAX_TAG_VALUE_LENGTH,
   PRODUCT_SALES_CLASSES,
+  PRODUCT_TAG_POSITIONS,
   PRODUCT_TAG_TYPES,
   PRODUCT_WARRANTY_YEARS,
 } from "@/features/products/domain/product-presentation";
@@ -29,6 +31,10 @@ const productTagSchema = z
       ])
       .optional()
       .transform((value) => (value ? value.toUpperCase() : null)),
+    position: z
+      .enum(PRODUCT_TAG_POSITIONS)
+      .optional()
+      .transform((value) => value ?? DEFAULT_PRODUCT_TAG_POSITION),
   })
   .superRefine((tag, ctx) => {
     if (!tag.value) return;

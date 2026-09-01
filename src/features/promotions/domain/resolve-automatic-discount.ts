@@ -24,6 +24,17 @@ function normalizePercent(value: number | null | undefined): number | null {
   return value;
 }
 
+/** Badge percent implied by a sale price vs compare-at (manual markdown). */
+function discountPercentFromCompareAtAmounts(
+  unitAmount: number,
+  compareAtAmount: number,
+): number | null {
+  if (compareAtAmount <= unitAmount || unitAmount < 0) return null;
+  return normalizePercent(
+    Math.round(((compareAtAmount - unitAmount) / compareAtAmount) * 100),
+  );
+}
+
 /** Picks the winning automatic percentage for one product. */
 export function pickAutomaticDiscountPercent(input: {
   productPercent?: number | null;
@@ -118,6 +129,10 @@ export function resolveCatalogPrice(input: {
     return {
       ...resolved,
       compareAtAmount: manual,
+      discountPercent: discountPercentFromCompareAtAmounts(
+        resolved.unitAmount,
+        manual,
+      ),
     };
   }
 

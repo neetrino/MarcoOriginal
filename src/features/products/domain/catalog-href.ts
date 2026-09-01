@@ -22,6 +22,9 @@ export function catalogHref(
   filters: CatalogSearchParams,
 ): string {
   const params = new URLSearchParams();
+  if (filters.q) {
+    params.set("q", filters.q);
+  }
   appendList(params, "category", filters.categorySlugs);
   appendList(params, "brand", filters.brandSlugs);
   appendList(params, "attr", filters.attributeValueIds ?? []);

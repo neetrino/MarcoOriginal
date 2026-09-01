@@ -106,7 +106,8 @@ function toProductFilter(
     categoryIds.length === 0 &&
     brandIds.length === 0 &&
     attributeValueIdGroups.length === 0 &&
-    amdRange == null
+    amdRange == null &&
+    !filters.q
   ) {
     return {
       sort: filters.sort,
@@ -114,6 +115,7 @@ function toProductFilter(
     };
   }
   return {
+    q: filters.q ?? undefined,
     categoryIds,
     brandIds,
     attributeValueIdGroups,

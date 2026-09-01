@@ -67,7 +67,7 @@ describe("resolveCatalogPrice", () => {
     ).toMatchObject({
       unitAmount: 8_000,
       compareAtAmount: 10_000,
-      discountPercent: null,
+      discountPercent: 20,
     });
   });
 

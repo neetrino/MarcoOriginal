@@ -198,9 +198,10 @@ function GalleryChrome({
           -{discountPercent}%
         </div>
       ) : null}
-      <div className="pointer-events-none absolute inset-0 z-20 p-2">
-        <ProductCardTags tags={tags} />
-      </div>
+      <ProductCardTags
+        tags={tags}
+        topRightClassName={discountPercent != null ? "top-20" : undefined}
+      />
       {showZoom ? (
         <button
           type="button"

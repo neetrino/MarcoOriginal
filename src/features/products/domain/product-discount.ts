@@ -29,3 +29,20 @@ export function discountPercentFromCompareAt(
     Math.round(((compareAtAmount - priceAmount) / compareAtAmount) * 100),
   );
 }
+
+/**
+ * Badge percent for storefront cards/PDP.
+ * Prefers an explicit resolved percent; otherwise derives from compare-at.
+ */
+export function resolveDisplayDiscountPercent(input: {
+  priceAmount: number;
+  compareAtAmount: number | null;
+  discountPercent?: number | null;
+}): number | null {
+  if (input.discountPercent != null) return input.discountPercent;
+  const fromCompare = discountPercentFromCompareAt(
+    input.priceAmount,
+    input.compareAtAmount,
+  );
+  return fromCompare > 0 ? fromCompare : null;
+}

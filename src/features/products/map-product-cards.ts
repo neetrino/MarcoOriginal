@@ -1,4 +1,5 @@
 import type { CatalogProduct } from "@/features/products/types";
+import { resolveDisplayDiscountPercent } from "@/features/products/domain/product-discount";
 import type { ProductCardItem } from "@/features/products/ui/ProductCard";
 import { warrantyLabelForYears } from "@/features/products/ui/ProductCardMeta";
 import type { Locale } from "@/lib/i18n/config";
@@ -36,7 +37,7 @@ export function mapProductCards(
       skuLine: `${warrantyLabels.sku}: ${product.sku}`,
       priceFormatted: price.formatted,
       compareAtFormatted: compareAt?.formatted ?? null,
-      discountPercent: product.discountPercent,
+      discountPercent: resolveDisplayDiscountPercent(product),
       imageUrl: product.imageUrl,
       brandLogoUrl: product.brandLogoUrl,
       brandName: product.brandName,
@@ -50,7 +51,6 @@ export function mapProductCards(
         warrantyLabels,
       ),
       warrantyCaption: warrantyLabels.warrantyBadge,
-      tags: product.tags,
     };
   });
 }

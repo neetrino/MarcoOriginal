@@ -8,8 +8,12 @@ import {
   ADMIN_LABEL,
   ADMIN_SELECT,
 } from "@/features/admin/ui/admin-form-classes";
-import type { ProductTag } from "@/features/products/domain/product-presentation";
-import { HEX_COLOR_PATTERN } from "@/features/products/domain/product-presentation";
+import {
+  HEX_COLOR_PATTERN,
+  PRODUCT_TAG_POSITIONS,
+  type ProductTag,
+  type ProductTagPosition,
+} from "@/features/products/domain/product-presentation";
 
 type TagEditorCopy = {
   tagCard: string;
@@ -19,6 +23,11 @@ type TagEditorCopy = {
   tagValue: string;
   tagValuePlaceholder: string;
   tagPercentPlaceholder: string;
+  tagPosition: string;
+  tagPositionTopLeft: string;
+  tagPositionTopRight: string;
+  tagPositionBottomLeft: string;
+  tagPositionBottomRight: string;
   tagColor: string;
   tagColorPlaceholder: string;
   tagColorEmpty: string;
@@ -33,6 +42,13 @@ type ProductDrawerTagCardProps = {
   onChange: (tag: ProductTag) => void;
   onRemove: () => void;
 };
+
+const POSITION_COPY_KEY = {
+  "top-left": "tagPositionTopLeft",
+  "top-right": "tagPositionTopRight",
+  "bottom-left": "tagPositionBottomLeft",
+  "bottom-right": "tagPositionBottomRight",
+} as const satisfies Record<ProductTagPosition, keyof TagEditorCopy>;
 
 export function ProductDrawerTagCard({
   index,
@@ -122,6 +138,27 @@ export function ProductDrawerTagCard({
         </label>
 
         <label>
+          <span className={ADMIN_LABEL}>{copy.tagPosition}</span>
+          <select
+            value={tag.position}
+            disabled={disabled}
+            onChange={(event) =>
+              onChange({
+                ...tag,
+                position: event.target.value as ProductTagPosition,
+              })
+            }
+            className={ADMIN_SELECT}
+          >
+            {PRODUCT_TAG_POSITIONS.map((position) => (
+              <option key={position} value={position}>
+                {copy[POSITION_COPY_KEY[position]]}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
           <span className={ADMIN_LABEL}>{copy.tagColor}</span>
           <input
             value={hexDraft}
@@ -133,7 +170,7 @@ export function ProductDrawerTagCard({
           />
         </label>
 
-        <div className="flex items-end gap-3">
+        <div className="flex items-end gap-3 sm:col-span-2">
           <label className="flex cursor-pointer items-center gap-3">
             <span className="sr-only">{copy.tagColor}</span>
             <input

@@ -6,6 +6,7 @@ import type {
 } from "@/features/products/application/list-admin-products";
 import {
   createDraftProductTag,
+  parseProductTags,
   type ProductSalesClass,
   type ProductTag,
   type ProductWarrantyYears,
@@ -116,11 +117,10 @@ export function useProductDrawerForm(args: {
   const [warrantyYears, setWarrantyYears] = useState<ProductWarrantyYears>(
     product?.warrantyYears ?? 0,
   );
-  const [tags, setTags] = useState<ProductTag[]>(() =>
-    product && product.tags.length > 0
-      ? product.tags
-      : [createDraftProductTag()],
-  );
+  const [tags, setTags] = useState<ProductTag[]>(() => {
+    const existing = product ? parseProductTags(product.tags) : [];
+    return existing.length > 0 ? existing : [createDraftProductTag()];
+  });
   const [specifications, setSpecifications] = useState<ProductSpecification[]>(
     () =>
       product && product.specifications.length > 0

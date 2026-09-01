@@ -1,13 +1,16 @@
 import { Search } from "lucide-react";
+import { Suspense } from "react";
 
 import {
   HEADER_CATEGORIES_PILL_CLASS,
   HEADER_SEARCH_SUBMIT_CLASS,
 } from "@/components/layout/site-header-classes";
+import { HeaderSearchQueryInput } from "@/components/layout/HeaderSearchQueryInput";
 import { AppLink } from "@/components/ui/AppLink";
 import { HeaderCategoriesDrawer } from "@/features/categories/ui/HeaderCategoriesDrawer";
 import type { HeaderCategoryPromoCopy } from "@/features/categories/domain/header-category-promo";
 import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
+import { CATALOG_SEARCH_QUERY_MAX_LENGTH } from "@/features/products/domain/catalog-text-search";
 import type { Locale } from "@/lib/i18n/config";
 
 type HeaderSearchBarProps = {
@@ -20,6 +23,20 @@ type HeaderSearchBarProps = {
   submitLabel: string;
   categories: readonly HeaderCategoryNode[];
 };
+
+function HeaderSearchQueryFallback({ placeholder }: { placeholder: string }) {
+  return (
+    <input
+      type="search"
+      name="q"
+      placeholder={placeholder}
+      className="min-w-0 flex-1 bg-transparent px-2 text-xs text-marco-slate outline-none placeholder:text-marco-slate/60"
+      aria-label={placeholder}
+      autoComplete="off"
+      maxLength={CATALOG_SEARCH_QUERY_MAX_LENGTH}
+    />
+  );
+}
 
 export function HeaderSearchBar({
   locale,
@@ -64,13 +81,11 @@ export function HeaderSearchBar({
           className="h-4 w-4 shrink-0 text-marco-slate"
           aria-hidden
         />
-        <input
-          type="search"
-          name="q"
-          placeholder={placeholder}
-          className="min-w-0 flex-1 bg-transparent px-2 text-xs text-marco-slate outline-none placeholder:text-marco-slate/60"
-          aria-label={placeholder}
-        />
+        <Suspense
+          fallback={<HeaderSearchQueryFallback placeholder={placeholder} />}
+        >
+          <HeaderSearchQueryInput placeholder={placeholder} />
+        </Suspense>
         <button type="submit" className={HEADER_SEARCH_SUBMIT_CLASS}>
           {submitLabel}
         </button>

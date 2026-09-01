@@ -6,6 +6,7 @@ import {
   type CatalogPricePresence,
   type CatalogSort,
 } from "@/features/products/domain/catalog-sort";
+import { normalizeCatalogSearchQuery } from "@/features/products/domain/catalog-text-search";
 
 export const CATALOG_SLUG_MAX_LENGTH = 120;
 export const CATALOG_MAX_SELECTED_VALUES = 20;
@@ -13,6 +14,8 @@ export const CATALOG_MAX_PRICE_MAJOR = 99_999_999;
 
 export type CatalogSearchParams = {
   page: number;
+  /** Free-text search (title + SKU); null when absent. */
+  q: string | null;
   categorySlugs: string[];
   brandSlugs: string[];
   colorHexes: string[];
@@ -25,6 +28,7 @@ export type CatalogSearchParams = {
 
 export const EMPTY_CATALOG_SEARCH: CatalogSearchParams = {
   page: 1,
+  q: null,
   categorySlugs: [],
   brandSlugs: [],
   colorHexes: [],
@@ -111,8 +115,13 @@ export function parseCatalogSearchParams(
     maxPrice = swap;
   }
 
+  const rawQ = Array.isArray(searchParams.q)
+    ? searchParams.q[0]
+    : searchParams.q;
+
   return {
     page: parsePage(searchParams.page),
+    q: normalizeCatalogSearchQuery(rawQ),
     categorySlugs: parseSlugs(searchParams.category),
     brandSlugs: parseSlugs(searchParams.brand),
     colorHexes: parseColorHexes(searchParams.color),
