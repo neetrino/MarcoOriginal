@@ -4,7 +4,8 @@ export type ProductCardItem = {
   href: string;
   title: string;
   skuLine?: string | null;
-  priceFormatted: string;
+  /** Null when the product has no list price (`priceAmount` is 0). */
+  priceFormatted: string | null;
   compareAtFormatted?: string | null;
   discountPercent?: number | null;
   imageUrl: string | null;

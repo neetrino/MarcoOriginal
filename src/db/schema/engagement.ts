@@ -30,7 +30,7 @@ export const reviews = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "restrict" }),
-    productId: uuid("product_id")
+    productId: text("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
     orderItemId: uuid("order_item_id").references(() => orderItems.id, {

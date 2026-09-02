@@ -2,9 +2,14 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { SocialBrandMenu } from "@/components/layout/SocialBrandMenu";
-import { buildSocialBrandMenus } from "@/components/layout/social-brand-profiles";
+import {
+  buildSocialBrandMenus,
+  type SocialBrandProfile,
+} from "@/components/layout/social-brand-profiles";
+import { buildSocialMessengerMenus } from "@/components/layout/social-messenger-contacts";
 import {
   FOOTER_SOCIAL_TILE_SPECS,
+  type FooterSocialTileSpec,
 } from "@/components/layout/site-footer.constants";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
@@ -19,71 +24,78 @@ type FooterSocialTilesProps = {
   dictionary: Dictionary;
 };
 
-function socialHref(href: string | undefined): string | null {
-  const trimmed = href?.trim() ?? "";
-  if (!trimmed || trimmed === "#") {
-    return null;
-  }
-  return trimmed;
-}
+type FooterSocialMenu = {
+  menuLabel: string;
+  profiles: readonly SocialBrandProfile[];
+};
 
-type SocialLabelKey = "instagram" | "facebook" | "telegram" | "whatsapp" | "viber";
-
-function socialLabel(dictionary: Dictionary, key: SocialLabelKey): string {
-  switch (key) {
+function footerSocialMenu(
+  spec: FooterSocialTileSpec,
+  brandMenus: ReturnType<typeof buildSocialBrandMenus>,
+  messengerMenus: ReturnType<typeof buildSocialMessengerMenus>,
+): FooterSocialMenu {
+  switch (spec.hrefKey) {
     case "instagram":
-      return "Instagram";
+      return {
+        menuLabel: brandMenus.instagramMenuLabel,
+        profiles: brandMenus.instagram,
+      };
     case "facebook":
-      return "Facebook";
+      return {
+        menuLabel: brandMenus.facebookMenuLabel,
+        profiles: brandMenus.facebook,
+      };
     case "telegram":
-      return "Telegram";
+      return {
+        menuLabel: messengerMenus.telegramMenuLabel,
+        profiles: messengerMenus.telegram,
+      };
     case "whatsapp":
-      return dictionary.header.whatsapp;
+      return {
+        menuLabel: messengerMenus.whatsappMenuLabel,
+        profiles: messengerMenus.whatsapp,
+      };
     case "viber":
-      return dictionary.header.viber;
+      return {
+        menuLabel: messengerMenus.viberMenuLabel,
+        profiles: messengerMenus.viber,
+      };
   }
 }
 
-function FooterSocialLink({
-  href,
-  label,
-  surfaceClass,
-  children,
+function FooterSocialTile({
+  spec,
 }: {
-  href: string | null;
-  label: string;
-  surfaceClass: string;
-  children: ReactNode;
-}) {
-  if (!href) {
+  spec: FooterSocialTileSpec;
+}): ReactNode {
+  if (spec.kind === "viberGlyph") {
     return (
-      <span
-        role="listitem"
-        className={`${surfaceClass} opacity-50`}
-        aria-label={label}
-      >
-        {children}
-      </span>
+      <Image
+        src={spec.src}
+        alt=""
+        width={16}
+        height={16}
+        className="h-4 w-4 shrink-0 object-contain"
+        aria-hidden
+      />
     );
   }
 
   return (
-    <a
-      role="listitem"
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={surfaceClass}
-      aria-label={label}
-    >
-      {children}
-    </a>
+    <Image
+      src={spec.src}
+      alt=""
+      width={28}
+      height={28}
+      className={`block ${FOOTER_SOCIAL_TILE_CLASS} max-h-none max-w-none shrink-0`}
+      aria-hidden
+    />
   );
 }
 
 export function FooterSocialTiles({ dictionary }: FooterSocialTilesProps) {
-  const social = dictionary.contact.social;
-  const menus = buildSocialBrandMenus(dictionary);
+  const brandMenus = buildSocialBrandMenus(dictionary);
+  const messengerMenus = buildSocialMessengerMenus(dictionary);
 
   return (
     <div
@@ -92,70 +104,22 @@ export function FooterSocialTiles({ dictionary }: FooterSocialTilesProps) {
       aria-label={dictionary.header.socialLinks}
     >
       {FOOTER_SOCIAL_TILE_SPECS.map((spec) => {
-        const label = socialLabel(dictionary, spec.labelKey);
-
-        if (spec.kind === "viberGlyph") {
-          return (
-            <FooterSocialLink
-              key={spec.hrefKey}
-              href={socialHref(social.viber)}
-              label={label}
-              surfaceClass={FOOTER_SOCIAL_VIBER_SURFACE_CLASS}
-            >
-              <Image
-                src={spec.src}
-                alt=""
-                width={16}
-                height={16}
-                className="h-4 w-4 shrink-0 object-contain"
-                aria-hidden
-              />
-            </FooterSocialLink>
-          );
-        }
-
-        const surfaceClass = `${FOOTER_SOCIAL_LINK_BASE} ${FOOTER_SOCIAL_TILE_CLASS} overflow-hidden`;
-        const tile = (
-          <Image
-            src={spec.src}
-            alt=""
-            width={28}
-            height={28}
-            className={`block ${FOOTER_SOCIAL_TILE_CLASS} max-h-none max-w-none shrink-0`}
-            aria-hidden
-          />
-        );
-
-        if (spec.hrefKey === "instagram" || spec.hrefKey === "facebook") {
-          const profiles =
-            spec.hrefKey === "instagram" ? menus.instagram : menus.facebook;
-          const menuLabel =
-            spec.hrefKey === "instagram"
-              ? menus.instagramMenuLabel
-              : menus.facebookMenuLabel;
-
-          return (
-            <div key={spec.hrefKey} role="listitem">
-              <SocialBrandMenu
-                label={menuLabel}
-                trigger={tile}
-                triggerClassName={surfaceClass}
-                profiles={profiles}
-                menuPlacement="top"
-              />
-            </div>
-          );
-        }
+        const menu = footerSocialMenu(spec, brandMenus, messengerMenus);
+        const surfaceClass =
+          spec.kind === "viberGlyph"
+            ? FOOTER_SOCIAL_VIBER_SURFACE_CLASS
+            : `${FOOTER_SOCIAL_LINK_BASE} ${FOOTER_SOCIAL_TILE_CLASS} overflow-hidden`;
 
         return (
-          <FooterSocialLink
-            key={spec.hrefKey}
-            href={socialHref(social[spec.hrefKey])}
-            label={label}
-            surfaceClass={surfaceClass}
-          >
-            {tile}
-          </FooterSocialLink>
+          <div key={spec.hrefKey} role="listitem">
+            <SocialBrandMenu
+              label={menu.menuLabel}
+              trigger={<FooterSocialTile spec={spec} />}
+              triggerClassName={surfaceClass}
+              profiles={menu.profiles}
+              menuPlacement="top"
+            />
+          </div>
         );
       })}
     </div>

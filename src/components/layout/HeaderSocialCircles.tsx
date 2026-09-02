@@ -10,6 +10,7 @@ import {
   buildSocialBrandMenus,
   type SocialBrandProfile,
 } from "@/components/layout/social-brand-profiles";
+import { buildSocialMessengerMenus } from "@/components/layout/social-messenger-contacts";
 import {
   FOOTER_SOCIAL_CIRCLE_SIZE_CLASS,
   HEADER_SOCIAL_CIRCLE_CLASS,
@@ -19,22 +20,13 @@ import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 type SocialIcon = typeof InstagramIcon;
 
-type DirectSocialLink = {
-  kind: "link";
-  href: string;
-  label: string;
-  Icon: SocialIcon;
-};
-
 type BrandSocialLink = {
-  kind: "brands";
+  kind: "menu";
   label: string;
   menuLabel: string;
   profiles: readonly SocialBrandProfile[];
   Icon: SocialIcon;
 };
-
-type SocialItem = DirectSocialLink | BrandSocialLink;
 
 type HeaderSocialCirclesProps = {
   dictionary: Dictionary;
@@ -43,54 +35,47 @@ type HeaderSocialCirclesProps = {
   menuPlacement?: "bottom" | "top";
 };
 
-function socialHref(href: string | undefined): string | null {
-  const trimmed = href?.trim() ?? "";
-  if (!trimmed || trimmed === "#") {
-    return null;
-  }
-  return trimmed;
-}
+function buildSocialItems(dictionary: Dictionary): BrandSocialLink[] {
+  const brandMenus = buildSocialBrandMenus(dictionary);
+  const messengerMenus = buildSocialMessengerMenus(dictionary);
 
-function buildSocialItems(dictionary: Dictionary): SocialItem[] {
-  const menus = buildSocialBrandMenus(dictionary);
-  const social = dictionary.contact.social;
-  const items: SocialItem[] = [
+  return [
     {
-      kind: "brands",
+      kind: "menu",
       label: "Instagram",
-      menuLabel: menus.instagramMenuLabel,
-      profiles: menus.instagram,
+      menuLabel: brandMenus.instagramMenuLabel,
+      profiles: brandMenus.instagram,
       Icon: InstagramIcon,
     },
     {
-      kind: "brands",
+      kind: "menu",
       label: "Facebook",
-      menuLabel: menus.facebookMenuLabel,
-      profiles: menus.facebook,
+      menuLabel: brandMenus.facebookMenuLabel,
+      profiles: brandMenus.facebook,
       Icon: FacebookIcon,
     },
-    { kind: "link", href: social.telegram, label: "Telegram", Icon: TelegramIcon },
-  ];
-
-  if (social.whatsapp) {
-    items.push({
-      kind: "link",
-      href: social.whatsapp,
+    {
+      kind: "menu",
+      label: "Telegram",
+      menuLabel: messengerMenus.telegramMenuLabel,
+      profiles: messengerMenus.telegram,
+      Icon: TelegramIcon,
+    },
+    {
+      kind: "menu",
       label: dictionary.header.whatsapp,
+      menuLabel: messengerMenus.whatsappMenuLabel,
+      profiles: messengerMenus.whatsapp,
       Icon: WhatsAppIcon,
-    });
-  }
-
-  if (social.viber) {
-    items.push({
-      kind: "link",
-      href: social.viber,
+    },
+    {
+      kind: "menu",
       label: dictionary.header.viber,
+      menuLabel: messengerMenus.viberMenuLabel,
+      profiles: messengerMenus.viber,
       Icon: ViberIcon,
-    });
-  }
-
-  return items;
+    },
+  ];
 }
 
 function SocialCircleItem({
@@ -99,52 +84,23 @@ function SocialCircleItem({
   surfaceClass,
   menuPlacement,
 }: {
-  item: SocialItem;
+  item: BrandSocialLink;
   iconClass: string;
   surfaceClass: string;
   menuPlacement: "bottom" | "top";
 }) {
   const { Icon } = item;
-  const inner = <Icon className={iconClass} />;
-
-  if (item.kind === "brands") {
-    return (
-      <div role="listitem">
-        <SocialBrandMenu
-          label={item.menuLabel}
-          trigger={inner}
-          triggerClassName={surfaceClass}
-          profiles={item.profiles}
-          menuPlacement={menuPlacement}
-        />
-      </div>
-    );
-  }
-
-  const href = socialHref(item.href);
-  if (!href) {
-    return (
-      <span
-        role="listitem"
-        className={`${surfaceClass} opacity-40`}
-        aria-label={item.label}
-      >
-        {inner}
-      </span>
-    );
-  }
 
   return (
-    <a
-      role="listitem"
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={surfaceClass}
-      aria-label={item.label}
-    >
-      {inner}
-    </a>
+    <div role="listitem">
+      <SocialBrandMenu
+        label={item.menuLabel}
+        trigger={<Icon className={iconClass} />}
+        triggerClassName={surfaceClass}
+        profiles={item.profiles}
+        menuPlacement={menuPlacement}
+      />
+    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 /**
- * Shared webhook reconciliation guards for online payment adapters (OPEN-002).
- * COD does not use webhooks; these helpers exist for future approved providers.
+ * Shared webhook reconciliation guards for online payment adapters.
+ * Used by ArCa / Idram callback verification helpers.
  */
 
 export type ExpectedPayment = {

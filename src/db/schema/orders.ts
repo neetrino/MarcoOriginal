@@ -125,7 +125,7 @@ export const orderItems = pgTable(
     orderId: uuid("order_id")
       .notNull()
       .references(() => orders.id, { onDelete: "restrict" }),
-    productId: uuid("product_id").references(() => products.id, {
+    productId: text("product_id").references(() => products.id, {
       onDelete: "restrict",
     }),
     productTitleSnapshot: text("product_title_snapshot").notNull(),

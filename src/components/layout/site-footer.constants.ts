@@ -6,7 +6,7 @@ export const FOOTER_PAYMENT_STRIP_SRC =
 export const FOOTER_PAYMENT_STRIP_WIDTH_PX = 1340;
 export const FOOTER_PAYMENT_STRIP_HEIGHT_PX = 164;
 
-type FooterSocialTileSpec = {
+export type FooterSocialTileSpec = {
   hrefKey: "instagram" | "facebook" | "telegram" | "whatsapp" | "viber";
   src: string;
   labelKey: "instagram" | "facebook" | "telegram" | "whatsapp" | "viber";

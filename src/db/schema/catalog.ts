@@ -10,10 +10,10 @@ import {
   text,
   timestamp,
   uniqueIndex,
-  uuid,
 } from "drizzle-orm/pg-core";
 
 import {
+  catalogIdColumn,
   createdAtColumn,
   deletedAtColumn,
   idColumn,
@@ -73,7 +73,7 @@ export type TranslationsJson = Partial<
 export const products = pgTable(
   "products",
   {
-    id: idColumn(),
+    id: catalogIdColumn(),
     sku: text("sku").notNull(),
     translations: jsonb("translations").$type<TranslationsJson>().notNull(),
     priceAmount: integer("price_amount").notNull(),
@@ -98,6 +98,11 @@ export const products = pgTable(
     >(),
     badgeStyle: text("badge_style"),
     badgePosition: text("badge_position"),
+    /**
+     * Exact marco.am catalog-snapshot row (source CUID ids + nested relations).
+     * Used for lossless import verification / fingerprint rebuild.
+     */
+    sourceExport: jsonb("source_export").$type<Record<string, unknown>>(),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),
     deletedAt: deletedAtColumn(),
@@ -131,13 +136,15 @@ export const products = pgTable(
 export const categories = pgTable(
   "categories",
   {
-    id: idColumn(),
-    parentId: uuid("parent_id").references((): AnyPgColumn => categories.id, {
+    id: catalogIdColumn(),
+    parentId: text("parent_id").references((): AnyPgColumn => categories.id, {
       onDelete: "restrict",
     }),
     translations: jsonb("translations").$type<TranslationsJson>().notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
     status: categoryStatusEnum("status").notNull().default("ACTIVE"),
+    /** Exact marco.am catalog-snapshot category row. */
+    sourceExport: jsonb("source_export").$type<Record<string, unknown>>(),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),
     deletedAt: deletedAtColumn(),
@@ -160,10 +167,12 @@ export const categories = pgTable(
 export const brands = pgTable(
   "brands",
   {
-    id: idColumn(),
+    id: catalogIdColumn(),
     sku: text("sku").notNull(),
     translations: jsonb("translations").$type<TranslationsJson>().notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
+    /** Exact marco.am catalog-snapshot brand row. */
+    sourceExport: jsonb("source_export").$type<Record<string, unknown>>(),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),
     deletedAt: deletedAtColumn(),
@@ -186,10 +195,12 @@ export const brands = pgTable(
 export const attributes = pgTable(
   "attributes",
   {
-    id: idColumn(),
+    id: catalogIdColumn(),
     key: text("key").notNull(),
     translations: jsonb("translations").$type<TranslationsJson>().notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
+    /** Exact marco.am catalog-snapshot attribute row (includes nested values). */
+    sourceExport: jsonb("source_export").$type<Record<string, unknown>>(),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),
     deletedAt: deletedAtColumn(),
@@ -203,8 +214,8 @@ export const attributes = pgTable(
 export const attributeValues = pgTable(
   "attribute_values",
   {
-    id: idColumn(),
-    attributeId: uuid("attribute_id")
+    id: catalogIdColumn(),
+    attributeId: text("attribute_id")
       .notNull()
       .references(() => attributes.id, { onDelete: "restrict" }),
     kind: text("kind").$type<AttributeValueKind>().notNull().default("TEXT"),
@@ -234,10 +245,10 @@ export const productCategories = pgTable(
   "product_categories",
   {
     id: idColumn(),
-    productId: uuid("product_id")
+    productId: text("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
-    categoryId: uuid("category_id")
+    categoryId: text("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "restrict" }),
     isPrimary: boolean("is_primary").notNull().default(false),
@@ -259,8 +270,8 @@ export const productCategories = pgTable(
 export const productVariants = pgTable(
   "product_variants",
   {
-    id: idColumn(),
-    productId: uuid("product_id")
+    id: catalogIdColumn(),
+    productId: text("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     sku: text("sku").notNull(),
@@ -300,10 +311,10 @@ export const productVariantAttributeValues = pgTable(
   "product_variant_attribute_values",
   {
     id: idColumn(),
-    variantId: uuid("variant_id")
+    variantId: text("variant_id")
       .notNull()
       .references(() => productVariants.id, { onDelete: "cascade" }),
-    attributeValueId: uuid("attribute_value_id")
+    attributeValueId: text("attribute_value_id")
       .notNull()
       .references(() => attributeValues.id, { onDelete: "restrict" }),
     createdAt: createdAtColumn(),
@@ -323,10 +334,10 @@ export const productBrands = pgTable(
   "product_brands",
   {
     id: idColumn(),
-    productId: uuid("product_id")
+    productId: text("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
-    brandId: uuid("brand_id")
+    brandId: text("brand_id")
       .notNull()
       .references(() => brands.id, { onDelete: "restrict" }),
     isPrimary: boolean("is_primary").notNull().default(false),

@@ -16,7 +16,7 @@ export const stockMovements = pgTable(
   "stock_movements",
   {
     id: idColumn(),
-    productId: uuid("product_id")
+    productId: text("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
     delta: integer("delta").notNull(),

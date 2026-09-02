@@ -59,3 +59,27 @@ export const CHECKOUT_SECONDARY_BUTTON_CLASS =
 
 export const CHECKOUT_EMPTY_ACTION_CLASS =
   "inline-flex h-11 items-center justify-center rounded-xl bg-marco-yellow px-4 text-sm font-bold text-marco-black transition-[filter] hover:brightness-95";
+
+export const CHECKOUT_SUCCESS_PAGE_CLASS =
+  "mx-auto flex w-full max-w-xl flex-col px-4 py-10 sm:px-6 sm:py-14 lg:px-8";
+
+export const CHECKOUT_SUCCESS_CARD_CLASS =
+  "relative overflow-hidden rounded-2xl border border-marco-yellow/25 bg-gradient-to-b from-marco-yellow/[0.12] via-white to-marco-gray/50 px-6 py-10 text-center shadow-[0_8px_30px_rgba(63,84,102,0.08)] sm:px-10 sm:py-12";
+
+export const CHECKOUT_SUCCESS_ACCENT_BAR_CLASS =
+  "absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-marco-yellow via-marco-yellow to-marco-slate/40";
+
+export const CHECKOUT_SUCCESS_ICON_WRAP_CLASS =
+  "mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-marco-yellow text-marco-slate shadow-[0_4px_14px_rgba(255,202,3,0.45)]";
+
+export const CHECKOUT_SUCCESS_ORDER_BADGE_CLASS =
+  "inline-flex items-center rounded-lg bg-marco-yellow/25 px-1.5 py-0.5 font-semibold text-marco-ink whitespace-nowrap";
+
+export const CHECKOUT_SUCCESS_META_CLASS =
+  "mt-6 rounded-xl border border-marco-yellow/30 bg-white/80 px-4 py-3";
+
+export const CHECKOUT_SUCCESS_PRIMARY_ACTION_CLASS =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-marco-yellow px-4 text-sm font-bold text-marco-black transition-[filter] hover:brightness-95 sm:min-w-[12rem]";
+
+export const CHECKOUT_SUCCESS_SECONDARY_ACTION_CLASS =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-marco-yellow px-4 text-sm font-bold text-marco-black transition-colors hover:bg-marco-yellow/10 sm:min-w-[12rem]";

@@ -167,7 +167,7 @@ Next.js, TypeScript, Neon/PostgreSQL, Drizzle, Auth.js, Upstash, R2, Tailwind, s
 - [x] Hosting: Vercel-compatible architecture; deploy deferred
 - [x] Session strategy: database-backed Auth.js sessions
 - [x] ID strategy: UUIDv7
-- [x] Online payment launch scope: COD only (OPEN-002 deferred)
+- [x] Online payment launch scope: ArCa (IDBank) + Idram + COD (OPEN-002)
 - [x] Exchange-rate: admin-maintained AMD rates + Redis cache (OPEN-003 default)
 - [x] Tax: amount 0 field reserved; tax-inclusive policy TBD without blocking P0
 - [x] Observability: structured logs; analytics first-party only

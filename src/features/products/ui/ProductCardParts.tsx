@@ -194,34 +194,36 @@ export function ProductCardBody({
           ) : null}
         </div>
         <div className="mt-auto w-full min-w-0">
-          <div
-            className="min-w-0 shrink-0 max-md:pr-0 md:[padding-right:var(--product-card-price-pad-end)]"
-            style={{
-              marginTop: PRODUCT_CARD_TITLE_TO_PRICE_GAP_PX,
-              marginBottom:
-                layout === "mobileGrid"
-                  ? PRODUCT_CARD_PRICE_TO_BRAND_GAP_MOBILE_PX
-                  : PRODUCT_CARD_PRICE_BLOCK_LIFT_FROM_BOTTOM_PX,
-            }}
-          >
-            <p
-              className={`whitespace-nowrap font-black ${PRODUCT_CARD_INK_CLASS}`}
+          {product.priceFormatted ? (
+            <div
+              className="min-w-0 shrink-0 max-md:pr-0 md:[padding-right:var(--product-card-price-pad-end)]"
               style={{
-                fontSize: PRODUCT_CARD_PRICE_FONT_SIZE_PX,
-                lineHeight: `${PRODUCT_CARD_PRICE_LINE_HEIGHT_PX}px`,
+                marginTop: PRODUCT_CARD_TITLE_TO_PRICE_GAP_PX,
+                marginBottom:
+                  layout === "mobileGrid"
+                    ? PRODUCT_CARD_PRICE_TO_BRAND_GAP_MOBILE_PX
+                    : PRODUCT_CARD_PRICE_BLOCK_LIFT_FROM_BOTTOM_PX,
               }}
             >
-              {product.priceFormatted}
-            </p>
-            {product.compareAtFormatted ? (
               <p
-                className="text-gray-400 line-through"
-                style={{ fontSize: PRODUCT_CARD_OLD_PRICE_FONT_SIZE_PX }}
+                className={`whitespace-nowrap font-black ${PRODUCT_CARD_INK_CLASS}`}
+                style={{
+                  fontSize: PRODUCT_CARD_PRICE_FONT_SIZE_PX,
+                  lineHeight: `${PRODUCT_CARD_PRICE_LINE_HEIGHT_PX}px`,
+                }}
               >
-                {product.compareAtFormatted}
+                {product.priceFormatted}
               </p>
-            ) : null}
-          </div>
+              {product.compareAtFormatted ? (
+                <p
+                  className="text-gray-400 line-through"
+                  style={{ fontSize: PRODUCT_CARD_OLD_PRICE_FONT_SIZE_PX }}
+                >
+                  {product.compareAtFormatted}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div
             className="min-h-[1.25rem] w-full min-w-0 shrink-0"
             style={

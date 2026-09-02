@@ -43,7 +43,15 @@
       "marcoGroup": "Marco Group",
       "marcoElectronics": "Marco Electronics",
       "instagramMenu": "Instagram profiles",
-      "facebookMenu": "Facebook profiles"
+      "facebookMenu": "Facebook profiles",
+      "telegramMenu": "Telegram numbers",
+      "whatsappMenu": "WhatsApp numbers",
+      "viberMenu": "Viber numbers"
+    },
+    "messengerBranches": {
+      "argavand": "Argavand",
+      "yerevan": "Alek Manukyan",
+      "avan": "Avan"
     },
     "categoryPromo": {
       "badge": "Limited offer",

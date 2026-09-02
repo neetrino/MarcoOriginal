@@ -26,10 +26,10 @@ export const promotions = pgTable(
     id: idColumn(),
     kind: promotionKindEnum("kind").notNull(),
     code: text("code"),
-    productId: uuid("product_id").references(() => products.id, {
+    productId: text("product_id").references(() => products.id, {
       onDelete: "restrict",
     }),
-    categoryId: uuid("category_id").references(() => categories.id, {
+    categoryId: text("category_id").references(() => categories.id, {
       onDelete: "restrict",
     }),
     discountType: discountTypeEnum("discount_type").notNull(),
