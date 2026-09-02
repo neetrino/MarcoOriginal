@@ -13,12 +13,18 @@ import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
 export type AuthActionState = { error?: string };
 
 function resolveSafeNextPath(locale: Locale, raw: FormDataEntryValue | null): string {
+  const homePath = `/${locale}`;
+
   if (typeof raw !== "string" || !raw.startsWith("/") || raw.startsWith("//")) {
-    return `/${locale}/profile`;
+    return homePath;
   }
 
-  if (!raw.startsWith(`/${locale}/`)) {
-    return `/${locale}/profile`;
+  if (raw === homePath || raw === `${homePath}/`) {
+    return homePath;
+  }
+
+  if (!raw.startsWith(`${homePath}/`)) {
+    return homePath;
   }
 
   return raw;

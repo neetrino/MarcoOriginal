@@ -72,22 +72,18 @@ export function ProfileAccountPanel({
       <ProfileUserCard user={user} title={dictionary.title} />
 
       <nav className={PROFILE_NAV_SHELL_CLASS} aria-label={dictionary.title}>
-        {variant === "mobile" ? (
-          <>
-            <div className="mb-1.5 rounded-xl border border-slate-200/80 bg-marco-gray/80 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-              <AppLink
-                href={`/${locale}`}
-                prefetchPolicy="intent"
-                className={`${PROFILE_NAV_ITEM_BASE_CLASS} ${PROFILE_NAV_ITEM_IDLE_CLASS}`}
-              >
-                <Home className="h-5 w-5 text-marco-slate" aria-hidden />
-                <span className="flex-1">{homeLabel}</span>
-                <ChevronRight className="h-4 w-4 text-marco-slate/45" aria-hidden />
-              </AppLink>
-            </div>
-            <div className="mb-2 border-b border-slate-200/80" />
-          </>
-        ) : null}
+        <div className="mb-1.5 rounded-xl border border-slate-200/80 bg-marco-gray/80 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+          <AppLink
+            href={`/${locale}`}
+            prefetchPolicy="intent"
+            className={`${PROFILE_NAV_ITEM_BASE_CLASS} ${PROFILE_NAV_ITEM_IDLE_CLASS}`}
+          >
+            <Home className="h-5 w-5 text-marco-slate" aria-hidden />
+            <span className="flex-1">{homeLabel}</span>
+            <ChevronRight className="h-4 w-4 text-marco-slate/45" aria-hidden />
+          </AppLink>
+        </div>
+        <div className="mb-2 border-b border-slate-200/80" />
 
         <div className="flex flex-col gap-1.5">
           {items.map((item) => {
