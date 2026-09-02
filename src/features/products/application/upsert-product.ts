@@ -75,13 +75,24 @@ function revalidateProducts(
   }
 }
 
-function parsePayload(formData: FormData): ProductUpsertInput | null {
+function parsePayload(
+  formData: FormData,
+): { data: ProductUpsertInput } | { error: string } {
   const raw = formData.get("data");
-  if (typeof raw !== "string") return null;
+  if (typeof raw !== "string") {
+    return { error: "Invalid product payload." };
+  }
   try {
-    return productUpsertSchema.parse(JSON.parse(raw));
+    const parsed = productUpsertSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      if (!issue) return { error: "Invalid product payload." };
+      const path = issue.path.length > 0 ? issue.path.join(".") : "payload";
+      return { error: `${path}: ${issue.message}` };
+    }
+    return { data: parsed.data };
   } catch {
-    return null;
+    return { error: "Invalid product payload." };
   }
 }
 
@@ -125,10 +136,10 @@ export async function createProductFromDrawerAction(
   }
 
   const parsed = parsePayload(formData);
-  if (!parsed) {
-    return err("VALIDATION_ERROR", "Invalid product payload.");
+  if ("error" in parsed) {
+    return err("VALIDATION_ERROR", parsed.error);
   }
-  const data = normalizeProductPayload(parsed);
+  const data = normalizeProductPayload(parsed.data);
 
   if (
     data.compareAtAmount != null &&
@@ -215,10 +226,10 @@ export async function updateProductFromDrawerAction(
   }
 
   const parsed = parsePayload(formData);
-  if (!parsed) {
-    return err("VALIDATION_ERROR", "Invalid product payload.");
+  if ("error" in parsed) {
+    return err("VALIDATION_ERROR", parsed.error);
   }
-  const data = normalizeProductPayload(parsed);
+  const data = normalizeProductPayload(parsed.data);
 
   if (
     data.compareAtAmount != null &&

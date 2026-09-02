@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useTransition, type FormEvent, type InvalidEvent } from "react";
+import {
+  useEffect,
+  useState,
+  useTransition,
+  type FormEvent,
+  type InvalidEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import { SideSheet } from "@/components/ui/SideSheet";
@@ -112,38 +118,45 @@ export function ProductDrawer({
   const copy = isLocale(locale)
     ? getDictionary(locale).admin.productEditor
     : getDictionary("hy").admin.productEditor;
+  const productId = product?.id ?? null;
+  const loadKey = !open ? "closed" : productId == null ? "new" : productId;
   const [variantState, setVariantState] = useState<{
     productType: ProductDrawerProduct["productType"];
     selectedAttributeIds: string[];
     attributeValueIds: Record<string, string>;
     variants: ProductVariantDraft[];
   } | null>(null);
-  const [variantStateReady, setVariantStateReady] = useState(!product?.id);
-  const [prevOpen, setPrevOpen] = useState(open);
-  const [prevProductId, setPrevProductId] = useState(product?.id);
+  const [variantStateReady, setVariantStateReady] = useState(loadKey !== productId);
+  const [activeLoadKey, setActiveLoadKey] = useState(loadKey);
 
-  if (open !== prevOpen || product?.id !== prevProductId) {
-    setPrevOpen(open);
-    setPrevProductId(product?.id);
-    if (!open) {
-      setVariantState(null);
-      setVariantStateReady(!product?.id);
-    } else if (!product?.id) {
-      setVariantState(null);
-      setVariantStateReady(true);
-    } else {
-      setVariantStateReady(false);
-      void loadProductDrawerVariantStateAction(locale, product.id).then((result) => {
-        if (result.ok) {
-          setVariantState(result.value);
-        }
-        setVariantStateReady(true);
-      });
-    }
+  // Reset local drawer state when open/product identity changes (no side effects).
+  if (loadKey !== activeLoadKey) {
+    setActiveLoadKey(loadKey);
+    setVariantState(null);
+    setVariantStateReady(loadKey !== productId);
   }
 
+  useEffect(() => {
+    if (loadKey === "closed" || loadKey === "new" || productId == null) {
+      return;
+    }
+
+    let cancelled = false;
+    void loadProductDrawerVariantStateAction(locale, productId).then((result) => {
+      if (cancelled) return;
+      if (result.ok) {
+        setVariantState(result.value);
+      }
+      setVariantStateReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loadKey, locale, productId]);
+
   const formKey = open
-    ? `${product?.id ?? "new"}-${variantStateReady ? "ready" : "loading"}`
+    ? `${productId ?? "new"}-${variantStateReady ? "ready" : "loading"}`
     : "closed";
 
   return (
