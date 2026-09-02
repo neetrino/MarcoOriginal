@@ -57,8 +57,14 @@ const productTagSchema = z
     }
   });
 
+/**
+ * Entity primary keys from createId() (UUIDv7) or legacy import IDs (CUID).
+ * Existence is enforced by relation sync, not format alone.
+ */
+const entityIdSchema = z.string().trim().min(1).max(64);
+
 const productVariantSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: entityIdSchema.optional(),
   key: z.string().trim().min(1).max(64),
   sku: z.string().trim().min(1).max(120),
   priceAmount: z.number().int().nonnegative(),
@@ -67,9 +73,9 @@ const productVariantSchema = z.object({
   discountStartsAt: z.coerce.date().nullable(),
   discountEndsAt: z.coerce.date().nullable(),
   compareAtAmount: z.number().int().nonnegative().nullable(),
-  attributeValueIds: z.array(z.string().uuid()).min(1),
-  removeImageId: z.string().uuid().nullable(),
-  existingImageId: z.string().uuid().nullable(),
+  attributeValueIds: z.array(entityIdSchema).min(1),
+  removeImageId: entityIdSchema.nullable(),
+  existingImageId: entityIdSchema.nullable(),
 });
 
 export const productUpsertSchema = z
@@ -81,8 +87,8 @@ export const productUpsertSchema = z
     description: z.string().trim().max(8000).optional(),
     priceAmount: z.number().int().nonnegative(),
     compareAtAmount: z.number().int().nonnegative().nullable(),
-    categoryIds: z.array(z.string().uuid()),
-    brandIds: z.array(z.string().uuid()).default([]),
+    categoryIds: z.array(entityIdSchema),
+    brandIds: z.array(entityIdSchema).default([]),
     status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
     salesClass: z.enum(PRODUCT_SALES_CLASSES),
     warrantyYears: z.number().int().refine(
@@ -100,12 +106,12 @@ export const productUpsertSchema = z
         }),
       )
       .max(MAX_PRODUCT_SPECS),
-    primaryExistingId: z.string().uuid().nullable(),
+    primaryExistingId: entityIdSchema.nullable(),
     primaryNewIndex: z.number().int().nullable(),
-    removeImageIds: z.array(z.string().uuid()),
-    selectedAttributeIds: z.array(z.string().uuid()).default([]),
+    removeImageIds: z.array(entityIdSchema),
+    selectedAttributeIds: z.array(entityIdSchema).default([]),
     /** SIMPLE product attribute value picks (one value per selected attribute). */
-    attributeValueIds: z.array(z.string().uuid()).default([]),
+    attributeValueIds: z.array(entityIdSchema).default([]),
     variants: z.array(productVariantSchema).default([]),
   })
   .superRefine((data, ctx) => {
