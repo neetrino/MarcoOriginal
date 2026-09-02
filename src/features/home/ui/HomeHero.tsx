@@ -1,10 +1,7 @@
 import Image from "next/image";
 
 import { AppLink } from "@/components/ui/AppLink";
-import {
-  isHomeFloorSlotId,
-  pickHeroLayout,
-} from "@/features/hero/domain/hero-layout";
+import { pickHeroLayout } from "@/features/hero/domain/hero-layout";
 import type { StorefrontHeroSlide } from "@/features/hero/application/queries";
 import { HomeHeroMobileCarousel } from "@/features/home/ui/HomeHeroMobileCarousel";
 
@@ -22,19 +19,6 @@ type HeroTileProps = {
   objectPosition: string;
   priority?: boolean;
 };
-
-function collectMobileHeroImages(slides: StorefrontHeroSlide[]): string[] {
-  const urls: string[] = [];
-  const seen = new Set<string>();
-  for (const slide of slides) {
-    if (isHomeFloorSlotId(slide.id)) continue;
-    const url = slide.mobileImageUrl ?? slide.desktopImageUrl;
-    if (!url || seen.has(url)) continue;
-    seen.add(url);
-    urls.push(url);
-  }
-  return urls;
-}
 
 function isInternalHref(href: string): boolean {
   return href.startsWith("/");
@@ -87,7 +71,9 @@ export function HomeHero({ slides }: HomeHeroProps) {
   const leftTop = layout.leftTop?.desktopImageUrl ?? null;
   const leftBottom = layout.leftBottom?.desktopImageUrl ?? null;
   const right = layout.right?.desktopImageUrl ?? null;
-  const mobileImages = collectMobileHeroImages(slides);
+  // Mobile storefront uses only the admin Mobile → Home hero image (leftTop).
+  const mobileUrl = layout.leftTop?.mobileImageUrl ?? null;
+  const mobileImages = mobileUrl ? [mobileUrl] : [];
 
   return (
     <section
