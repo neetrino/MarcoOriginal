@@ -4,8 +4,11 @@ import { createHash } from "node:crypto";
 
 import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
+import { getEnv } from "@/config/env";
 import { getProviders } from "@/config/providers";
+import { getDb } from "@/db/client";
 import {
   cartItems,
   carts,
@@ -42,6 +45,7 @@ import { restockIfAtThreshold } from "@/features/products/domain/product-stock";
 import { resolveProductPrices } from "@/features/promotions/application/resolve-product-prices";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheckoutRateSnapshot } from "@/lib/fx/service";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { createId } from "@/lib/id";
 import { convertAmount } from "@/lib/money/convert";
 import { defaultCurrency } from "@/lib/money/currency";
@@ -49,6 +53,10 @@ import {
   CURRENCY_COOKIE_NAME,
   parseCurrencyCookie,
 } from "@/lib/money/currency-cookie";
+import { logger } from "@/lib/observability/logger";
+import { isArcaConfigured } from "@/lib/payments/arca/config";
+import { registerArcaOrder } from "@/lib/payments/arca/client";
+import { isIdramConfigured } from "@/lib/payments/idram/config";
 
 function hashValue(value: string): string {
   return createHash("sha256").update(value).digest("hex");
@@ -66,7 +74,7 @@ export type CreateOrderResult =
   | { ok: true; orderNumber: string }
   | { ok: false; error: string };
 
-/** Creates a COD order with server-side totals, stock decrement, and cart clear. */
+/** Creates an order; COD returns success, online methods redirect to the provider. */
 export async function createOrderAction(
   raw: CheckoutInput,
 ): Promise<CreateOrderResult> {
@@ -76,6 +84,13 @@ export async function createOrderAction(
   }
 
   const input = parsed.data;
+  if (input.paymentMethod === "arca" && !isArcaConfigured()) {
+    return { ok: false, error: "Card payment is temporarily unavailable." };
+  }
+  if (input.paymentMethod === "idram" && !isIdramConfigured()) {
+    return { ok: false, error: "Idram is temporarily unavailable." };
+  }
+
   const user = await getCurrentUser();
   const { cart, items } = await getCartWithItems();
   const cookieStore = await cookies();
@@ -111,10 +126,29 @@ export async function createOrderAction(
     }),
   );
 
+  const isOnline =
+    input.paymentMethod === "arca" || input.paymentMethod === "idram";
+
+  let created: {
+    orderId: string;
+    orderNumber: string;
+    totalAmount: number;
+    paymentId: string | null;
+    locale: string;
+    paymentStatus: string;
+    reused: boolean;
+  };
+
   try {
-    const orderNumber = await withTransaction(async (tx) => {
+    created = await withTransaction(async (tx) => {
       const [existing] = await tx
-        .select({ orderNumber: orders.orderNumber })
+        .select({
+          id: orders.id,
+          orderNumber: orders.orderNumber,
+          totalAmount: orders.totalAmount,
+          locale: orders.locale,
+          paymentStatus: orders.paymentStatus,
+        })
         .from(orders)
         .where(
           and(
@@ -126,7 +160,20 @@ export async function createOrderAction(
         .limit(1);
 
       if (existing) {
-        return existing.orderNumber;
+        const [existingPayment] = await tx
+          .select({ id: payments.id })
+          .from(payments)
+          .where(eq(payments.orderId, existing.id))
+          .limit(1);
+        return {
+          orderId: existing.id,
+          orderNumber: existing.orderNumber,
+          totalAmount: existing.totalAmount,
+          paymentId: existingPayment?.id ?? null,
+          locale: existing.locale,
+          paymentStatus: existing.paymentStatus,
+          reused: true as const,
+        };
       }
 
       let delivery: typeof deliveryRules.$inferSelect | null = null;
@@ -407,24 +454,31 @@ export async function createOrderAction(
         }
       }
 
-      const payment = await getProviders().payment.createPayment({
-        orderId,
-        amount: BigInt(totalAmount),
-        currency: defaultCurrency,
-        idempotencyKey: input.idempotencyKey,
-      });
       const paymentRecord = toPaymentRecord(input.paymentMethod);
+      const paymentId = createId();
+      let providerReference: string | null = null;
+
+      if (!isOnline) {
+        const payment = await getProviders().payment.createPayment({
+          orderId,
+          amount: BigInt(totalAmount),
+          currency: defaultCurrency,
+          idempotencyKey: input.idempotencyKey,
+        });
+        providerReference = payment.providerReference;
+      }
 
       await tx.insert(payments).values({
-        id: createId(),
+        id: paymentId,
         orderId,
         provider: paymentRecord.provider,
         method: paymentRecord.method,
-        providerReference: payment.providerReference,
+        providerReference,
         amount: totalAmount,
         currency: defaultCurrency,
         status: "PENDING",
         attemptNumber: 1,
+        metadata: isOnline ? { cartId: cart.id } : null,
       });
 
       await tx.insert(orderEvents).values({
@@ -438,20 +492,91 @@ export async function createOrderAction(
         payload: { source: "checkout" },
       });
 
-      await tx.delete(cartItems).where(eq(cartItems.cartId, cart.id));
-      await tx
-        .update(carts)
-        .set({ status: "CONVERTED", updatedAt: now })
-        .where(eq(carts.id, cart.id));
+      if (!isOnline) {
+        await tx.delete(cartItems).where(eq(cartItems.cartId, cart.id));
+        await tx
+          .update(carts)
+          .set({ status: "CONVERTED", updatedAt: now })
+          .where(eq(carts.id, cart.id));
+      }
 
-      return number;
+      return {
+        orderId,
+        orderNumber: number,
+        totalAmount,
+        paymentId,
+        locale: input.locale,
+        paymentStatus: "PENDING" as const,
+        reused: false as const,
+      };
     });
-
-    await revalidateCartPaths();
-    return { ok: true, orderNumber };
   } catch (error) {
+    logger.error("create_order_failed", {
+      message: error instanceof Error ? error.message : "unknown",
+      paymentMethod: input.paymentMethod,
+    });
     const message =
       error instanceof Error ? error.message : "Unable to place order.";
     return { ok: false, error: message };
   }
+
+  if (!isOnline) {
+    await revalidateCartPaths();
+    return {
+      ok: true,
+      orderNumber: created.orderNumber,
+    };
+  }
+
+  if (created.paymentStatus === "CAPTURED") {
+    redirect(`/${input.locale}/checkout/success/${created.orderNumber}`);
+  }
+
+  const locale: Locale = isLocale(created.locale)
+    ? created.locale
+    : input.locale;
+  const appUrl = getEnv().NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+
+  if (input.paymentMethod === "arca") {
+    let formUrl: string;
+    try {
+      const registered = await registerArcaOrder({
+        orderNumber: created.orderNumber,
+        amountMinor: created.totalAmount,
+        currency: defaultCurrency,
+        returnUrl: `${appUrl}/api/v1/payments/arca/callback?order=${created.orderId}`,
+        description: `Order ${created.orderNumber}`,
+        language: locale,
+      });
+
+      if (created.paymentId) {
+        await getDb()
+          .update(payments)
+          .set({
+            providerReference: registered.providerOrderId,
+            updatedAt: new Date(),
+          })
+          .where(eq(payments.id, created.paymentId));
+      }
+
+      formUrl = registered.formUrl;
+    } catch (error) {
+      logger.error("arca_init_failed", {
+        orderNumber: created.orderNumber,
+        message: error instanceof Error ? error.message : "unknown",
+      });
+      return {
+        ok: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Card payment failed to start.",
+      };
+    }
+
+    redirect(formUrl);
+  }
+
+  // Idram: intermediate page auto-POSTs to GetPayment (avoids SA refresh race).
+  redirect(`/${locale}/checkout/pay/${created.orderNumber}`);
 }

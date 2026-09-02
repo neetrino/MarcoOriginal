@@ -3,6 +3,8 @@ import type { Dictionary } from "@/lib/i18n/get-dictionary";
 export type SocialBrandProfile = {
   label: string;
   href: string;
+  /** Optional second line (e.g. phone under a branch name). */
+  subtitle?: string;
 };
 
 export type SocialBrandMenus = {

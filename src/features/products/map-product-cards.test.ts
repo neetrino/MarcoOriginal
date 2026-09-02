@@ -70,4 +70,25 @@ describe("mapProductCards", () => {
 
     expect(card.discountPercent).toBe(15);
   });
+
+  it("omits price and discount when priceAmount is 0", () => {
+    const [card] = mapProductCards(
+      [
+        product({
+          id: "p3",
+          priceAmount: 0,
+          compareAtAmount: 10_000,
+          discountPercent: 20,
+        }),
+      ],
+      "hy",
+      formatPrice,
+      warrantyLabels,
+      new Set(),
+    );
+
+    expect(card.priceFormatted).toBeNull();
+    expect(card.compareAtFormatted).toBeNull();
+    expect(card.discountPercent).toBeNull();
+  });
 });

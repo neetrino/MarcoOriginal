@@ -24,9 +24,10 @@ export function mapProductCards(
   compareIds: ReadonlySet<string> = new Set(),
 ): ProductCardItem[] {
   return products.map((product) => {
-    const price = formatPrice(product.priceAmount);
+    const hasPrice = product.priceAmount > 0;
+    const price = hasPrice ? formatPrice(product.priceAmount) : null;
     const compareAt =
-      product.compareAtAmount != null
+      hasPrice && product.compareAtAmount != null
         ? formatPrice(product.compareAtAmount)
         : null;
 
@@ -35,9 +36,11 @@ export function mapProductCards(
       href: `/${locale}/products/${product.translation.slug}`,
       title: product.translation.title,
       skuLine: `${warrantyLabels.sku}: ${product.sku}`,
-      priceFormatted: price.formatted,
+      priceFormatted: price?.formatted ?? null,
       compareAtFormatted: compareAt?.formatted ?? null,
-      discountPercent: resolveDisplayDiscountPercent(product),
+      discountPercent: hasPrice
+        ? resolveDisplayDiscountPercent(product)
+        : null,
       imageUrl: product.imageUrl,
       brandLogoUrl: product.brandLogoUrl,
       brandName: product.brandName,

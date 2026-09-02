@@ -62,7 +62,7 @@ export const cartItems = pgTable(
     cartId: uuid("cart_id")
       .notNull()
       .references(() => carts.id, { onDelete: "cascade" }),
-    productId: uuid("product_id")
+    productId: text("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
     quantity: integer("quantity").notNull(),
@@ -85,7 +85,7 @@ export const wishlistItems = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "restrict" }),
-    productId: uuid("product_id")
+    productId: text("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
     createdAt: createdAtColumn(),

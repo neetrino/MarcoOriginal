@@ -43,7 +43,15 @@
       "marcoGroup": "Marco Group",
       "marcoElectronics": "Marco Electronics",
       "instagramMenu": "Instagram էջեր",
-      "facebookMenu": "Facebook էջեր"
+      "facebookMenu": "Facebook էջեր",
+      "telegramMenu": "Telegram համարներ",
+      "whatsappMenu": "WhatsApp համարներ",
+      "viberMenu": "Viber համարներ"
+    },
+    "messengerBranches": {
+      "argavand": "Արգավանդ",
+      "yerevan": "Ալեք Մանուկյան",
+      "avan": "Ավան"
     },
     "categoryPromo": {
       "badge": "Սահմանափակ առաջարկ",

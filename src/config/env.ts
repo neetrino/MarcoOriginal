@@ -6,6 +6,11 @@ import { z } from "zod";
  * Foundation env contract. Provider secrets become required when the
  * corresponding feature is wired (auth, DB, Redis, R2, email).
  */
+const boolish = z
+  .enum(["true", "false"])
+  .optional()
+  .transform((value) => value === "true");
+
 const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
@@ -24,6 +29,25 @@ const envSchema = z.object({
   R2_ENDPOINT: z.string().url().optional(),
   EMAIL_FROM: z.string().email().optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
+  // --- ArCa ---
+  ARCA_TEST_MODE: boolish,
+  ARCA_BANK: z.string().min(1).optional(),
+  ARCA_USERNAME: z.string().min(1).optional(),
+  ARCA_PASSWORD: z.string().min(1).optional(),
+  ARCA_LIVE_USERNAME: z.string().min(1).optional(),
+  ARCA_LIVE_PASSWORD: z.string().min(1).optional(),
+  // --- Idram ---
+  IDRAM_TEST_MODE: boolish,
+  IDRAM_DEV_MOCK: boolish,
+  IDRAM_GET_PAYMENT_URL: z.string().url().optional(),
+  IDRAM_REC_ACCOUNT: z.string().min(1).optional(),
+  IDRAM_SECRET_KEY: z.string().min(1).optional(),
+  IDRAM_LIVE_REC_ACCOUNT: z.string().min(1).optional(),
+  IDRAM_LIVE_SECRET_KEY: z.string().min(1).optional(),
+  // --- Payment reconciliation / cron ---
+  CRON_SECRET: z.string().min(1).optional(),
+  PAYMENT_RECONCILE_INTERVAL_MINUTES: z.string().min(1).optional(),
+  PAYMENT_PENDING_TIMEOUT_MINUTES: z.string().min(1).optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -62,6 +86,26 @@ export function getEnv(): AppEnv {
     R2_ENDPOINT: optionalEnv(process.env.R2_ENDPOINT),
     EMAIL_FROM: optionalEnv(process.env.EMAIL_FROM),
     RESEND_API_KEY: optionalEnv(process.env.RESEND_API_KEY),
+    ARCA_TEST_MODE: optionalEnv(process.env.ARCA_TEST_MODE),
+    ARCA_BANK: optionalEnv(process.env.ARCA_BANK),
+    ARCA_USERNAME: optionalEnv(process.env.ARCA_USERNAME),
+    ARCA_PASSWORD: optionalEnv(process.env.ARCA_PASSWORD),
+    ARCA_LIVE_USERNAME: optionalEnv(process.env.ARCA_LIVE_USERNAME),
+    ARCA_LIVE_PASSWORD: optionalEnv(process.env.ARCA_LIVE_PASSWORD),
+    IDRAM_TEST_MODE: optionalEnv(process.env.IDRAM_TEST_MODE),
+    IDRAM_DEV_MOCK: optionalEnv(process.env.IDRAM_DEV_MOCK),
+    IDRAM_GET_PAYMENT_URL: optionalEnv(process.env.IDRAM_GET_PAYMENT_URL),
+    IDRAM_REC_ACCOUNT: optionalEnv(process.env.IDRAM_REC_ACCOUNT),
+    IDRAM_SECRET_KEY: optionalEnv(process.env.IDRAM_SECRET_KEY),
+    IDRAM_LIVE_REC_ACCOUNT: optionalEnv(process.env.IDRAM_LIVE_REC_ACCOUNT),
+    IDRAM_LIVE_SECRET_KEY: optionalEnv(process.env.IDRAM_LIVE_SECRET_KEY),
+    CRON_SECRET: optionalEnv(process.env.CRON_SECRET),
+    PAYMENT_RECONCILE_INTERVAL_MINUTES: optionalEnv(
+      process.env.PAYMENT_RECONCILE_INTERVAL_MINUTES,
+    ),
+    PAYMENT_PENDING_TIMEOUT_MINUTES: optionalEnv(
+      process.env.PAYMENT_PENDING_TIMEOUT_MINUTES,
+    ),
   });
 
   if (!parsed.success) {

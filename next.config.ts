@@ -25,7 +25,8 @@ const securityHeaders = [
       "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      // Idram GetPayment is a cross-origin HTML form POST from checkout/pay.
+      "form-action 'self' https://banking.idram.am",
     ].join("; "),
   },
 ];

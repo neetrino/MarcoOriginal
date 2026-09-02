@@ -44,6 +44,7 @@ export {
   wishlistItems,
 } from "@/db/schema/commerce";
 export {
+  catalogIdColumn,
   createdAtColumn,
   deletedAtColumn,
   idColumn,

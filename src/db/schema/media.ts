@@ -46,17 +46,17 @@ export const mediaAssets = pgTable(
     altTranslations: jsonb("alt_translations").$type<
       Partial<Record<"hy" | "en" | "ru", string>>
     >(),
-    productId: uuid("product_id").references(() => products.id, {
+    productId: text("product_id").references(() => products.id, {
       onDelete: "restrict",
     }),
-    productVariantId: uuid("product_variant_id").references(
+    productVariantId: text("product_variant_id").references(
       () => productVariants.id,
       { onDelete: "restrict" },
     ),
-    categoryId: uuid("category_id").references(() => categories.id, {
+    categoryId: text("category_id").references(() => categories.id, {
       onDelete: "restrict",
     }),
-    brandId: uuid("brand_id").references(() => brands.id, {
+    brandId: text("brand_id").references(() => brands.id, {
       onDelete: "restrict",
     }),
     heroSlideId: uuid("hero_slide_id").references(() => heroSlides.id, {
@@ -68,7 +68,7 @@ export const mediaAssets = pgTable(
     reelId: uuid("reel_id").references(() => reels.id, {
       onDelete: "restrict",
     }),
-    attributeValueId: uuid("attribute_value_id").references(
+    attributeValueId: text("attribute_value_id").references(
       () => attributeValues.id,
       { onDelete: "restrict" },
     ),
