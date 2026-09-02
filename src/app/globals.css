@@ -333,3 +333,16 @@ body {
   background-repeat: repeat-x;
   background-size: 32px 20px;
 }
+
+/**
+ * Hardware-composited <video> layers (and overlays attached to them) can paint
+ * above fixed dialogs. Hide page media while any SideSheet is open.
+ */
+html[data-side-sheet-open] [data-home-reels],
+html[data-side-sheet-open] video {
+  visibility: hidden !important;
+}
+
+html[data-side-sheet-open] [data-side-sheet] video {
+  visibility: visible !important;
+}

@@ -96,6 +96,34 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
     });
   }
 
+  function runRemove(
+    slide: AdminHeroSlideListItem | null,
+    slot: BannerUploadSlot,
+  ): void {
+    if (!slide) return;
+    const formData = new FormData();
+    formData.set("removeImage", "1");
+
+    startTransition(async () => {
+      setUploading({ slot });
+      setError(null);
+      setMessage(null);
+      const result = await saveHeroSlideImageAction(
+        locale,
+        slide.id,
+        role,
+        formData,
+      );
+      setUploading(null);
+      if (!result.ok) {
+        setError(result.error.message);
+        return;
+      }
+      setMessage(copy.removed);
+      router.refresh();
+    });
+  }
+
   return (
     <section className="space-y-5">
       <div>
@@ -133,6 +161,11 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
                     previewRadiusClassName={HERO_DESKTOP_RADIUS_CLASS}
                     fillCell
                     onUpload={(file) => runUpload(layout.leftTop, "leftTop", file)}
+                    onRemove={
+                      layout.leftTop?.desktopImageUrl
+                        ? () => runRemove(layout.leftTop, "leftTop")
+                        : undefined
+                    }
                   />
                   <HeroBannerImageField
                     label={copy.leftBottom}
@@ -145,6 +178,11 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
                     onUpload={(file) =>
                       runUpload(layout.leftBottom, "leftBottom", file)
                     }
+                    onRemove={
+                      layout.leftBottom?.desktopImageUrl
+                        ? () => runRemove(layout.leftBottom, "leftBottom")
+                        : undefined
+                    }
                   />
                 </div>
                 <HeroBannerImageField
@@ -156,6 +194,11 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
                   previewRadiusClassName={HERO_DESKTOP_RADIUS_CLASS}
                   fillCell
                   onUpload={(file) => runUpload(layout.right, "right", file)}
+                  onRemove={
+                    layout.right?.desktopImageUrl
+                      ? () => runRemove(layout.right, "right")
+                      : undefined
+                  }
                 />
               </div>
             </div>
@@ -174,6 +217,7 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
                   : null
               }
               onUpload={runUpload}
+              onRemove={runRemove}
             />
           </Card>
         </div>
@@ -203,6 +247,11 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
               previewClassName={HERO_MOBILE_PREVIEW_CLASS}
               previewRadiusClassName={HERO_MOBILE_RADIUS_CLASS}
               onUpload={(file) => runUpload(layout.leftTop, "mobile", file)}
+              onRemove={
+                layout.leftTop?.mobileImageUrl
+                  ? () => runRemove(layout.leftTop, "mobile")
+                  : undefined
+              }
             />
           </Card>
           <Card className="border border-gray-100 bg-white/95 p-4 shadow-sm sm:p-6">
@@ -214,6 +263,7 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
                 uploading?.slot === "floorMobile" ? "floorMobile" : null
               }
               onUpload={runUpload}
+              onRemove={runRemove}
             />
           </Card>
         </div>

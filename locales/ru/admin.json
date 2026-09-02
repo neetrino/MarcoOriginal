@@ -419,6 +419,7 @@
     "sectionMobileFloorHint": "Промо-карточка под блоком брендов на мобильном.",
     "mobileFloorBanner": "Нижний баннер",
     "uploaded": "Изображение загружено и сохранено. Скоро появится на витрине.",
+    "removed": "Изображение удалено. Слот на витрине теперь пустой.",
     "saved": "Изображения hero-баннера успешно сохранены."
   },
   "reels": {
@@ -640,6 +641,8 @@
     "close": "Закрыть",
     "nameLabel": "Название категории",
     "namePlaceholder": "Введите название категории",
+    "slugLabel": "Slug",
+    "slugPlaceholder": "category-slug",
     "parentLabel": "Родительская категория",
     "parentSearchPlaceholder": "Введите текст, чтобы отфильтровать список...",
     "parentSelect": "Выбрать категорию",
@@ -653,6 +656,8 @@
     "uploadBannerImage": "+ Загрузить баннер",
     "changeBannerImage": "Изменить баннер",
     "removeBannerImage": "Удалить баннер",
+    "drawerTitleLabel": "Заголовок в drawer",
+    "drawerTitlePlaceholder": "Промо-заголовок в меню категорий",
     "status": "Статус",
     "statusActive": "Опубликовано",
     "statusArchived": "В архиве",

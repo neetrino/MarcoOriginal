@@ -9,8 +9,6 @@ type CartDrawerSummaryProps = {
   checkoutHref: string;
   orderSummaryLabel: string;
   subtotalLabel: string;
-  shippingLabel: string;
-  shippingValue: string;
   totalLabel: string;
   subtotalFormatted: string;
   totalFormatted: string;
@@ -22,8 +20,6 @@ export function CartDrawerSummary({
   checkoutHref,
   orderSummaryLabel,
   subtotalLabel,
-  shippingLabel,
-  shippingValue,
   totalLabel,
   subtotalFormatted,
   totalFormatted,
@@ -37,10 +33,6 @@ export function CartDrawerSummary({
         <div className="flex items-center justify-between gap-3">
           <span className="text-marco-slate/70">{subtotalLabel}</span>
           <span className="font-medium text-marco-ink">{subtotalFormatted}</span>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-marco-slate/70">{shippingLabel}</span>
-          <span className="font-medium text-marco-ink">{shippingValue}</span>
         </div>
       </div>
       <div className="mt-3 border-t border-gray-200/80 pt-3">

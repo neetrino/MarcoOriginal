@@ -90,7 +90,7 @@ export function HeaderCategoriesDrawer({
         ariaLabel={copy.categories}
         side="left"
         panelClassName={HEADER_CATEGORY_PANEL_WIDTH_CLASS}
-        zIndexClassName="z-[90]"
+        zIndexClassName="z-[200]"
         backdropBlur
         closeAriaLabel={copy.close}
         closeClassName={HEADER_CATEGORY_CLOSE_CLASS}

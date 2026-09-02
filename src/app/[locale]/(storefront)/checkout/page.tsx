@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { getCartWithItems } from "@/features/cart/cart";
 import { getCheckoutDeliveryOptions } from "@/features/checkout/application/get-checkout-delivery";
+import { getCheckoutOrderProducts } from "@/features/checkout/application/get-checkout-order-products";
 import { CheckoutForm } from "@/features/checkout/ui/CheckoutForm";
 import { buildContactLocations } from "@/features/contact/content/contact-locations";
 import { getDefaultShippingAddress } from "@/features/profile/application/address-queries";
@@ -37,6 +38,11 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
       })),
     ),
   ]);
+  const orderProducts = await getCheckoutOrderProducts(
+    rawLocale,
+    items,
+    prices,
+  );
   const subtotal = items.reduce((sum, { item, product }) => {
     const unit = prices.get(product.id)?.unitAmount ?? product.priceAmount;
     return sum + item.quantity * unit;
@@ -53,6 +59,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
       locale={rawLocale}
       productsHref={`/${rawLocale}/products`}
       hasItems={items.length > 0}
+      orderProducts={orderProducts}
       pickupBranches={pickupBranches}
       defaultFirstName={
         defaultAddress?.recipientFirstName ?? user?.firstName ?? ""
@@ -67,6 +74,10 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
       deliveryOptions={deliveryOptions}
       labels={{
         title: copy.title,
+        productsInOrder: copy.productsInOrder,
+        itemsOne: copy.itemsOne,
+        itemsMany: copy.itemsMany,
+        removeItem: copy.removeItem,
         contactInformation: copy.contactInformation,
         shippingMethod: copy.shippingMethod,
         paymentMethod: copy.paymentMethod,

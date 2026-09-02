@@ -5,8 +5,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useTransition } from "react";
 import { X } from "lucide-react";
 
-import type { CheckoutOrderProduct } from "@/features/checkout/ui/checkout-order-product";
 import { removeItem } from "@/features/cart/cart";
+import type { CheckoutOrderProduct } from "@/features/checkout/ui/checkout-order-product";
+import {
+  CHECKOUT_PRODUCT_CARD_CLASS,
+  CHECKOUT_PRODUCT_QTY_CLASS,
+  CHECKOUT_PRODUCT_REMOVE_CLASS,
+  CHECKOUT_PRODUCTS_COUNT_CLASS,
+  CHECKOUT_PRODUCTS_HEADER_CLASS,
+  CHECKOUT_PRODUCTS_LIST_CLASS,
+  CHECKOUT_PRODUCTS_SECTION_CLASS,
+  CHECKOUT_PRODUCTS_TITLE_CLASS,
+} from "@/features/checkout/ui/checkout-section-classes";
 import { useSyncedState } from "@/lib/react/sync-state-from-prop";
 
 type CheckoutProductsInOrderProps = {
@@ -15,7 +25,6 @@ type CheckoutProductsInOrderProps = {
   itemsOneLabel: string;
   itemsManyLabel: string;
   removeItemLabel: string;
-  onCartChanged?: () => void;
 };
 
 function formatItemCount(
@@ -35,7 +44,6 @@ export function CheckoutProductsInOrder({
   itemsOneLabel,
   itemsManyLabel,
   removeItemLabel,
-  onCartChanged,
 }: CheckoutProductsInOrderProps) {
   const router = useRouter();
   const [products, setProducts] = useSyncedState(initialProducts);
@@ -78,7 +86,6 @@ export function CheckoutProductsInOrder({
 
   function onRemove(itemId: string): void {
     setProducts((current) => current.filter((product) => product.id !== itemId));
-    onCartChanged?.();
 
     startTransition(async () => {
       await removeItem(itemId);
@@ -88,38 +95,42 @@ export function CheckoutProductsInOrder({
 
   return (
     <section
-      className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+      className={CHECKOUT_PRODUCTS_SECTION_CLASS}
       aria-labelledby="checkout-order-items-preview-title"
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className={CHECKOUT_PRODUCTS_HEADER_CLASS}>
         <h2
           id="checkout-order-items-preview-title"
-          className="text-xl font-semibold text-marco-slate"
+          className={CHECKOUT_PRODUCTS_TITLE_CLASS}
         >
           {title}
         </h2>
-        <p className="shrink-0 text-sm text-gray-500">
+        <p className={CHECKOUT_PRODUCTS_COUNT_CLASS}>
           {formatItemCount(itemCount, itemsOneLabel, itemsManyLabel)}
         </p>
       </div>
 
-      <ul
-        ref={scrollerRef}
-        className="flex gap-3 overflow-x-auto overscroll-x-contain pt-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-      >
+      <ul ref={scrollerRef} className={CHECKOUT_PRODUCTS_LIST_CLASS}>
         {products.map((product) => (
-          <li
-            key={product.id}
-            className="relative w-max max-w-[320px] min-w-[200px] shrink-0 rounded-xl border border-gray-200/80 bg-white p-3"
-          >
-            <div className="flex items-stretch gap-3">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-marco-gray">
+          <li key={product.id} className={CHECKOUT_PRODUCT_CARD_CLASS}>
+            <button
+              type="button"
+              onClick={() => onRemove(product.id)}
+              disabled={pending}
+              className={CHECKOUT_PRODUCT_REMOVE_CLASS}
+              aria-label={removeItemLabel}
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+
+            <div className="flex items-stretch gap-3 pr-6">
+              <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-marco-gray">
                 {product.imageUrl ? (
                   <Image
                     src={product.imageUrl}
                     alt={product.title}
                     fill
-                    sizes="80px"
+                    sizes="72px"
                     className="object-contain p-1.5"
                   />
                 ) : (
@@ -128,29 +139,22 @@ export function CheckoutProductsInOrder({
                   </div>
                 )}
               </div>
-              <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
-                <div className="flex items-start justify-between gap-2">
-                  <p
-                    className="line-clamp-2 text-sm font-medium text-gray-900"
-                    title={product.title}
-                  >
-                    {product.title}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => onRemove(product.id)}
-                    disabled={pending}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-red-300 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
-                    aria-label={removeItemLabel}
-                  >
-                    <X className="h-3.5 w-3.5" aria-hidden="true" />
-                  </button>
-                </div>
-                <span className="inline-flex h-6 min-w-[24px] w-fit items-center justify-center rounded-full border border-gray-200 bg-sky-50/70 px-2 text-[11px] font-semibold text-gray-900">
-                  ×{product.quantity}
-                </span>
+              <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 pb-6">
+                <p
+                  className="line-clamp-2 text-sm font-semibold text-marco-ink"
+                  title={product.title}
+                >
+                  {product.title}
+                </p>
+                <p className="text-sm font-medium text-marco-slate">
+                  {product.priceFormatted}
+                </p>
               </div>
             </div>
+
+            <span className={CHECKOUT_PRODUCT_QTY_CLASS}>
+              ×{product.quantity}
+            </span>
           </li>
         ))}
       </ul>

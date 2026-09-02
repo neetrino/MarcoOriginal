@@ -22,6 +22,7 @@ import { err, ok, type Result } from "@/lib/result";
 const localeCopySchema = z.object({
   title: z.string().trim().min(1).max(120),
   slug: z.string().trim().min(1).max(120),
+  drawerTitle: z.string().trim().max(200).optional(),
 });
 
 const createCategorySchema = z.object({

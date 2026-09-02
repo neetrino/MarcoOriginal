@@ -124,12 +124,14 @@ export function headerCategoryPromoImageUrl(
 export function headerCategoryPromoText(
   key: HeaderCategoryPromoKey,
   copy: HeaderCategoryPromoCopy,
+  drawerTitle?: string | null,
 ): HeaderCategoryPromoText {
+  const override = drawerTitle?.trim() || null;
   if (key === "hardware") {
     return {
       badge: copy.badge,
       cta: copy.cta,
-      headline: copy.hardwareHeadline,
+      headline: override ?? copy.hardwareHeadline,
       subline: copy.hardwareSubline,
     };
   }
@@ -138,7 +140,7 @@ export function headerCategoryPromoText(
     return {
       badge: copy.badge,
       cta: copy.cta,
-      headline: copy.genericHeadline,
+      headline: override ?? copy.genericHeadline,
       subline: copy.genericSubline,
     };
   }
@@ -146,7 +148,7 @@ export function headerCategoryPromoText(
   return {
     badge: copy.badge,
     cta: copy.cta,
-    headline: copy.furnitureHeadline,
+    headline: override ?? copy.furnitureHeadline,
     subline: copy.furnitureSubline,
   };
 }

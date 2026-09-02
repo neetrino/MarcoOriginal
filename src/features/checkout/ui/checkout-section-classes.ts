@@ -2,6 +2,30 @@ export const CHECKOUT_PAGE_CLASS = "w-full";
 
 export const CHECKOUT_TITLE_CLASS = "mb-8 text-3xl font-bold text-marco-slate";
 
+export const CHECKOUT_PRODUCTS_SECTION_CLASS =
+  "mb-8 overflow-hidden rounded-2xl border border-marco-ink bg-white px-5 py-5 sm:px-6 sm:py-6";
+
+export const CHECKOUT_PRODUCTS_HEADER_CLASS =
+  "mb-4 flex items-start justify-between gap-4";
+
+export const CHECKOUT_PRODUCTS_TITLE_CLASS =
+  "text-base font-bold tracking-wide text-marco-ink uppercase sm:text-lg";
+
+export const CHECKOUT_PRODUCTS_COUNT_CLASS =
+  "shrink-0 text-sm font-medium text-marco-slate";
+
+export const CHECKOUT_PRODUCTS_LIST_CLASS =
+  "flex gap-3 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden";
+
+export const CHECKOUT_PRODUCT_CARD_CLASS =
+  "relative w-max max-w-[320px] min-w-[220px] shrink-0 rounded-2xl border border-gray-200 bg-white p-3";
+
+export const CHECKOUT_PRODUCT_REMOVE_CLASS =
+  "absolute top-2.5 right-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-marco-gray text-marco-slate/70 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-60";
+
+export const CHECKOUT_PRODUCT_QTY_CLASS =
+  "absolute right-3 bottom-3 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-marco-gray px-2 text-[11px] font-semibold text-marco-ink";
+
 export const CHECKOUT_LAYOUT_CLASS = "grid grid-cols-1 gap-8 lg:grid-cols-3";
 
 export const CHECKOUT_CARD_CLASS = "rounded-lg border border-gray-200 bg-white p-6 shadow-sm";

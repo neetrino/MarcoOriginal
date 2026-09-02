@@ -8,8 +8,6 @@
   "loading": "Loading cart…",
   "orderSummary": "Order Summary",
   "subtotal": "Subtotal",
-  "shipping": "Shipping",
-  "shippingNotCalculated": "Not calculated",
   "total": "Total",
   "checkout": "Proceed to checkout",
   "close": "Close",

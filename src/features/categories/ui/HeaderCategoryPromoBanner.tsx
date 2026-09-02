@@ -24,6 +24,7 @@ type HeaderCategoryPromoBannerProps = {
   href: string;
   copy: HeaderCategoryPromoCopy;
   bannerImageUrl?: string | null;
+  drawerTitle?: string | null;
   onNavigate: () => void;
 };
 
@@ -33,9 +34,10 @@ export function HeaderCategoryPromoBanner({
   href,
   copy,
   bannerImageUrl = null,
+  drawerTitle = null,
   onNavigate,
 }: HeaderCategoryPromoBannerProps) {
-  const text = headerCategoryPromoText(promoKey, copy);
+  const text = headerCategoryPromoText(promoKey, copy, drawerTitle);
   const imageUrl = headerCategoryPromoImageUrl(promoKey, bannerImageUrl);
 
   return (

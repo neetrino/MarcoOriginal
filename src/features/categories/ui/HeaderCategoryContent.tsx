@@ -44,13 +44,16 @@ export function HeaderCategoryContent({
       ref={scrollRef}
       className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain bg-white pt-4 pb-6 md:pt-5 md:pb-8 ${HEADER_CATEGORY_CONTENT_PADDING_CLASS}`}
     >
-      <HeaderCategoryPromoBanner
-        promoKey={promoKey}
-        href={hrefFor(selected.slug)}
-        copy={promoCopy}
-        bannerImageUrl={selected.bannerImageUrl}
-        onNavigate={onNavigate}
-      />
+      <div className="w-full shrink-0">
+        <HeaderCategoryPromoBanner
+          promoKey={promoKey}
+          href={hrefFor(selected.slug)}
+          copy={promoCopy}
+          bannerImageUrl={selected.bannerImageUrl}
+          drawerTitle={selected.drawerTitle}
+          onNavigate={onNavigate}
+        />
+      </div>
       <div className="flex w-full min-w-0 flex-col gap-6 md:gap-8">
         <div className="w-full shrink-0 pt-1">
           <div className="flex flex-wrap items-center gap-2.5 md:gap-3">

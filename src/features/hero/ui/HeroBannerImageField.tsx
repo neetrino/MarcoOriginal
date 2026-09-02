@@ -80,7 +80,7 @@ export function HeroBannerImageField({
               {uploading ? (
                 <>
                   <span className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-gray-300 border-t-amber-500" />
-                  <span className="text-sm font-medium">Uploading…</span>
+                  <span className="text-sm font-medium">Saving…</span>
                 </>
               ) : (
                 <>
@@ -159,7 +159,7 @@ function HeroBannerFilledPreview({
         {uploading ? (
           <div className="flex flex-col items-center gap-2 text-white">
             <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-amber-400" />
-            <span className="text-sm font-medium">Uploading…</span>
+            <span className="text-sm font-medium">Saving…</span>
           </div>
         ) : (
           <>

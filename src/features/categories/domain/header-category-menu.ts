@@ -5,6 +5,8 @@ export type HeaderCategoryNode = {
   count: number;
   imageUrl: string | null;
   bannerImageUrl: string | null;
+  /** Optional promo card headline from admin; falls back to static copy. */
+  drawerTitle: string | null;
   children: HeaderCategoryNode[];
 };
 

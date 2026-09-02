@@ -180,8 +180,6 @@ export function CartDrawer({
                 checkoutHref={`/${locale}/checkout`}
                 orderSummaryLabel={labels.orderSummary}
                 subtotalLabel={labels.subtotal}
-                shippingLabel={labels.shipping}
-                shippingValue={labels.shippingNotCalculated}
                 totalLabel={labels.total}
                 subtotalFormatted={view.subtotalFormatted}
                 totalFormatted={view.totalFormatted}
