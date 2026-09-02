@@ -30,4 +30,9 @@ describe("admin nav classes", () => {
     expect(adminNavIconClass(true)).toContain("text-marco-slate");
     expect(adminNavIconClass(false)).toContain("text-marco-slate/50");
   });
+
+  it("prevents products group from flex-shrinking away in a tall nav", () => {
+    expect(adminNavGroupClass(true)).toContain("shrink-0");
+    expect(adminNavItemClass({ active: false })).toContain("shrink-0");
+  });
 });

@@ -15,15 +15,20 @@ export function adminNavItemClass({
     ? "bg-marco-yellow text-marco-slate"
     : "text-marco-slate/80 hover:bg-white hover:text-marco-ink";
 
-  return `flex w-full items-center rounded-xl text-sm font-medium transition-colors ${layout} ${tone}`;
+  return `flex w-full shrink-0 items-center rounded-xl text-sm font-medium transition-colors ${layout} ${tone}`;
 }
 
 export function adminNavIconClass(active: boolean): string {
   return active ? "shrink-0 text-marco-slate" : "shrink-0 text-marco-slate/50";
 }
 
+/**
+ * Products parent row. `overflow-hidden` clips the yellow pill; `shrink-0` is
+ * required so flex column overflow scrolls the nav instead of collapsing this
+ * row to 0 height (overflow ≠ visible zeroes the flex min-size).
+ */
 export function adminNavGroupClass(active: boolean): string {
-  return `flex w-full min-w-0 overflow-hidden rounded-xl ${
+  return `flex w-full min-w-0 shrink-0 overflow-hidden rounded-xl ${
     active ? "bg-marco-yellow text-marco-slate" : "bg-transparent"
   }`;
 }
