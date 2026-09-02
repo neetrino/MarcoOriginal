@@ -61,6 +61,8 @@ export type LocaleTranslation = {
   title: string;
   slug: string;
   description?: string;
+  /** Header mega-menu promo card headline override. */
+  drawerTitle?: string;
   specifications?: ProductSpecification[];
   seoTitle?: string;
   seoDescription?: string;

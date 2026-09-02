@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 
-import { AdminSearchInput } from "@/features/admin/ui/AdminSearchInput";
 import { ADMIN_LABEL } from "@/features/admin/ui/admin-form-classes";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import type { AdminCategoryListItem } from "@/features/categories/application/list-admin-categories";
@@ -43,22 +42,15 @@ export function CategoryParentField({
     const excluded = excludeId
       ? new Set([excludeId, ...collectDescendantIds(excludeId, categories)])
       : new Set<string>();
-    const needle = query.trim().toLowerCase();
 
     return flattenCategoryOptions(categories)
-      .filter((row) => {
-        if (excluded.has(row.item.id)) return false;
-        if (!needle) return true;
-        return (
-          row.item.title.toLowerCase().includes(needle) ||
-          row.item.slug.toLowerCase().includes(needle)
-        );
-      })
+      .filter((row) => !excluded.has(row.item.id))
       .map((row) => ({
         label: optionLabel(row.item.title, row.depth),
         value: row.item.id,
+        searchText: `${row.item.title} ${row.item.slug}`,
       }));
-  }, [categories, excludeId, query]);
+  }, [categories, excludeId]);
 
   return (
     <div className="space-y-2">
@@ -66,13 +58,6 @@ export function CategoryParentField({
         {copy.parentLabel}
         {required ? <span className="text-red-600"> *</span> : null}
       </span>
-      <AdminSearchInput
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder={copy.parentSearchPlaceholder}
-        disabled={disabled}
-        aria-label={copy.parentSearchPlaceholder}
-      />
       <SelectDropdown
         ariaLabel={copy.parentLabel}
         value={value}
@@ -80,6 +65,9 @@ export function CategoryParentField({
         options={options}
         disabled={disabled}
         deferChange={false}
+        searchValue={query}
+        searchPlaceholder={copy.parentSearchPlaceholder}
+        onSearchChange={setQuery}
         onValueChange={onChange}
       />
     </div>

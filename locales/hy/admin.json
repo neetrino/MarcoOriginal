@@ -419,6 +419,7 @@
     "sectionMobileFloorHint": "Պրոմո քարտ բրենդների տակ՝ mobile-ում։",
     "mobileFloorBanner": "Floor banner",
     "uploaded": "Image uploaded to storage and saved. It will show on the storefront shortly.",
+    "removed": "Նկարը ջնջվեց։ Տեղը հիմա դատարկ է վիտրինայում։",
     "saved": "Hero banner images saved successfully."
   },
   "reels": {
@@ -640,6 +641,8 @@
     "close": "Փակել",
     "nameLabel": "Կատեգորիայի անվանում",
     "namePlaceholder": "Մուտքագրել կատեգորիայի անվանումը",
+    "slugLabel": "Slug",
+    "slugPlaceholder": "category-slug",
     "parentLabel": "Գլխավոր կատեգորիա",
     "parentSearchPlaceholder": "Մուտքագրեք՝ ֆիլտրելու ցուցակը...",
     "parentSelect": "Ընտրել կատեգորիա",
@@ -653,6 +656,8 @@
     "uploadBannerImage": "+ Վերբեռնել banner նկար",
     "changeBannerImage": "Փոխել banner նկարը",
     "removeBannerImage": "Հեռացնել banner-ը",
+    "drawerTitleLabel": "Drawer-ի վերնագիր",
+    "drawerTitlePlaceholder": "Պրոմո վերնագիր կատեգորիաների drawer-ում",
     "status": "Կարգավիճակ",
     "statusActive": "Հրապարակված",
     "statusArchived": "Արխիվացված",

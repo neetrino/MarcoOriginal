@@ -12,7 +12,9 @@ import {
   type CheckoutPickupBranch,
 } from "@/features/checkout/ui/CheckoutDetailsSections";
 import type { CheckoutLabels } from "@/features/checkout/ui/checkout-form-labels";
+import type { CheckoutOrderProduct } from "@/features/checkout/ui/checkout-order-product";
 import { CheckoutOrderSummary } from "@/features/checkout/ui/CheckoutOrderSummary";
+import { CheckoutProductsInOrder } from "@/features/checkout/ui/CheckoutProductsInOrder";
 import {
   CHECKOUT_CARD_CLASS,
   CHECKOUT_EMPTY_ACTION_CLASS,
@@ -36,6 +38,7 @@ type CheckoutFormProps = {
   defaultLine1: string;
   subtotalAmount: number;
   deliveryOptions: CheckoutDeliveryOption[];
+  orderProducts: CheckoutOrderProduct[];
   hasItems: boolean;
 };
 
@@ -65,6 +68,7 @@ export function CheckoutForm({
   defaultLine1,
   subtotalAmount,
   deliveryOptions,
+  orderProducts,
   hasItems,
 }: CheckoutFormProps) {
   const router = useRouter();
@@ -247,6 +251,14 @@ export function CheckoutForm({
   return (
     <div className={CHECKOUT_PAGE_CLASS}>
       <h1 className={CHECKOUT_TITLE_CLASS}>{labels.title}</h1>
+
+      <CheckoutProductsInOrder
+        products={orderProducts}
+        title={labels.productsInOrder}
+        itemsOneLabel={labels.itemsOne}
+        itemsManyLabel={labels.itemsMany}
+        removeItemLabel={labels.removeItem}
+      />
 
       <form onSubmit={onSubmit}>
         <div className={CHECKOUT_LAYOUT_CLASS}>

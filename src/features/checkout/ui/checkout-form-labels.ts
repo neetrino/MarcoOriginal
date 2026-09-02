@@ -1,5 +1,9 @@
 export type CheckoutLabels = {
   title: string;
+  productsInOrder: string;
+  itemsOne: string;
+  itemsMany: string;
+  removeItem: string;
   contactInformation: string;
   shippingMethod: string;
   paymentMethod: string;

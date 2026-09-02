@@ -37,24 +37,25 @@ export const HEADER_CATEGORY_SEE_ALL_CLASS =
   "mt-0.5 block w-full rounded-lg px-2 py-1.5 text-left text-sm font-semibold leading-5 text-marco-slate underline decoration-marco-slate/30 underline-offset-2 transition-[background-color,color,decoration-color] duration-150 hover:bg-marco-gray/60 hover:decoration-marco-slate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/10";
 
 export const HEADER_CATEGORY_PROMO_CARD_CLASS =
-  "relative mb-6 w-full overflow-hidden rounded-[24px] bg-gradient-to-b from-marco-yellow/45 to-[#fff9e5] p-5 pb-6 md:mb-5 md:p-6";
+  "relative mb-6 w-full shrink-0 overflow-hidden rounded-[24px] bg-gradient-to-b from-marco-yellow/45 to-[#fff9e5] p-5 pb-6 md:mb-5 md:p-6 md:pb-7";
 
 export const HEADER_CATEGORY_PROMO_IMAGE_WRAP_CLASS =
-  "pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] sm:block";
+  "pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-[42%] sm:block";
 
-export const HEADER_CATEGORY_PROMO_CONTENT_CLASS = "relative sm:max-w-[58%]";
+export const HEADER_CATEGORY_PROMO_CONTENT_CLASS =
+  "relative z-[1] flex min-w-0 flex-col items-start gap-0 sm:max-w-[58%]";
 
 export const HEADER_CATEGORY_PROMO_BADGE_CLASS =
-  "relative -top-1 mb-3 inline-flex rounded-full bg-[rgba(110,108,77,0.2)] px-3 py-1 text-xs font-bold leading-4 text-marco-slate";
+  "mb-3 inline-flex rounded-full bg-[rgba(71,69,48,0.18)] px-3 py-1 text-xs font-bold leading-4 text-marco-slate";
 
 export const HEADER_CATEGORY_PROMO_HEADLINE_CLASS =
-  "mb-3 text-2xl font-black leading-[1.15] tracking-tight text-marco-slate md:text-[28px]";
+  "mb-3 text-2xl font-black leading-[1.25] tracking-tight text-marco-slate md:text-[28px] md:leading-[1.22]";
 
 export const HEADER_CATEGORY_PROMO_SUBLINE_CLASS =
-  "mb-6 text-base leading-7 text-[#475569] md:text-lg md:leading-8";
+  "mb-5 text-base leading-7 text-[#334155] md:mb-6 md:text-lg md:leading-8";
 
 export const HEADER_CATEGORY_PROMO_CTA_CLASS =
-  "inline-flex w-auto max-w-full items-center gap-2 self-start rounded-[68px] bg-marco-yellow py-2 pr-1.5 pl-4 text-sm font-bold text-marco-slate transition-[filter] hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/20 sm:gap-2.5 sm:pr-2 sm:pl-5 sm:text-base";
+  "inline-flex w-auto max-w-full shrink-0 items-center gap-2 rounded-[68px] bg-marco-yellow py-2 pr-1.5 pl-4 text-sm font-bold text-marco-slate shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-[filter] hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-black/20 sm:gap-2.5 sm:pr-2 sm:pl-5 sm:text-base";
 
 export const HEADER_CATEGORY_PROMO_CTA_ICON_CLASS =
   "flex size-9 shrink-0 items-center justify-center rounded-full bg-marco-slate text-white sm:size-10";

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import { getDb } from "@/db/client";
@@ -11,6 +11,10 @@ import {
   products,
   type LocaleTranslation,
 } from "@/db/schema";
+import {
+  buildCategoryTreeWithDistinctProductCounts,
+  type CategoryDistinctCountNode,
+} from "@/features/categories/domain/category-distinct-product-counts";
 import {
   buildCategoryTree,
   type CategoryTreeNode,
@@ -42,25 +46,35 @@ function translationFor(
   return translations[locale] ?? translations.hy ?? translations.en ?? null;
 }
 
+function groupProductIdsByCategory(
+  rows: readonly { categoryId: string; productId: string }[],
+): Map<string, Set<string>> {
+  const productIdsByCategoryId = new Map<string, Set<string>>();
+  for (const row of rows) {
+    const productIds = productIdsByCategoryId.get(row.categoryId) ?? new Set();
+    productIds.add(row.productId);
+    productIdsByCategoryId.set(row.categoryId, productIds);
+  }
+  return productIdsByCategoryId;
+}
+
 function toMenuNode(
-  node: CategoryTreeNode<CategoryRow>,
-  countById: Map<string, number>,
+  node: CategoryDistinctCountNode,
   images: Map<string, string>,
   banners: Map<string, string>,
+  drawerTitles: Map<string, string>,
 ): HeaderCategoryNode {
-  const children = node.children.map((child) =>
-    toMenuNode(child, countById, images, banners),
-  );
-  const direct = countById.get(node.id) ?? 0;
-  const count = children.reduce((sum, child) => sum + child.count, direct);
   return {
     id: node.id,
     slug: node.slug,
     title: node.title,
-    count,
+    count: node.count,
     imageUrl: images.get(node.id) ?? null,
     bannerImageUrl: banners.get(node.id) ?? null,
-    children,
+    drawerTitle: drawerTitles.get(node.id) ?? null,
+    children: node.children.map((child) =>
+      toMenuNode(child, images, banners, drawerTitles),
+    ),
   };
 }
 
@@ -118,6 +132,7 @@ async function loadHeaderCategoryMenu(
     .orderBy(asc(categories.sortOrder), asc(categories.createdAt));
 
   const mapped: CategoryRow[] = [];
+  const drawerTitles = new Map<string, string>();
   for (const row of rows) {
     const translation = translationFor(row.translations, locale);
     if (!translation) continue;
@@ -127,32 +142,30 @@ async function loadHeaderCategoryMenu(
       title: translation.title,
       slug: translation.slug,
     });
+    const drawerTitle = translation.drawerTitle?.trim();
+    if (drawerTitle) drawerTitles.set(row.id, drawerTitle);
   }
 
   const ids = mapped.map((row) => row.id);
-  const [countRows, media] = await Promise.all([
+  const [linkRows, media] = await Promise.all([
     ids.length === 0
       ? Promise.resolve([])
       : getDb()
           .select({
             categoryId: productCategories.categoryId,
-            count: sql<number>`count(distinct ${productCategories.productId})::int`,
+            productId: productCategories.productId,
           })
           .from(productCategories)
           .innerJoin(products, eq(products.id, productCategories.productId))
-          .where(and(activeProductWhere, inArray(productCategories.categoryId, ids)))
-          .groupBy(productCategories.categoryId),
+          .where(and(activeProductWhere, inArray(productCategories.categoryId, ids))),
     loadCategoryImages(ids),
   ]);
 
-  const countById = new Map<string, number>();
-  for (const row of countRows) {
-    countById.set(row.categoryId, row.count);
-  }
-
-  return buildCategoryTree(mapped).map((node) =>
-    toMenuNode(node, countById, media.images, media.banners),
-  );
+  const tree: CategoryTreeNode<CategoryRow>[] = buildCategoryTree(mapped);
+  return buildCategoryTreeWithDistinctProductCounts(
+    tree,
+    groupProductIdsByCategory(linkRows),
+  ).map((node) => toMenuNode(node, media.images, media.banners, drawerTitles));
 }
 
 /** Published category tree for the header mega menu. */
@@ -161,7 +174,7 @@ export async function getHeaderCategoryMenu(
 ): Promise<HeaderCategoryNode[]> {
   return unstable_cache(
     async () => loadHeaderCategoryMenu(locale),
-    ["header-category-menu", locale],
+    ["header-category-menu-v3", locale],
     {
       tags: [CACHE_TAGS.products],
       revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,

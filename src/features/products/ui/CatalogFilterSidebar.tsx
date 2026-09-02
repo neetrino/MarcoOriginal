@@ -19,6 +19,7 @@ import { CatalogPageTitle } from "@/features/products/ui/CatalogPageTitle";
 import { CatalogViewModeProvider } from "@/features/products/ui/CatalogViewModeProvider";
 import {
   CATALOG_FILTER_ASIDE,
+  CATALOG_FILTER_ASIDE_SCROLL,
   CATALOG_LAYOUT,
 } from "@/features/products/ui/catalog-filter-classes";
 import type { Currency } from "@/lib/money/currency";
@@ -69,10 +70,10 @@ export function CatalogFilterSidebar({
     <CatalogViewModeProvider>
       <div className={CATALOG_LAYOUT}>
         <aside className={CATALOG_FILTER_ASIDE}>
-          <div className="mb-4 lg:mb-5 xl:mb-6">
+          <div className="mb-4 shrink-0 lg:mb-5 xl:mb-6">
             <CatalogPageTitle title={pageTitle} />
           </div>
-          {panel}
+          <div className={CATALOG_FILTER_ASIDE_SCROLL}>{panel}</div>
         </aside>
         <div className="min-w-0 flex-1">
           <div className="pb-3 min-[744px]:hidden">

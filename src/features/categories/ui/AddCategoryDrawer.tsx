@@ -15,7 +15,7 @@ import {
 } from "@/features/categories/actions";
 import type { AdminCategoryListItem } from "@/features/categories/application/list-admin-categories";
 import {
-  filledTranslationsFromDrafts,
+  mergeCategoryTranslations,
   translationsFromDrafts,
 } from "@/features/categories/domain/category-translations";
 import { CategoryDrawerMediaFields } from "@/features/categories/ui/CategoryDrawerMediaFields";
@@ -24,6 +24,9 @@ import { CategoryParentField } from "@/features/categories/ui/CategoryParentFiel
 import {
   draftsFromCategory,
   emptyCategoryDrafts,
+  sharedCategorySlug,
+  withDraftDrawerTitle,
+  withDraftSlug,
   withDraftTitle,
 } from "@/features/categories/ui/category-drawer-drafts";
 import { defaultLocale, isLocale, localeLabels, type Locale } from "@/lib/i18n/config";
@@ -72,6 +75,7 @@ export function AddCategoryDrawer({
     isLocale(locale) ? locale : defaultLocale,
   );
   const [drafts, setDrafts] = useState(emptyCategoryDrafts);
+  const [slugTouched, setSlugTouched] = useState(false);
   const [parentId, setParentId] = useState("");
   const [status, setStatus] = useState<"ACTIVE" | "ARCHIVED">("ACTIVE");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -97,6 +101,7 @@ export function AddCategoryDrawer({
     if (open) {
       setActiveLocale(isLocale(locale) ? locale : defaultLocale);
       setDrafts(draftsFromCategory(category));
+      setSlugTouched(false);
       setParentId(category?.parentId ?? defaultParentId);
       setStatus(category?.status === "ARCHIVED" ? "ARCHIVED" : "ACTIVE");
       setImageFile(null);
@@ -110,16 +115,18 @@ export function AddCategoryDrawer({
   }
 
   const draft = drafts[activeLocale];
-  const drawerTitle = isEdit
+  const sharedSlug = sharedCategorySlug(drafts);
+  const sheetTitle = isEdit
     ? copy.drawerEdit
     : requireParent
       ? copy.drawerAddSubcategory
       : copy.drawerAddCategory;
 
   function submitDrawer(): void {
-    const translations = isEdit
-      ? filledTranslationsFromDrafts(drafts)
-      : translationsFromDrafts(drafts);
+    const translations =
+      isEdit && category
+        ? mergeCategoryTranslations(category.translations, drafts)
+        : translationsFromDrafts(drafts);
     if (!translations || Object.keys(translations).length === 0) return;
     if (requireParent && !parentId) {
       setError(copy.parentRequired);
@@ -154,11 +161,11 @@ export function AddCategoryDrawer({
     <SideSheet
       open={open}
       onClose={onClose}
-      ariaLabel={drawerTitle}
+      ariaLabel={sheetTitle}
       panelClassName="w-full max-w-lg"
     >
       <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">{drawerTitle}</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{sheetTitle}</h2>
         <button
           type="button"
           onClick={onClose}
@@ -193,10 +200,35 @@ export function AddCategoryDrawer({
               value={draft.title}
               onChange={(event) =>
                 setDrafts((current) =>
-                  withDraftTitle(current, activeLocale, event.target.value, isEdit),
+                  withDraftTitle(
+                    current,
+                    activeLocale,
+                    event.target.value,
+                    isEdit || slugTouched,
+                  ),
                 )
               }
               placeholder={copy.namePlaceholder}
+              className={ADMIN_INPUT}
+              disabled={isPending}
+            />
+          </label>
+
+          <label className="block">
+            <span className={ADMIN_LABEL}>
+              {copy.slugLabel}{" "}
+              <span className="text-red-600">*</span>
+            </span>
+            <input
+              required
+              value={sharedSlug}
+              onChange={(event) => {
+                setSlugTouched(true);
+                setDrafts((current) =>
+                  withDraftSlug(current, event.target.value),
+                );
+              }}
+              placeholder={copy.slugPlaceholder}
               className={ADMIN_INPUT}
               disabled={isPending}
             />
@@ -239,9 +271,16 @@ export function AddCategoryDrawer({
           <CategoryDrawerMediaFields
             copy={copy}
             showBanner={!parentId}
+            activeLocale={activeLocale}
+            drawerTitle={draft.drawerTitle}
             imagePreview={imagePreview}
             bannerPreview={bannerPreview}
             disabled={isPending}
+            onDrawerTitleChange={(value) =>
+              setDrafts((current) =>
+                withDraftDrawerTitle(current, activeLocale, value),
+              )
+            }
             onImageFileChange={(file) => {
               setImagePreview((current) => previewFromFile(current, file));
               setImageFile(file);
@@ -272,7 +311,7 @@ export function AddCategoryDrawer({
         <div className="flex items-center gap-4 border-t border-gray-200 px-5 py-4">
           <button
             type="submit"
-            disabled={isPending || !draft.title.trim()}
+            disabled={isPending || !draft.title.trim() || !sharedSlug.trim()}
             className="rounded-full bg-marco-yellow px-5 py-2.5 text-sm font-semibold text-marco-slate transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending

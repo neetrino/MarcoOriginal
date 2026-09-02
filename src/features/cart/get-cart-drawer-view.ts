@@ -28,7 +28,6 @@ export type CartDrawerView = {
   itemCount: number;
   items: CartDrawerItemView[];
   subtotalFormatted: string;
-  shippingFormatted: string;
   totalFormatted: string;
   headerTotalFormatted: string;
 };
@@ -216,7 +215,6 @@ export async function getCartDrawerView(
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
     items,
     subtotalFormatted,
-    shippingFormatted: formatMoneyAmount(0, currency, locale),
     totalFormatted: subtotalFormatted,
     headerTotalFormatted: formatConvertedAmountWithSymbol(
       subtotalBase,

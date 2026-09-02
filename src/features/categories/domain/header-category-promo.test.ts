@@ -74,6 +74,15 @@ describe("headerCategoryPromoText", () => {
       "Generic headline",
     );
   });
+
+  it("prefers an admin drawer title over the static headline", () => {
+    expect(
+      headerCategoryPromoText("furniture", copy, "Custom promo").headline,
+    ).toBe("Custom promo");
+    expect(
+      headerCategoryPromoText("generic", copy, "   ").headline,
+    ).toBe("Generic headline");
+  });
 });
 
 describe("headerCategoryPromoImageUrl", () => {

@@ -6,6 +6,8 @@ import { getDb } from "@/db/client";
 import { cartItems, mediaAssets, products } from "@/db/schema";
 import type { CheckoutOrderProduct } from "@/features/checkout/ui/checkout-order-product";
 import type { Locale } from "@/lib/i18n/config";
+import { defaultCurrency } from "@/lib/money/currency";
+import { formatMoneyWithSymbol } from "@/lib/money/format";
 import { mediaPublicUrl } from "@/lib/media/public-url";
 
 export type { CheckoutOrderProduct };
@@ -14,6 +16,8 @@ type CartItemWithProduct = {
   item: typeof cartItems.$inferSelect;
   product: typeof products.$inferSelect;
 };
+
+type UnitPriceByProductId = Map<string, { unitAmount: number }>;
 
 async function loadPrimaryProductImages(
   productIds: string[],
@@ -52,6 +56,7 @@ async function loadPrimaryProductImages(
 export async function getCheckoutOrderProducts(
   locale: Locale,
   rows: CartItemWithProduct[],
+  prices: UnitPriceByProductId,
 ): Promise<CheckoutOrderProduct[]> {
   const images = await loadPrimaryProductImages(
     rows.map(({ product }) => product.id),
@@ -60,11 +65,18 @@ export async function getCheckoutOrderProducts(
   return rows.map(({ item, product }) => {
     const translation =
       product.translations[locale] ?? product.translations.hy;
+    const unitAmount =
+      prices.get(product.id)?.unitAmount ?? product.priceAmount;
     return {
       id: item.id,
       title: translation?.title ?? product.sku,
       quantity: item.quantity,
       imageUrl: images.get(product.id) ?? null,
+      priceFormatted: formatMoneyWithSymbol(
+        unitAmount,
+        defaultCurrency,
+        locale,
+      ),
     };
   });
 }

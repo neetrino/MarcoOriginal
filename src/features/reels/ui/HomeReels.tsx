@@ -62,6 +62,7 @@ export function HomeReels({
 
   return (
     <section
+      data-home-reels=""
       className="mt-4 bg-white py-8 sm:mt-6 sm:py-10 md:mt-8"
       aria-labelledby="home-reels-heading"
     >

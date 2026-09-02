@@ -1,3 +1,7 @@
+import {
+  buildCategoryTreeWithDistinctProductCounts,
+  type CategoryDistinctCountNode,
+} from "@/features/categories/domain/category-distinct-product-counts";
 import type {
   CategoryLink,
   CategoryTreeNode,
@@ -17,7 +21,10 @@ export function buildCategoryFacetsWithDistinctCounts(
   nodes: readonly CategoryTreeNode<CategoryFacetSource>[],
   productIdsByCategoryId: ReadonlyMap<string, ReadonlySet<string>>,
 ): CatalogCategoryFacet[] {
-  return nodes.map((node) => toFacet(node, productIdsByCategoryId).facet);
+  return buildCategoryTreeWithDistinctProductCounts(
+    nodes,
+    productIdsByCategoryId,
+  ).map(toFacet);
 }
 
 /** Drops category nodes with no matching products in the current listing mode. */
@@ -33,27 +40,12 @@ export function pruneEmptyCategoryFacets(
   return pruned;
 }
 
-function toFacet(
-  node: CategoryTreeNode<CategoryFacetSource>,
-  productIdsByCategoryId: ReadonlyMap<string, ReadonlySet<string>>,
-): { facet: CatalogCategoryFacet; productIds: Set<string> } {
-  const childResults = node.children.map((child) =>
-    toFacet(child, productIdsByCategoryId),
-  );
-  const productIds = new Set(productIdsByCategoryId.get(node.id) ?? []);
-  for (const child of childResults) {
-    for (const productId of child.productIds) {
-      productIds.add(productId);
-    }
-  }
+function toFacet(node: CategoryDistinctCountNode): CatalogCategoryFacet {
   return {
-    productIds,
-    facet: {
-      id: node.id,
-      slug: node.slug,
-      title: node.title,
-      count: productIds.size,
-      children: childResults.map((child) => child.facet),
-    },
+    id: node.id,
+    slug: node.slug,
+    title: node.title,
+    count: node.count,
+    children: node.children.map(toFacet),
   };
 }

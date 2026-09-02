@@ -16,6 +16,9 @@ import { useOpenSnapshot } from "@/lib/react/use-open-snapshot";
 /** Must match `.animate-side-sheet-panel-*` duration in globals.css. */
 export const SIDE_SHEET_ANIMATION_MS = 300;
 
+/** Tracks nested/overlapping side sheets for page-media suppression. */
+let openSideSheetCount = 0;
+
 type SideSheetProps = {
   open: boolean;
   onClose: () => void;
@@ -79,6 +82,8 @@ export function SideSheet({
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    openSideSheetCount += 1;
+    document.documentElement.dataset.sideSheetOpen = "";
 
     function handleKeyDown(event: KeyboardEvent): void {
       if (event.key === "Escape") onCloseRef.current();
@@ -88,6 +93,10 @@ export function SideSheet({
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
+      openSideSheetCount = Math.max(0, openSideSheetCount - 1);
+      if (openSideSheetCount === 0) {
+        delete document.documentElement.dataset.sideSheetOpen;
+      }
     };
   }, [rendered]);
 
@@ -128,7 +137,8 @@ export function SideSheet({
 
   return createPortal(
     <div
-      className={`fixed inset-0 ${zIndexClassName}`}
+      data-side-sheet=""
+      className={`fixed inset-0 isolate ${zIndexClassName}`}
       role="dialog"
       aria-modal="true"
       aria-label={displayAriaLabel}

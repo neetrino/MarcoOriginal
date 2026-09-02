@@ -18,6 +18,7 @@ function node(
     count: 0,
     imageUrl: null,
     bannerImageUrl: null,
+    drawerTitle: null,
     children,
   };
 }

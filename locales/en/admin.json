@@ -419,6 +419,7 @@
     "sectionMobileFloorHint": "Promo card below the brands block on mobile.",
     "mobileFloorBanner": "Floor banner",
     "uploaded": "Image uploaded to storage and saved. It will show on the storefront shortly.",
+    "removed": "Image removed. The slot is empty on the storefront now.",
     "saved": "Hero banner images saved successfully."
   },
   "reels": {
@@ -640,6 +641,8 @@
     "close": "Close",
     "nameLabel": "Category name",
     "namePlaceholder": "Enter the category name",
+    "slugLabel": "Slug",
+    "slugPlaceholder": "category-slug",
     "parentLabel": "Parent category",
     "parentSearchPlaceholder": "Type to filter the list...",
     "parentSelect": "Select category",
@@ -653,6 +656,8 @@
     "uploadBannerImage": "+ Upload banner image",
     "changeBannerImage": "Change banner image",
     "removeBannerImage": "Remove banner",
+    "drawerTitleLabel": "Drawer title",
+    "drawerTitlePlaceholder": "Promo headline in the categories drawer",
     "status": "Status",
     "statusActive": "Published",
     "statusArchived": "Archived",

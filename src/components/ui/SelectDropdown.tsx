@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { ChevronDown, Search } from "lucide-react";
 
 import { useHoldFlag } from "@/lib/react/use-hold-flag";
 
@@ -10,6 +10,8 @@ export const DROPDOWN_ANIMATION_MS = 280;
 export type SelectDropdownOption = {
   label: string;
   value: string;
+  /** Extra text used only when filtering searchable dropdowns. */
+  searchText?: string;
 };
 
 type SelectDropdownProps = {
@@ -27,6 +29,10 @@ type SelectDropdownProps = {
   /** Size the trigger to the selected label instead of full width. */
   fitContent?: boolean;
   triggerClassName?: string;
+  /** When set with onSearchChange, shows a search field above the options. */
+  searchValue?: string;
+  searchPlaceholder?: string;
+  onSearchChange?: (value: string) => void;
 };
 
 export function SelectDropdown({
@@ -41,18 +47,49 @@ export function SelectDropdown({
   deferChange = true,
   fitContent = false,
   triggerClassName = "",
+  searchValue,
+  searchPlaceholder,
+  onSearchChange,
 }: SelectDropdownProps) {
   const [open, setOpen] = useState(false);
   const elevated = useHoldFlag(open, DROPDOWN_ANIMATION_MS);
   const rootRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const pendingChangeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchValueRef = useRef(searchValue);
+  const onSearchChangeRef = useRef(onSearchChange);
   const listId = useId();
+  const searchable = onSearchChange != null;
+
+  searchValueRef.current = searchValue;
+  onSearchChangeRef.current = onSearchChange;
 
   const selectedLabel =
     options.find((option) => option.value === value)?.label ??
     allLabel ??
     value;
   const isPlaceholder = value === "" && allLabel !== undefined;
+
+  const visibleOptions = useMemo(() => {
+    if (!searchable) return options;
+    const needle = (searchValue ?? "").trim().toLowerCase();
+    if (!needle) return options;
+    return options.filter((option) => {
+      const haystack = `${option.label} ${option.searchText ?? ""}`.toLowerCase();
+      return haystack.includes(needle);
+    });
+  }, [options, searchable, searchValue]);
+
+  function clearSearch(): void {
+    if (searchable && searchValueRef.current) {
+      onSearchChangeRef.current?.("");
+    }
+  }
+
+  function closeDropdown(): void {
+    setOpen(false);
+    clearSearch();
+  }
 
   useEffect(() => {
     return () => {
@@ -67,12 +104,12 @@ export function SelectDropdown({
 
     function handlePointerDown(event: MouseEvent): void {
       if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
+        closeDropdown();
       }
     }
 
     function handleKeyDown(event: KeyboardEvent): void {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") closeDropdown();
     }
 
     document.addEventListener("mousedown", handlePointerDown);
@@ -83,8 +120,13 @@ export function SelectDropdown({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open || !searchable) return;
+    searchRef.current?.focus();
+  }, [open, searchable]);
+
   function selectValue(next: string): void {
-    setOpen(false);
+    closeDropdown();
     if (!deferChange) {
       onValueChange(next);
       return;
@@ -114,7 +156,13 @@ export function SelectDropdown({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (open) {
+            closeDropdown();
+            return;
+          }
+          setOpen(true);
+        }}
       >
         <span
           className={`${fitContent ? "whitespace-nowrap" : "min-w-0 truncate"} ${
@@ -141,27 +189,57 @@ export function SelectDropdown({
         aria-hidden={!open}
       >
         <div className="min-h-0 overflow-hidden">
-          <div
-            id={listId}
-            role="listbox"
-            aria-label={ariaLabel}
-            className="max-h-72 overflow-y-auto rounded-2xl border border-gray-100 bg-white py-2"
-          >
-            {allLabel !== undefined ? (
-              <SelectDropdownOptionRow
-                label={allLabel}
-                selected={value === ""}
-                onSelect={() => selectValue("")}
-              />
+          <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+            {searchable ? (
+              <div className="border-b border-gray-100 p-2">
+                <label className="relative block">
+                  <span className="sr-only">
+                    {searchPlaceholder ?? "Search"}
+                  </span>
+                  <Search
+                    className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
+                    aria-hidden
+                  />
+                  <input
+                    ref={searchRef}
+                    type="search"
+                    value={searchValue ?? ""}
+                    disabled={disabled}
+                    placeholder={searchPlaceholder}
+                    className="h-9 w-full rounded-xl border border-gray-200 bg-white py-0 pr-3 pl-9 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-gray-300"
+                    onChange={(event) => onSearchChange(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        event.stopPropagation();
+                        closeDropdown();
+                      }
+                    }}
+                  />
+                </label>
+              </div>
             ) : null}
-            {options.map((option) => (
-              <SelectDropdownOptionRow
-                key={option.value}
-                label={option.label}
-                selected={value === option.value}
-                onSelect={() => selectValue(option.value)}
-              />
-            ))}
+            <div
+              id={listId}
+              role="listbox"
+              aria-label={ariaLabel}
+              className="max-h-64 overflow-y-auto py-2"
+            >
+              {allLabel !== undefined ? (
+                <SelectDropdownOptionRow
+                  label={allLabel}
+                  selected={value === ""}
+                  onSelect={() => selectValue("")}
+                />
+              ) : null}
+              {visibleOptions.map((option) => (
+                <SelectDropdownOptionRow
+                  key={option.value}
+                  label={option.label}
+                  selected={value === option.value}
+                  onSelect={() => selectValue(option.value)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
