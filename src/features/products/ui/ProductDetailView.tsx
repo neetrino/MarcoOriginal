@@ -82,7 +82,13 @@ export function ProductDetailView({
               compareAtFormatted={compareAtFormatted}
             />
             <div className="mb-8">
-              <ProductShortText html={product.translation.description ?? ""} />
+              <ProductShortText
+                html={
+                  product.translation.subtitle ??
+                  product.translation.description ??
+                  ""
+                }
+              />
             </div>
           </div>
           <ProductPurchaseControls

@@ -60,9 +60,13 @@ export type ProductSpecification = {
 export type LocaleTranslation = {
   title: string;
   slug: string;
+  /** Short HTML blurb (marco.am `subtitle`, including colored spans). */
+  subtitle?: string;
+  /** Short HTML shown on PDP (mirrors subtitle when imported from marco.am). */
   description?: string;
   /** Header mega-menu promo card headline override. */
   drawerTitle?: string;
+  /** Spec table rows (marco.am translation `description` title/value list). */
   specifications?: ProductSpecification[];
   seoTitle?: string;
   seoDescription?: string;

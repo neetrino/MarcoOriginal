@@ -3,6 +3,7 @@ import type { ProductTag } from "@/db/schema";
 type LocaleTranslation = {
   title: string;
   slug: string;
+  subtitle?: string;
   description?: string;
   specifications?: Array<{ title: string; value: string }>;
   seoTitle?: string;

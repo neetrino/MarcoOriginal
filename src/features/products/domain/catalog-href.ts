@@ -59,11 +59,18 @@ function toggleValue(values: readonly string[], value: string): string[] {
 export function withToggledCategory(
   filters: CatalogSearchParams,
   slug: string,
+  options?: { forcePricePresence?: CatalogPricePresence },
 ): CatalogSearchParams {
+  const categorySlugs = toggleValue(filters.categorySlugs, slug);
+  const selecting = categorySlugs.includes(slug);
   return {
     ...filters,
     page: 1,
-    categorySlugs: toggleValue(filters.categorySlugs, slug),
+    categorySlugs,
+    pricePresence:
+      selecting && options?.forcePricePresence
+        ? options.forcePricePresence
+        : filters.pricePresence,
   };
 }
 
