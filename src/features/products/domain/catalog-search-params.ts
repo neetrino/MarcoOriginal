@@ -82,11 +82,17 @@ function parseColorHexes(value: RawSearchValue): string[] {
   return uniqueLimited(hexes, CATALOG_MAX_SELECTED_VALUES);
 }
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/**
+ * Catalog attribute value ids are text PKs: UUIDv7 (admin-created) or
+ * imported marco.am CUID source ids. Keep this aligned with entityIdSchema.
+ */
+const CATALOG_ENTITY_ID_RE =
+  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[a-z][a-z0-9]{20,63})$/i;
 
 function parseAttributeValueIds(value: RawSearchValue): string[] {
-  const ids = readList(value).filter((id) => UUID_RE.test(id));
+  const ids = readList(value).filter(
+    (id) => id.length <= 64 && CATALOG_ENTITY_ID_RE.test(id),
+  );
   return uniqueLimited(ids, CATALOG_MAX_SELECTED_VALUES);
 }
 

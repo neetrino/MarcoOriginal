@@ -4,6 +4,7 @@ import { findCategoryFacetBySlug } from "@/features/products/domain/catalog-cate
 import type { CatalogFacets } from "@/features/products/domain/catalog-filters";
 import {
   withPriceRange,
+  withToggledAttributeValue,
   withToggledBrand,
   withToggledCategory,
 } from "@/features/products/domain/catalog-href";
@@ -29,20 +30,6 @@ export type CatalogFilterCopy = {
   minPrice: string;
   maxPrice: string;
 };
-
-function withToggledAttributeValue(
-  filters: CatalogSearchParams,
-  valueId: string,
-): CatalogSearchParams {
-  const current = filters.attributeValueIds ?? [];
-  return {
-    ...filters,
-    page: 1,
-    attributeValueIds: current.includes(valueId)
-      ? current.filter((id) => id !== valueId)
-      : [...current, valueId],
-  };
-}
 
 type CatalogFilterPanelProps = {
   filters: CatalogSearchParams;

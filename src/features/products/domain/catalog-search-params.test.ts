@@ -29,6 +29,7 @@ describe("parseCatalogSearchParams", () => {
         attr: [
           "11111111-1111-1111-1111-111111111111",
           "22222222-2222-2222-2222-222222222222,bad",
+          "cmobkyy780039765lvlfq7q0y",
         ],
         minPrice: "7",
         maxPrice: "4975",
@@ -45,6 +46,7 @@ describe("parseCatalogSearchParams", () => {
       attributeValueIds: [
         "11111111-1111-1111-1111-111111111111",
         "22222222-2222-2222-2222-222222222222",
+        "cmobkyy780039765lvlfq7q0y",
       ],
       minPrice: 7,
       maxPrice: 4975,
