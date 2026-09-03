@@ -19,6 +19,7 @@ import { CatalogViewModeToggle } from "@/features/products/ui/CatalogViewModeTog
 
 export type CatalogListingToolbarCopy = {
   filtersLabel: string;
+  closeFilters: string;
   sortLabel: string;
   sortDefault: string;
   sortPriceAsc: string;

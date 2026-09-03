@@ -17,8 +17,7 @@ type MobileNavDrawerProps = {
 };
 
 /**
- * Full-viewport mobile navigate menu — pill rows, socials, and call flow
- * matching the marco.am hamburger sheet.
+ * Mobile navigate menu — blurred backdrop with a Marco-branded popup card.
  */
 export function MobileNavDrawer({
   locale,

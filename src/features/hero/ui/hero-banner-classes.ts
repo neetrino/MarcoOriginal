@@ -1,6 +1,6 @@
 /** SuperSudo hero-banner preview frames. */
 export const HERO_DESKTOP_PREVIEW_CLASS = "aspect-[141/68] w-full";
-export const HERO_MOBILE_PREVIEW_CLASS = "aspect-[399/288] w-full";
+export const HERO_MOBILE_PREVIEW_CLASS = "aspect-[1456/613] w-full";
 
 export const HERO_DESKTOP_RADIUS_CLASS = "rounded-[30px]";
 export const HERO_MOBILE_RADIUS_CLASS = "rounded-[24px]";

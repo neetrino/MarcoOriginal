@@ -63,6 +63,7 @@ export default async function ProductsPage({
         currency={currency}
         copy={{
           filtersLabel: dictionary.catalog.filtersLabel,
+          closeFilters: dictionary.catalog.closeFilters,
           categories: dictionary.catalog.categories,
           price: dictionary.catalog.price,
           brands: dictionary.catalog.brands,

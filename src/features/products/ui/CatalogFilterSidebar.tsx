@@ -2,7 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState, type ReactNode } from "react";
+import { X } from "lucide-react";
 
+import {
+  MOBILE_DRAWER_MENU_HEADER_ROW_CLASS,
+  MOBILE_DRAWER_SHEET_CLOSE_BTN_CLASS,
+} from "@/components/layout/mobile-nav-drawer.classes";
 import { SideSheet } from "@/components/ui/SideSheet";
 import { catalogHref } from "@/features/products/domain/catalog-href";
 import type { CatalogFacets } from "@/features/products/domain/catalog-filters";
@@ -48,6 +53,7 @@ export function CatalogFilterSidebar({
 }: CatalogFilterSidebarProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const closeFilters = useCallback(() => setOpen(false), []);
   const onFiltersChange = useCallback(
     (next: CatalogSearchParams) => {
       router.push(catalogHref(locale, next));
@@ -87,12 +93,29 @@ export function CatalogFilterSidebar({
           />
           <SideSheet
             open={open}
-            onClose={() => setOpen(false)}
+            onClose={closeFilters}
             ariaLabel={copy.filtersLabel}
             side="left"
             panelClassName="w-full max-w-sm"
+            closeVariant="none"
+            closeAriaLabel={copy.closeFilters}
           >
-            <div className="h-full overflow-y-auto px-5 py-6">{panel}</div>
+            <div className="flex h-full min-h-0 flex-col px-5 pt-4 pb-6">
+              <div className={MOBILE_DRAWER_MENU_HEADER_ROW_CLASS}>
+                <h2 className="text-base font-bold text-marco-black">
+                  {copy.filtersLabel}
+                </h2>
+                <button
+                  type="button"
+                  onClick={closeFilters}
+                  className={MOBILE_DRAWER_SHEET_CLOSE_BTN_CLASS}
+                  aria-label={copy.closeFilters}
+                >
+                  <X className="h-6 w-6" strokeWidth={2} aria-hidden />
+                </button>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto pt-2">{panel}</div>
+            </div>
           </SideSheet>
           {children}
         </div>
