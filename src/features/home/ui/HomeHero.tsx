@@ -3,6 +3,10 @@ import Image from "next/image";
 import { AppLink } from "@/components/ui/AppLink";
 import { pickHeroLayout } from "@/features/hero/domain/hero-layout";
 import type { StorefrontHeroSlide } from "@/features/hero/application/queries";
+import {
+  HERO_MOBILE_PREVIEW_CLASS,
+  HERO_MOBILE_RADIUS_CLASS,
+} from "@/features/hero/ui/hero-banner-classes";
 import { HomeHeroMobileCarousel } from "@/features/home/ui/HomeHeroMobileCarousel";
 
 const HERO_DESKTOP_IMAGE_SIZES =
@@ -80,7 +84,9 @@ export function HomeHero({ slides }: HomeHeroProps) {
       id="hero"
       className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-11 lg:px-8 lg:pt-10"
     >
-      <div className="relative aspect-[399/288] w-full min-w-0 overflow-hidden rounded-[24px] bg-neutral-950 md:aspect-[141/68] md:rounded-[32px] md:bg-transparent">
+      <div
+        className={`relative min-w-0 overflow-hidden bg-neutral-950 box-border md:aspect-[141/68] md:rounded-[32px] md:bg-transparent ${HERO_MOBILE_PREVIEW_CLASS} ${HERO_MOBILE_RADIUS_CLASS}`}
+      >
         <HomeHeroMobileCarousel images={mobileImages} />
 
         <div className="hidden h-full w-full grid-cols-[minmax(0,1.24fr)_minmax(0,0.96fr)] gap-3 md:grid lg:gap-4">

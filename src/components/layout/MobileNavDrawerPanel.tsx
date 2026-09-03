@@ -2,17 +2,26 @@
 
 import { ChevronRight, X } from "lucide-react";
 
-import { MobileNavDrawerCallFooter } from "@/components/layout/MobileNavDrawerCallFooter";
+import { MobileNavDrawerCallSection } from "@/components/layout/MobileNavDrawerCallSection";
+import { MobileNavDrawerLocaleSwitch } from "@/components/layout/MobileNavDrawerLocaleSwitch";
+import { HeaderSocialCircles } from "@/components/layout/HeaderSocialCircles";
 import {
   buildMobileDrawerNavItems,
   isMobileDrawerNavActive,
 } from "@/components/layout/mobile-nav-drawer-items";
 import {
+  MOBILE_DRAWER_BACKDROP_CLASS,
   MOBILE_DRAWER_CLOSE_BTN_CLASS,
-  MOBILE_DRAWER_CONTENT_MAX_CLASS,
-  MOBILE_DRAWER_MENU_HEADER_ROW_CLASS,
-  MOBILE_DRAWER_PANEL_CLASS,
-  mobileDrawerNavPillClass,
+  MOBILE_DRAWER_FOOTER_CLASS,
+  MOBILE_DRAWER_POPUP_BODY_CLASS,
+  MOBILE_DRAWER_POPUP_CARD_CLASS,
+  MOBILE_DRAWER_POPUP_CLASS,
+  MOBILE_DRAWER_POPUP_SHELL_CLASS,
+  MOBILE_DRAWER_PROFILE_BTN_CLASS,
+  mobileDrawerBackdropStateClass,
+  mobileDrawerCloseButtonStateClass,
+  mobileDrawerNavLinkClass,
+  mobileDrawerPopupStateClass,
 } from "@/components/layout/mobile-nav-drawer.classes";
 import { AppLink } from "@/components/ui/AppLink";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
@@ -23,6 +32,7 @@ type MobileNavDrawerPanelProps = {
   dictionary: Dictionary;
   pathname: string;
   menuId: string;
+  entered: boolean;
   onClose: () => void;
 };
 
@@ -31,12 +41,12 @@ function MobileDrawerNavList({
   dictionary,
   pathname,
   onClose,
-}: Omit<MobileNavDrawerPanelProps, "menuId">) {
+}: Omit<MobileNavDrawerPanelProps, "menuId" | "entered">) {
   const items = buildMobileDrawerNavItems(locale, dictionary);
 
   return (
     <nav
-      className="flex min-h-0 flex-1 flex-col justify-center gap-y-[clamp(0.3rem,1.1dvh,0.5rem)] overflow-y-auto overscroll-y-contain pb-2"
+      className="flex flex-col"
       aria-label={dictionary.nav.navigation}
     >
       {items.map((item) => {
@@ -48,7 +58,7 @@ function MobileDrawerNavList({
             href={item.href}
             prefetchPolicy="intent"
             aria-current={active ? "page" : undefined}
-            className={mobileDrawerNavPillClass(active)}
+            className={mobileDrawerNavLinkClass(active)}
             onClick={onClose}
           >
             <span className="flex min-w-0 flex-1 items-center gap-3.5">
@@ -63,11 +73,60 @@ function MobileDrawerNavList({
   );
 }
 
+function MobileDrawerSocialRow({ dictionary }: { dictionary: Dictionary }) {
+  return (
+    <div className="mb-4 flex justify-center">
+      <HeaderSocialCircles
+        dictionary={dictionary}
+        className="justify-center"
+        menuPlacement="top"
+      />
+    </div>
+  );
+}
+
+function MobileDrawerPopupFooter({
+  locale,
+  dictionary,
+  onClose,
+}: {
+  locale: Locale;
+  dictionary: Dictionary;
+  onClose: () => void;
+}) {
+  return (
+    <footer className={MOBILE_DRAWER_FOOTER_CLASS}>
+      <MobileDrawerSocialRow dictionary={dictionary} />
+      <MobileNavDrawerCallSection
+        locale={locale}
+        dictionary={dictionary}
+        onClose={onClose}
+      />
+      <div className="flex items-end gap-3">
+        <MobileNavDrawerLocaleSwitch
+          locale={locale}
+          languageLabel={dictionary.header.language}
+          onNavigate={onClose}
+        />
+        <AppLink
+          href={`/${locale}/profile`}
+          prefetchPolicy="intent"
+          className={MOBILE_DRAWER_PROFILE_BTN_CLASS}
+          onClick={onClose}
+        >
+          {dictionary.header.profile}
+        </AppLink>
+      </div>
+    </footer>
+  );
+}
+
 export function MobileNavDrawerPanel({
   locale,
   dictionary,
   pathname,
   menuId,
+  entered,
   onClose,
 }: MobileNavDrawerPanelProps) {
   return (
@@ -76,34 +135,40 @@ export function MobileNavDrawerPanel({
       role="dialog"
       aria-modal="true"
       aria-label={dictionary.nav.navigation}
-      className={`pointer-events-auto fixed inset-0 z-[200] min-[1180px]:hidden ${MOBILE_DRAWER_PANEL_CLASS}`}
+      className={`fixed inset-0 z-[600] min-[1180px]:hidden ${entered ? "pointer-events-auto" : "pointer-events-none"}`}
     >
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden px-3 min-[400px]:px-4">
-        <div className="flex min-h-0 flex-1 flex-col gap-y-[clamp(0.35rem,1.2dvh,0.75rem)] pb-2 text-marco-black">
-          <div className={MOBILE_DRAWER_MENU_HEADER_ROW_CLASS}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={MOBILE_DRAWER_CLOSE_BTN_CLASS}
-              aria-label={dictionary.nav.closeMenu}
-            >
-              <X className="h-6 w-6" strokeWidth={2} aria-hidden />
-            </button>
-          </div>
-          <div
-            className={`${MOBILE_DRAWER_CONTENT_MAX_CLASS} flex min-h-0 flex-1 flex-col`}
+      <button
+        type="button"
+        className={`${MOBILE_DRAWER_BACKDROP_CLASS} ${mobileDrawerBackdropStateClass(entered)}`}
+        aria-label={dictionary.nav.closeMenu}
+        onClick={onClose}
+      />
+
+      <div className={MOBILE_DRAWER_POPUP_SHELL_CLASS}>
+        <div className={`${MOBILE_DRAWER_POPUP_CLASS} ${mobileDrawerPopupStateClass(entered)}`}>
+          <button
+            type="button"
+            onClick={onClose}
+            className={`${MOBILE_DRAWER_CLOSE_BTN_CLASS} ${mobileDrawerCloseButtonStateClass(entered)}`}
+            aria-label={dictionary.nav.closeMenu}
           >
-            <MobileDrawerNavList
-              locale={locale}
-              dictionary={dictionary}
-              pathname={pathname}
-              onClose={onClose}
-            />
-            <MobileNavDrawerCallFooter
-              locale={locale}
-              dictionary={dictionary}
-              onClose={onClose}
-            />
+            <X className="h-6 w-6" strokeWidth={2} aria-hidden />
+          </button>
+
+          <div className={MOBILE_DRAWER_POPUP_CARD_CLASS}>
+            <div className={MOBILE_DRAWER_POPUP_BODY_CLASS}>
+              <MobileDrawerNavList
+                locale={locale}
+                dictionary={dictionary}
+                pathname={pathname}
+                onClose={onClose}
+              />
+              <MobileDrawerPopupFooter
+                locale={locale}
+                dictionary={dictionary}
+                onClose={onClose}
+              />
+            </div>
           </div>
         </div>
       </div>

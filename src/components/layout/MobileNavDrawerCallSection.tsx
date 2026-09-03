@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { ChevronRight, Phone } from "lucide-react";
 
-import { HeaderSocialCircles } from "@/components/layout/HeaderSocialCircles";
 import {
   MOBILE_DRAWER_CONTACT_COMPACT_CLASS,
   MOBILE_DRAWER_CTA_COMPACT_CLASS,
@@ -24,7 +23,7 @@ import type { Locale } from "@/lib/i18n/config";
 
 type CallFlow = "idle" | "branches" | "phones";
 
-type MobileNavDrawerCallFooterProps = {
+type MobileNavDrawerCallSectionProps = {
   locale: Locale;
   dictionary: Dictionary;
   onClose: () => void;
@@ -38,22 +37,14 @@ function CallIdle({
   onStart: () => void;
 }) {
   return (
-    <>
-      <p className="text-center text-[11px] font-bold uppercase tracking-wide text-marco-black">
-        {dictionary.contact.title}
-      </p>
-      <p className="text-center text-[10px] leading-snug text-marco-ink/75">
-        {dictionary.contact.callToUs.description}
-      </p>
-      <button
-        type="button"
-        onClick={onStart}
-        className={MOBILE_DRAWER_CTA_COMPACT_CLASS}
-      >
-        <Phone className="h-5 w-5 shrink-0" strokeWidth={2} aria-hidden />
-        <span>{dictionary.contact.drawerCall.cta}</span>
-      </button>
-    </>
+    <button
+      type="button"
+      onClick={onStart}
+      className={MOBILE_DRAWER_CTA_COMPACT_CLASS}
+      aria-label={dictionary.contact.drawerCall.cta}
+    >
+      <Phone className="h-5 w-5 shrink-0" strokeWidth={2} aria-hidden />
+    </button>
   );
 }
 
@@ -154,28 +145,16 @@ function CallPhones({
   );
 }
 
-function DrawerSocialRow({ dictionary }: { dictionary: Dictionary }) {
-  return (
-    <div className="mt-5 flex shrink-0 justify-center pb-2 pt-1 sm:mt-6">
-      <HeaderSocialCircles
-        dictionary={dictionary}
-        className="justify-center"
-        menuPlacement="top"
-      />
-    </div>
-  );
-}
-
-export function MobileNavDrawerCallFooter({
+/** Compact call flow for the mobile menu popup footer. */
+export function MobileNavDrawerCallSection({
   locale,
   dictionary,
   onClose,
-}: MobileNavDrawerCallFooterProps) {
+}: MobileNavDrawerCallSectionProps) {
   const [callFlow, setCallFlow] = useState<CallFlow>("idle");
   const [callBranchId, setCallBranchId] = useState<ContactPhoneSectionId | null>(
     null,
   );
-  const year = new Date().getFullYear();
   const sections = buildContactPhoneSections(
     buildContactLocations(dictionary.contact.locations),
     dictionary.contact.deliveryPhonesLabel,
@@ -186,42 +165,36 @@ export function MobileNavDrawerCallFooter({
       : null;
 
   return (
-    <footer className="mt-auto flex shrink-0 flex-col pb-1">
-      <DrawerSocialRow dictionary={dictionary} />
-      <div className="w-full space-y-3 border-t border-marco-black/10 px-0 pb-2 pt-3">
-        {callFlow === "idle" ? (
-          <CallIdle
-            dictionary={dictionary}
-            onStart={() => setCallFlow("branches")}
-          />
-        ) : null}
-        {callFlow === "branches" ? (
-          <CallBranches
-            sections={sections}
-            dictionary={dictionary}
-            onSelect={(id) => {
-              setCallBranchId(id);
-              setCallFlow("phones");
-            }}
-            onCancel={() => setCallFlow("idle")}
-          />
-        ) : null}
-        {selectedSection ? (
-          <CallPhones
-            locale={locale}
-            section={selectedSection}
-            dictionary={dictionary}
-            onClose={onClose}
-            onChangeBranch={() => {
-              setCallBranchId(null);
-              setCallFlow("branches");
-            }}
-          />
-        ) : null}
-      </div>
-      <div className="border-t border-marco-black/10 py-3 text-center text-[10px] font-medium uppercase tracking-wide text-marco-ink/60">
-        {dictionary.nav.menuCopyright.replace("{year}", String(year))}
-      </div>
-    </footer>
+    <div className="mb-4 space-y-3">
+      {callFlow === "idle" ? (
+        <CallIdle
+          dictionary={dictionary}
+          onStart={() => setCallFlow("branches")}
+        />
+      ) : null}
+      {callFlow === "branches" ? (
+        <CallBranches
+          sections={sections}
+          dictionary={dictionary}
+          onSelect={(id) => {
+            setCallBranchId(id);
+            setCallFlow("phones");
+          }}
+          onCancel={() => setCallFlow("idle")}
+        />
+      ) : null}
+      {selectedSection ? (
+        <CallPhones
+          locale={locale}
+          section={selectedSection}
+          dictionary={dictionary}
+          onClose={onClose}
+          onChangeBranch={() => {
+            setCallBranchId(null);
+            setCallFlow("branches");
+          }}
+        />
+      ) : null}
+    </div>
   );
 }

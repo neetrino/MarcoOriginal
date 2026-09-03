@@ -83,11 +83,13 @@ function SocialCircleItem({
   iconClass,
   surfaceClass,
   menuPlacement,
+  menuAlign,
 }: {
   item: BrandSocialLink;
   iconClass: string;
   surfaceClass: string;
   menuPlacement: "bottom" | "top";
+  menuAlign: "left" | "right";
 }) {
   const { Icon } = item;
 
@@ -99,6 +101,7 @@ function SocialCircleItem({
         triggerClassName={surfaceClass}
         profiles={item.profiles}
         menuPlacement={menuPlacement}
+        menuAlign={menuAlign}
       />
     </div>
   );
@@ -128,13 +131,14 @@ export function HeaderSocialCircles({
       role="list"
       aria-label={dictionary.header.socialLinks}
     >
-      {items.map((item) => (
+      {items.map((item, index) => (
         <SocialCircleItem
           key={item.label}
           item={item}
           iconClass={iconClass}
           surfaceClass={surfaceClass}
           menuPlacement={menuPlacement}
+          menuAlign={index < Math.ceil(items.length / 2) ? "left" : "right"}
         />
       ))}
     </div>

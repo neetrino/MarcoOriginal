@@ -7,6 +7,7 @@
   "pageStatus": "Page {page} of {total}",
   "brandsEmpty": "No brands yet.",
   "filtersLabel": "Filters",
+  "closeFilters": "Close filters",
   "categories": "Categories",
   "price": "Price",
   "brands": "Brands",
