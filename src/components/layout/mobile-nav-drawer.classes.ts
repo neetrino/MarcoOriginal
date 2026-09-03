@@ -18,7 +18,7 @@ export const MOBILE_DRAWER_POPUP_BODY_CLASS =
   "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain px-6 pb-6 pt-8";
 
 export const MOBILE_DRAWER_CLOSE_BTN_CLASS =
-  "absolute right-0 top-0 z-20 flex h-[3.25rem] w-[3.25rem] -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-marco-yellow text-marco-black shadow-[0_8px_24px_rgba(0,0,0,0.14)] transition-[filter,transform,opacity] duration-200 hover:brightness-95 active:scale-95";
+  "absolute right-1 top-0 z-20 flex h-[3.25rem] w-[3.25rem] -translate-y-1/2 translate-x-[40%] items-center justify-center rounded-full bg-marco-yellow text-marco-black shadow-[0_8px_24px_rgba(0,0,0,0.14)] transition-[filter,transform,opacity] duration-200 hover:brightness-95 active:scale-95";
 
 export function mobileDrawerBackdropStateClass(entered: boolean): string {
   return entered ? "opacity-100" : "opacity-0";
