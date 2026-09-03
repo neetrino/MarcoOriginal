@@ -13,6 +13,7 @@ import {
   HEADER_CATEGORY_PANEL_WIDTH_CLASS,
   HEADER_CATEGORY_SURFACE_CLASS,
 } from "@/features/categories/ui/header-category-menu.classes";
+import { resolveHeaderCategoryPromo } from "@/features/categories/domain/header-category-promo";
 import { catalogHref } from "@/features/products/domain/catalog-href";
 import { EMPTY_CATALOG_SEARCH } from "@/features/products/domain/catalog-search-params";
 import type { Locale } from "@/lib/i18n/config";
@@ -56,9 +57,13 @@ export function HeaderCategoriesDrawer({
   }, [categories, selectedId]);
 
   function hrefFor(slug: string): string {
+    const rootIsHardware =
+      selected != null &&
+      resolveHeaderCategoryPromo(selected.slug, selected.title) === "hardware";
     return catalogHref(locale, {
       ...EMPTY_CATALOG_SEARCH,
       categorySlugs: [slug],
+      ...(rootIsHardware ? { pricePresence: "without" as const } : {}),
     });
   }
 

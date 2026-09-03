@@ -1,5 +1,6 @@
 "use client";
 
+import { findCategoryFacetBySlug } from "@/features/products/domain/catalog-category-facet-counts";
 import type { CatalogFacets } from "@/features/products/domain/catalog-filters";
 import {
   withPriceRange,
@@ -75,9 +76,14 @@ export function CatalogFilterPanel({
           selectedSlugs={selectedCategories}
           expandLabel={copy.expandCategory}
           collapseLabel={copy.collapseCategory}
-          onToggle={(slug) =>
-            onFiltersChange(withToggledCategory(filters, slug))
-          }
+          onToggle={(slug) => {
+            const facet = findCategoryFacetBySlug(facets.categories, slug);
+            onFiltersChange(
+              withToggledCategory(filters, slug, {
+                forcePricePresence: facet?.forcePricePresence,
+              }),
+            );
+          }}
         />
       </section>
       <section className={CATALOG_FILTER_SECTION}>

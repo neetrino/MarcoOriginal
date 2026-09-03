@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { buildCategoryTree } from "@/features/categories/domain/category-tree";
 import {
   buildCategoryFacetsWithDistinctCounts,
+  findCategoryFacetBySlug,
+  mergeCategoryFacetsByPricePresence,
   pruneEmptyCategoryFacets,
 } from "@/features/products/domain/catalog-category-facet-counts";
 
@@ -102,5 +104,129 @@ describe("pruneEmptyCategoryFacets", () => {
         children: [],
       },
     ]);
+  });
+});
+
+describe("mergeCategoryFacetsByPricePresence", () => {
+  it("keeps alternate-only categories and forces the other price mode", () => {
+    const merged = mergeCategoryFacetsByPricePresence(
+      [
+        {
+          id: "priced",
+          slug: "priced",
+          title: "Priced",
+          count: 4,
+          children: [],
+        },
+      ],
+      [
+        {
+          id: "hardware",
+          slug: "hardware",
+          title: "Hardware",
+          count: 12,
+          children: [
+            {
+              id: "lam",
+              slug: "lam",
+              title: "Laminate",
+              count: 5,
+              children: [],
+            },
+          ],
+        },
+      ],
+      "without",
+    );
+
+    expect(merged).toEqual([
+      {
+        id: "priced",
+        slug: "priced",
+        title: "Priced",
+        count: 4,
+        children: [],
+      },
+      {
+        id: "hardware",
+        slug: "hardware",
+        title: "Hardware",
+        count: 12,
+        forcePricePresence: "without",
+        children: [
+          {
+            id: "lam",
+            slug: "lam",
+            title: "Laminate",
+            count: 5,
+            forcePricePresence: "without",
+            children: [],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("prefers active-mode count when both modes have products", () => {
+    const merged = mergeCategoryFacetsByPricePresence(
+      [
+        {
+          id: "shared",
+          slug: "shared",
+          title: "Shared",
+          count: 3,
+          children: [],
+        },
+      ],
+      [
+        {
+          id: "shared",
+          slug: "shared",
+          title: "Shared",
+          count: 9,
+          children: [],
+        },
+      ],
+      "without",
+    );
+
+    expect(merged).toEqual([
+      {
+        id: "shared",
+        slug: "shared",
+        title: "Shared",
+        count: 3,
+        children: [],
+      },
+    ]);
+  });
+});
+
+describe("findCategoryFacetBySlug", () => {
+  it("finds nested facets", () => {
+    const found = findCategoryFacetBySlug(
+      [
+        {
+          id: "root",
+          slug: "root",
+          title: "Root",
+          count: 1,
+          children: [
+            {
+              id: "child",
+              slug: "child",
+              title: "Child",
+              count: 1,
+              forcePricePresence: "without",
+              children: [],
+            },
+          ],
+        },
+      ],
+      "child",
+    );
+
+    expect(found?.id).toBe("child");
+    expect(found?.forcePricePresence).toBe("without");
   });
 });

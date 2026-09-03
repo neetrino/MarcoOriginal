@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 import { getDb } from "@/db/client";
@@ -16,7 +16,7 @@ import {
 import { buildCategoryTree } from "@/features/categories/domain/category-tree";
 import {
   buildCategoryFacetsWithDistinctCounts,
-  pruneEmptyCategoryFacets,
+  mergeCategoryFacetsByPricePresence,
 } from "@/features/products/domain/catalog-category-facet-counts";
 import type {
   CatalogAttributeFacet,
@@ -43,12 +43,6 @@ const activeProductWhere = and(
   eq(products.status, "ACTIVE"),
   isNull(products.deletedAt),
 );
-
-function productPricePresenceWhere(pricePresence: CatalogPricePresence) {
-  return pricePresence === "without"
-    ? eq(products.priceAmount, 0)
-    : gt(products.priceAmount, 0);
-}
 
 function translationFor(
   translations: { hy?: LocaleTranslation; en?: LocaleTranslation; ru?: LocaleTranslation },
@@ -102,13 +96,13 @@ async function loadCategoryFacets(
           .select({
             categoryId: productCategories.categoryId,
             productId: productCategories.productId,
+            priceAmount: products.priceAmount,
           })
           .from(productCategories)
           .innerJoin(products, eq(products.id, productCategories.productId))
           .where(
             and(
               activeProductWhere,
-              productPricePresenceWhere(pricePresence),
               inArray(
                 productCategories.categoryId,
                 mapped.map((row) => row.id),
@@ -116,11 +110,30 @@ async function loadCategoryFacets(
             ),
           );
 
-  return pruneEmptyCategoryFacets(
-    buildCategoryFacetsWithDistinctCounts(
-      buildCategoryTree(mapped),
-      groupProductIdsByCategory(linkRows),
-    ),
+  const withPriceRows = linkRows.filter((row) => row.priceAmount > 0);
+  const withoutPriceRows = linkRows.filter((row) => row.priceAmount === 0);
+  const tree = buildCategoryTree(mapped);
+  const withFacets = buildCategoryFacetsWithDistinctCounts(
+    tree,
+    groupProductIdsByCategory(withPriceRows),
+  );
+  const withoutFacets = buildCategoryFacetsWithDistinctCounts(
+    tree,
+    groupProductIdsByCategory(withoutPriceRows),
+  );
+
+  if (pricePresence === "without") {
+    return mergeCategoryFacetsByPricePresence(
+      withoutFacets,
+      withFacets,
+      "with",
+    );
+  }
+
+  return mergeCategoryFacetsByPricePresence(
+    withFacets,
+    withoutFacets,
+    "without",
   );
 }
 
@@ -264,7 +277,8 @@ async function loadCatalogFacets(
 
 /**
  * Storefront filter facets: categories, brands, colors, and AMD price bounds.
- * Category counts match the active priced/unpriced listing mode.
+ * Category counts prefer the active priced/unpriced mode; categories that only
+ * exist in the other mode stay visible and switch mode on select.
  */
 export async function getCatalogFacets(
   locale: Locale,

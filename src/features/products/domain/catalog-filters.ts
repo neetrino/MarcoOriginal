@@ -1,9 +1,16 @@
+import type { CatalogPricePresence } from "@/features/products/domain/catalog-sort";
+
 export type CatalogCategoryFacet = {
   id: string;
   slug: string;
   title: string;
   count: number;
   children: CatalogCategoryFacet[];
+  /**
+   * When the category has no products in the active price mode but has some
+   * in the other mode, selecting it should switch listing to that mode.
+   */
+  forcePricePresence?: CatalogPricePresence;
 };
 
 export type CatalogBrandFacet = {
