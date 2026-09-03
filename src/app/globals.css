@@ -346,3 +346,12 @@ html[data-side-sheet-open] video {
 html[data-side-sheet-open] [data-side-sheet] video {
   visibility: visible !important;
 }
+
+/**
+ * Mobile nav drawer: prevent hardware-composited video overlays (reels/controls)
+ * from painting above the popup card.
+ */
+html[data-mobile-nav-open] [data-home-reels],
+html[data-mobile-nav-open] video {
+  visibility: hidden !important;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { Menu } from "lucide-react";
 
@@ -16,6 +16,8 @@ type MobileNavDrawerProps = {
   triggerClassName?: string;
 };
 
+const MOBILE_DRAWER_ANIMATION_MS = 320;
+
 /**
  * Mobile navigate menu — blurred backdrop with a Marco-branded popup card.
  */
@@ -27,6 +29,33 @@ export function MobileNavDrawer({
   const menuId = useId();
   const mounted = useIsClient();
   const { open, pathname, closeMenu, toggleMenu } = useMobileNavDrawer();
+  const [rendered, setRendered] = useState(open);
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setRendered(true);
+      const enterTimer = setTimeout(() => setEntered(true), 24);
+      return () => clearTimeout(enterTimer);
+    }
+
+    setEntered(false);
+    const timer = setTimeout(() => setRendered(false), MOBILE_DRAWER_ANIMATION_MS);
+    return () => clearTimeout(timer);
+  }, [open]);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    if (open) {
+      document.documentElement.setAttribute("data-mobile-nav-open", "true");
+      return () => {
+        document.documentElement.removeAttribute("data-mobile-nav-open");
+      };
+    }
+
+    document.documentElement.removeAttribute("data-mobile-nav-open");
+  }, [mounted, open]);
 
   return (
     <>
@@ -44,13 +73,14 @@ export function MobileNavDrawer({
         <Menu className="h-6 w-6" strokeWidth={2.25} aria-hidden="true" />
       </button>
 
-      {mounted && open
+      {mounted && rendered
         ? createPortal(
             <MobileNavDrawerPanel
               locale={locale}
               dictionary={dictionary}
               pathname={pathname}
               menuId={menuId}
+              entered={entered}
               onClose={closeMenu}
             />,
             document.body,

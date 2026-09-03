@@ -18,7 +18,10 @@ import {
   MOBILE_DRAWER_POPUP_CLASS,
   MOBILE_DRAWER_POPUP_SHELL_CLASS,
   MOBILE_DRAWER_PROFILE_BTN_CLASS,
+  mobileDrawerBackdropStateClass,
+  mobileDrawerCloseButtonStateClass,
   mobileDrawerNavLinkClass,
+  mobileDrawerPopupStateClass,
 } from "@/components/layout/mobile-nav-drawer.classes";
 import { AppLink } from "@/components/ui/AppLink";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
@@ -29,6 +32,7 @@ type MobileNavDrawerPanelProps = {
   dictionary: Dictionary;
   pathname: string;
   menuId: string;
+  entered: boolean;
   onClose: () => void;
 };
 
@@ -37,7 +41,7 @@ function MobileDrawerNavList({
   dictionary,
   pathname,
   onClose,
-}: Omit<MobileNavDrawerPanelProps, "menuId">) {
+}: Omit<MobileNavDrawerPanelProps, "menuId" | "entered">) {
   const items = buildMobileDrawerNavItems(locale, dictionary);
 
   return (
@@ -122,6 +126,7 @@ export function MobileNavDrawerPanel({
   dictionary,
   pathname,
   menuId,
+  entered,
   onClose,
 }: MobileNavDrawerPanelProps) {
   return (
@@ -130,21 +135,21 @@ export function MobileNavDrawerPanel({
       role="dialog"
       aria-modal="true"
       aria-label={dictionary.nav.navigation}
-      className="fixed inset-0 z-[200] min-[1180px]:hidden"
+      className={`fixed inset-0 z-[600] min-[1180px]:hidden ${entered ? "pointer-events-auto" : "pointer-events-none"}`}
     >
       <button
         type="button"
-        className={MOBILE_DRAWER_BACKDROP_CLASS}
+        className={`${MOBILE_DRAWER_BACKDROP_CLASS} ${mobileDrawerBackdropStateClass(entered)}`}
         aria-label={dictionary.nav.closeMenu}
         onClick={onClose}
       />
 
       <div className={MOBILE_DRAWER_POPUP_SHELL_CLASS}>
-        <div className={MOBILE_DRAWER_POPUP_CLASS}>
+        <div className={`${MOBILE_DRAWER_POPUP_CLASS} ${mobileDrawerPopupStateClass(entered)}`}>
           <button
             type="button"
             onClick={onClose}
-            className={MOBILE_DRAWER_CLOSE_BTN_CLASS}
+            className={`${MOBILE_DRAWER_CLOSE_BTN_CLASS} ${mobileDrawerCloseButtonStateClass(entered)}`}
             aria-label={dictionary.nav.closeMenu}
           >
             <X className="h-6 w-6" strokeWidth={2} aria-hidden />

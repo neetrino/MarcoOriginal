@@ -3,13 +3,13 @@
  */
 
 export const MOBILE_DRAWER_BACKDROP_CLASS =
-  "absolute inset-0 bg-marco-black/20 backdrop-blur-[6px]";
+  "absolute inset-0 bg-marco-black/20 backdrop-blur-[6px] transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 export const MOBILE_DRAWER_POPUP_SHELL_CLASS =
   "pointer-events-none absolute inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] top-28 flex justify-center overflow-visible px-5 pt-3 sm:px-6";
 
 export const MOBILE_DRAWER_POPUP_CLASS =
-  "pointer-events-auto relative w-full max-w-[22rem] min-w-0";
+  "pointer-events-auto relative w-full max-w-[22rem] min-w-0 transform-gpu will-change-transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 export const MOBILE_DRAWER_POPUP_CARD_CLASS =
   "flex max-h-full min-w-0 flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.16)] ring-1 ring-marco-black/5";
@@ -18,7 +18,21 @@ export const MOBILE_DRAWER_POPUP_BODY_CLASS =
   "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain px-6 pb-6 pt-8";
 
 export const MOBILE_DRAWER_CLOSE_BTN_CLASS =
-  "absolute right-0 top-0 z-20 flex h-[3.25rem] w-[3.25rem] -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-marco-yellow text-marco-black shadow-[0_8px_24px_rgba(0,0,0,0.14)] transition-[filter,transform] duration-200 hover:brightness-95 active:scale-95";
+  "absolute right-0 top-0 z-20 flex h-[3.25rem] w-[3.25rem] -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-marco-yellow text-marco-black shadow-[0_8px_24px_rgba(0,0,0,0.14)] transition-[filter,transform,opacity] duration-200 hover:brightness-95 active:scale-95";
+
+export function mobileDrawerBackdropStateClass(entered: boolean): string {
+  return entered ? "opacity-100" : "opacity-0";
+}
+
+export function mobileDrawerPopupStateClass(entered: boolean): string {
+  return entered
+    ? "translate-y-0 scale-100 opacity-100"
+    : "translate-y-8 scale-95 opacity-0";
+}
+
+export function mobileDrawerCloseButtonStateClass(entered: boolean): string {
+  return entered ? "opacity-100" : "scale-95 opacity-0";
+}
 
 /** Close control for full-height sheets (catalog filters, etc.). */
 export const MOBILE_DRAWER_SHEET_CLOSE_BTN_CLASS =

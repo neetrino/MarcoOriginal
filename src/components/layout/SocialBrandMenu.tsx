@@ -15,6 +15,7 @@ type SocialBrandMenuProps = {
   triggerClassName: string;
   profiles: readonly SocialBrandProfile[];
   menuPlacement?: "bottom" | "top";
+  menuAlign?: "left" | "right";
 };
 
 export function SocialBrandMenu({
@@ -23,6 +24,7 @@ export function SocialBrandMenu({
   triggerClassName,
   profiles,
   menuPlacement = "bottom",
+  menuAlign = "left",
 }: SocialBrandMenuProps) {
   return (
     <IconDropdown
@@ -30,7 +32,7 @@ export function SocialBrandMenu({
       trigger={trigger}
       triggerClassName={`${triggerClassName} cursor-pointer p-0`}
       menuPlacement={menuPlacement}
-      menuAlign="left"
+      menuAlign={menuAlign}
       menuSurfaceClass={MENU_SURFACE_CLASS}
       className="shrink-0"
     >
