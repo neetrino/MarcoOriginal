@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
 import { resolveHeaderCategoryPromo } from "@/features/categories/domain/header-category-promo";
+import { orderMobileCatalogSections } from "@/features/categories/domain/mobile-catalog-card";
 import { MobileCatalogBrowseCards } from "@/features/categories/ui/MobileCatalogBrowseCards";
 import { MobileCatalogBrowseSearch } from "@/features/categories/ui/MobileCatalogBrowseSearch";
 import { MobileCatalogBrowseSection } from "@/features/categories/ui/MobileCatalogBrowseSection";
@@ -25,7 +26,8 @@ export type MobileCatalogBrowseCopy = {
   title: string;
   close: string;
   allCategories: string;
-  more: string;
+  expandCategory: string;
+  collapseCategory: string;
   searchPlaceholder: string;
   searchSubmit: string;
 };
@@ -47,6 +49,7 @@ export function MobileCatalogBrowseDrawer({
 }: MobileCatalogBrowseDrawerProps) {
   const mounted = useIsClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const sectionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -66,11 +69,22 @@ export function MobileCatalogBrowseDrawer({
     if (!open) setSelectedId(null);
   }, [open]);
 
-  const visibleSections = useMemo(() => {
-    if (selectedId === null) return categories;
-    const selected = categories.find((item) => item.id === selectedId);
-    return selected ? [selected] : categories;
-  }, [categories, selectedId]);
+  const visibleSections = useMemo(
+    () => orderMobileCatalogSections(categories, selectedId),
+    [categories, selectedId],
+  );
+
+  useEffect(() => {
+    if (!open || selectedId === null) return;
+    const sections = sectionsRef.current;
+    if (!sections) return;
+    const scroller = sections.closest("[data-mobile-browse-scroll]");
+    if (!(scroller instanceof HTMLElement)) return;
+    const nextTop =
+      scroller.scrollTop +
+      (sections.getBoundingClientRect().top - scroller.getBoundingClientRect().top);
+    scroller.scrollTo({ top: Math.max(0, nextTop), behavior: "smooth" });
+  }, [open, selectedId]);
 
   function hrefFor(slug: string, root?: HeaderCategoryNode): string {
     const rootIsHardware =
@@ -129,13 +143,14 @@ export function MobileCatalogBrowseDrawer({
         />
 
         {visibleSections.length > 0 ? (
-          <div className={MOBILE_BROWSE_SECTIONS_CLASS}>
+          <div ref={sectionsRef} className={MOBILE_BROWSE_SECTIONS_CLASS}>
             {visibleSections.map((category) => (
               <MobileCatalogBrowseSection
                 key={category.id}
                 category={category}
                 hrefFor={(slug) => hrefFor(slug, category)}
-                moreLabel={copy.more}
+                expandLabel={copy.expandCategory}
+                collapseLabel={copy.collapseCategory}
                 onNavigate={onClose}
               />
             ))}

@@ -46,16 +46,18 @@ export const MOBILE_BROWSE_SECTION_TITLE_CLASS =
   "shrink-0 text-lg font-semibold tracking-[0.18px] text-black";
 
 export const MOBILE_BROWSE_SECTION_LIST_CLASS =
-  "mt-5 flex min-h-0 max-h-[479px] flex-1 flex-col gap-2 overflow-y-auto overscroll-y-contain pr-1";
+  "mt-5 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-y-contain pr-1";
 
 export const MOBILE_BROWSE_ROW_CLASS =
-  "flex h-[54px] shrink-0 items-center gap-1 rounded-2xl px-[7px] transition-colors hover:bg-black/[0.03] active:bg-black/[0.05]";
+  "flex h-[54px] shrink-0 items-center gap-1 rounded-2xl pr-[7px] transition-colors hover:bg-black/[0.03] active:bg-black/[0.05]";
 
 export const MOBILE_BROWSE_ROW_LABEL_CLASS =
-  "min-w-0 truncate text-base tracking-[0.16px] text-black/45";
+  "min-w-0 flex-1 truncate text-base tracking-[0.16px] text-black/45";
 
-export const MOBILE_BROWSE_MORE_BTN_CLASS =
-  "mx-auto mt-auto flex h-[54px] w-full max-w-[312px] shrink-0 items-center justify-center rounded-[36px] bg-[#909090] text-base font-medium tracking-[0.16px] text-white transition-[filter] hover:brightness-95 active:brightness-90";
+export const MOBILE_BROWSE_ROW_EXPAND_CLASS =
+  "flex size-9 shrink-0 items-center justify-center rounded-full text-black/45 transition-colors hover:bg-black/[0.05] hover:text-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marco-slate/25";
+
+export const MOBILE_BROWSE_NESTED_LIST_CLASS = "flex flex-col gap-1";
 
 export function mobileBrowseCardSurfaceClass(selected: boolean): string {
   return selected ? "bg-marco-yellow" : "bg-[#ececec]";

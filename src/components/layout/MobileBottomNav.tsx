@@ -287,7 +287,8 @@ export function MobileBottomNav({
           title: dictionary.catalog.mobileBrowseTitle,
           close: dictionary.catalog.closeBrowse,
           allCategories: dictionary.catalog.allCategories,
-          more: dictionary.catalog.more,
+          expandCategory: dictionary.catalog.expandCategory,
+          collapseCategory: dictionary.catalog.collapseCategory,
           searchPlaceholder: dictionary.catalog.mobileBrowseSearchPlaceholder,
           searchSubmit: dictionary.header.searchSubmit,
         }}

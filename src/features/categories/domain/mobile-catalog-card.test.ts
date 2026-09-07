@@ -2,10 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
 import {
-  flattenMobileCatalogSubcategories,
   mobileCatalogCardImageUrl,
+  orderMobileCatalogSections,
   resolveMobileCatalogCardVisual,
-  visibleMobileCatalogSubcategories,
 } from "@/features/categories/domain/mobile-catalog-card";
 
 function node(
@@ -56,42 +55,33 @@ describe("mobileCatalogCardImageUrl", () => {
   });
 });
 
-describe("flattenMobileCatalogSubcategories", () => {
-  it("returns depth-first descendants with real titles", () => {
-    const root = node({
-      id: "root",
-      slug: "kahovyq",
-      title: "Կահույք",
-      children: [
-        node({
-          id: "soft",
-          slug: "papuk",
-          title: "Փափուկ կահույք",
-          children: [
-            node({ id: "sofa", slug: "bnakaran", title: "Բազմոցներ" }),
-          ],
-        }),
-        node({ id: "bed", slug: "nnj", title: "Ննջասենյակի կահույք" }),
-      ],
-    });
-
-    expect(
-      flattenMobileCatalogSubcategories(root).map((item) => item.title),
-    ).toEqual(["Փափուկ կահույք", "Բազմոցներ", "Ննջասենյակի կահույք"]);
+describe("orderMobileCatalogSections", () => {
+  const furniture = node({ id: "f", slug: "kahovyq", title: "Կահույք" });
+  const hardware = node({
+    id: "h",
+    slug: "kahovyqi-patrastman-paraganer",
+    title: "Կահույքի պատրաստման պարագաներ",
   });
-});
+  const electronics = node({
+    id: "e",
+    slug: "texnika-ev-elektronika",
+    title: "Տեխնիկա և էլեկտրոնիկա",
+  });
+  const roots = [furniture, hardware, electronics];
 
-describe("visibleMobileCatalogSubcategories", () => {
-  it("caps collapsed rows and returns all when expanded", () => {
-    const entries = Array.from({ length: 10 }, (_, index) =>
-      node({
-        id: `c-${index}`,
-        slug: `c-${index}`,
-        title: `Cat ${index}`,
-      }),
-    );
+  it("keeps original order when All is selected", () => {
+    expect(orderMobileCatalogSections(roots, null).map((item) => item.id)).toEqual([
+      "f",
+      "h",
+      "e",
+    ]);
+  });
 
-    expect(visibleMobileCatalogSubcategories(entries, false)).toHaveLength(8);
-    expect(visibleMobileCatalogSubcategories(entries, true)).toHaveLength(10);
+  it("pins the selected category to the first section slot", () => {
+    expect(orderMobileCatalogSections(roots, "h").map((item) => item.id)).toEqual([
+      "h",
+      "f",
+      "e",
+    ]);
   });
 });

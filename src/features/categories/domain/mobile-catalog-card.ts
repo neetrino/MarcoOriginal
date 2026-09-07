@@ -4,18 +4,12 @@ import {
 } from "@/features/categories/domain/header-category-promo";
 import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
 
-/** Visible subcategory rows before the “More” control (Figma list height). */
-export const MOBILE_CATALOG_SUBCATEGORY_PREVIEW = 8;
-
 export const MOBILE_CATALOG_CARD_IMAGES = {
   all: "/assets/mobile-catalog/card-all.webp",
   furniture: "/assets/mobile-catalog/card-furniture.webp",
   hardware: "/assets/mobile-catalog/card-hardware.webp",
   electronics: "/assets/mobile-catalog/card-electronics.webp",
 } as const;
-
-export const MOBILE_CATALOG_SUBCATEGORY_ICON =
-  "/assets/mobile-catalog/subcategory-icon.svg";
 
 export type MobileCatalogCardVisual =
   | "all"
@@ -52,34 +46,17 @@ function matchesAlias(value: string, aliases: readonly string[]): boolean {
 }
 
 /**
- * Depth-first list of every nested subcategory under a root
- * (excludes the root itself). Used by the mobile browse section rows.
+ * Puts the selected root category section first (pin to top).
+ * When `selectedId` is null (“All”), returns the original order.
  */
-export function flattenMobileCatalogSubcategories(
-  root: HeaderCategoryNode,
+export function orderMobileCatalogSections(
+  categories: readonly HeaderCategoryNode[],
+  selectedId: string | null,
 ): HeaderCategoryNode[] {
-  const rows: HeaderCategoryNode[] = [];
-
-  function walk(nodes: readonly HeaderCategoryNode[]): void {
-    for (const node of nodes) {
-      rows.push(node);
-      if (node.children.length > 0) {
-        walk(node.children);
-      }
-    }
-  }
-
-  walk(root.children);
-  return rows;
-}
-
-/** Rows shown before tapping “More”; expanded lists return the full set. */
-export function visibleMobileCatalogSubcategories(
-  entries: readonly HeaderCategoryNode[],
-  expanded: boolean,
-): HeaderCategoryNode[] {
-  if (expanded) return [...entries];
-  return entries.slice(0, MOBILE_CATALOG_SUBCATEGORY_PREVIEW);
+  if (selectedId === null) return [...categories];
+  const selected = categories.find((item) => item.id === selectedId);
+  if (!selected) return [...categories];
+  return [selected, ...categories.filter((item) => item.id !== selectedId)];
 }
 
 /**
