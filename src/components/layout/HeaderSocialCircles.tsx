@@ -118,7 +118,7 @@ export function HeaderSocialCircles({
     variant === "header"
       ? HEADER_SOCIAL_CIRCLE_SIZE_CLASS
       : FOOTER_SOCIAL_CIRCLE_SIZE_CLASS;
-  const gapClass = variant === "header" ? "gap-6 min-[1367px]:gap-4" : "gap-4";
+  const gapClass = variant === "header" ? "gap-2.5 min-[1367px]:gap-2" : "gap-3";
   const iconClass =
     variant === "header"
       ? "h-5 w-5 min-[1367px]:h-3.5 min-[1367px]:w-3.5"

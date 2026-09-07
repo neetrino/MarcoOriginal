@@ -4,11 +4,6 @@ import type {
   HomeFloorSlotKey,
 } from "@/features/hero/domain/hero-layout";
 import {
-  HOME_APP_BANNER_DEFAULT_PATH,
-  HOME_PROMO_LEFT_DEFAULT_PATH,
-  HOME_PROMO_RIGHT_DEFAULT_PATH,
-} from "@/features/hero/domain/home-floor-defaults";
-import {
   APP_DOWNLOAD_PREVIEW_CLASS,
   APP_DOWNLOAD_RADIUS_CLASS,
   MOBILE_FLOOR_PREVIEW_CLASS,
@@ -68,7 +63,7 @@ export function AdminHeroDesktopFloorSections({
       </section>
       <HeroBannerImageField
         label={copy.appDownloadBanner}
-        currentUrl={appDownloadUrl ?? HOME_APP_BANNER_DEFAULT_PATH}
+        currentUrl={appDownloadUrl}
         uploading={uploadingSlot === "appDownload"}
         disabled={isBusy || !floor.appDownload}
         previewClassName={APP_DOWNLOAD_PREVIEW_CLASS}
@@ -88,7 +83,7 @@ export function AdminHeroDesktopFloorSections({
           <div className="min-w-0">
             <HeroBannerImageField
               label={copy.promoCardLeft}
-              currentUrl={promoLeftUrl ?? HOME_PROMO_LEFT_DEFAULT_PATH}
+              currentUrl={promoLeftUrl}
               uploading={uploadingSlot === "promoLeft"}
               disabled={isBusy || !floor.promoLeft}
               previewClassName={PROMO_LEFT_PREVIEW_CLASS}
@@ -104,7 +99,7 @@ export function AdminHeroDesktopFloorSections({
           <div className="relative min-h-0 min-w-0 max-md:aspect-[820/328] md:h-full">
             <HeroBannerImageField
               label={copy.promoCardRight}
-              currentUrl={promoRightUrl ?? HOME_PROMO_RIGHT_DEFAULT_PATH}
+              currentUrl={promoRightUrl}
               uploading={uploadingSlot === "promoRight"}
               disabled={isBusy || !floor.promoRight}
               previewClassName="h-full w-full"
@@ -144,11 +139,7 @@ export function AdminHeroMobileFloorSection({
       </div>
       <HeroBannerImageField
         label={copy.mobileFloorBanner}
-        currentUrl={
-          mobileFloorUrl ??
-          floor.promoLeft?.desktopImageUrl ??
-          HOME_PROMO_LEFT_DEFAULT_PATH
-        }
+        currentUrl={mobileFloorUrl ?? floor.promoLeft?.desktopImageUrl ?? null}
         uploading={uploadingSlot === "floorMobile"}
         disabled={isBusy || !floor.promoLeft}
         previewClassName={MOBILE_FLOOR_PREVIEW_CLASS}

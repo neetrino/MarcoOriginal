@@ -99,8 +99,9 @@ export const mediaAssets = pgTable(
       .where(
         sql`${table.heroSlideId} IS NOT NULL AND ${table.role} = 'HERO_DESKTOP'`,
       ),
-    uniqueIndex("media_assets_hero_mobile_uidx")
-      .on(table.heroSlideId)
+    // HERO_MOBILE allows multiple assets per slide (mobile home carousel).
+    index("media_assets_hero_mobile_idx")
+      .on(table.heroSlideId, table.sortOrder)
       .where(
         sql`${table.heroSlideId} IS NOT NULL AND ${table.role} = 'HERO_MOBILE'`,
       ),

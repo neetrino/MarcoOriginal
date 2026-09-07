@@ -29,5 +29,10 @@
   "pricePresenceAria": "Переключить товары с ценой и без цены",
   "viewList": "Список",
   "viewGrid": "Сетка",
-  "viewDense": "Плотная сетка"
+  "viewDense": "Плотная сетка",
+  "allCategories": "Все",
+  "more": "Ещё",
+  "mobileBrowseSearchPlaceholder": "Поиск",
+  "mobileBrowseTitle": "Категории",
+  "closeBrowse": "Закрыть категории"
 }

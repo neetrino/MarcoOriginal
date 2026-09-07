@@ -29,5 +29,10 @@
   "pricePresenceAria": "Փոխել գնով և առանց գնի ապրանքների միջև",
   "viewList": "Ցուցակի տեսք",
   "viewGrid": "Ցանցի տեսք",
-  "viewDense": "Խիտ ցանցի տեսք"
+  "viewDense": "Խիտ ցանցի տեսք",
+  "allCategories": "Բոլորը",
+  "more": "Ավելին",
+  "mobileBrowseSearchPlaceholder": "Որոնել",
+  "mobileBrowseTitle": "Կատեգորիաներ",
+  "closeBrowse": "Փակել կատեգորիաները"
 }

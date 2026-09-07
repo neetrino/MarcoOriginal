@@ -29,5 +29,10 @@
   "pricePresenceAria": "Toggle between priced and unpriced products",
   "viewList": "List view",
   "viewGrid": "Grid view",
-  "viewDense": "Dense grid view"
+  "viewDense": "Dense grid view",
+  "allCategories": "All",
+  "more": "More",
+  "mobileBrowseSearchPlaceholder": "Search",
+  "mobileBrowseTitle": "Categories",
+  "closeBrowse": "Close categories"
 }

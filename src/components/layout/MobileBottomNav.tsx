@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import {
   MobileNavCartBoldIcon,
@@ -14,7 +14,11 @@ import {
   MobileNavWishlistBoldIcon,
   MobileNavWishlistLinearIcon,
 } from "@/components/layout/mobile-bottom-nav-icons";
-import { buildFloorNavItems, type FloorNavItem, type NavSlot } from "@/components/layout/mobile-bottom-nav-items";
+import {
+  buildFloorNavItems,
+  type FloorNavItem,
+  type NavSlot,
+} from "@/components/layout/mobile-bottom-nav-items";
 import {
   MOBILE_NAV_ACTIVE_FOREGROUND,
   MOBILE_NAV_ACTIVE_PILL_BG,
@@ -26,6 +30,8 @@ import {
   MOBILE_NAV_TOP_CORNER_RADIUS_PX,
 } from "@/components/layout/mobile-bottom-nav.constants";
 import { AppLink } from "@/components/ui/AppLink";
+import type { HeaderCategoryNode } from "@/features/categories/domain/header-category-menu";
+import { MobileCatalogBrowseDrawer } from "@/features/categories/ui/MobileCatalogBrowseDrawer";
 import { CartDrawer } from "@/features/cart/ui/CartDrawer";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 import type { Locale } from "@/lib/i18n/config";
@@ -37,6 +43,7 @@ type MobileBottomNavProps = {
   dictionary: Dictionary;
   cartItemCount: number;
   isSignedIn: boolean;
+  categories: readonly HeaderCategoryNode[];
 };
 
 function renderNavIcon(slot: NavSlot, active: boolean, sizeClass: string): ReactNode {
@@ -139,12 +146,22 @@ function SideLinkTab({
   );
 }
 
-function CenterShopTab({ item }: { item: FloorNavItem }) {
+function CenterShopTab({
+  label,
+  open,
+  onOpen,
+}: {
+  label: string;
+  open: boolean;
+  onOpen: () => void;
+}) {
   return (
-    <AppLink
-      href={item.href}
-      prefetchPolicy="intent"
-      aria-label={item.label}
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={label}
+      aria-expanded={open}
+      aria-haspopup="dialog"
       className="flex h-14 w-14 items-center justify-center"
     >
       <span
@@ -161,7 +178,7 @@ function CenterShopTab({ item }: { item: FloorNavItem }) {
           {renderNavIcon("shop", false, "h-7 w-7 shrink-0")}
         </span>
       </span>
-    </AppLink>
+    </button>
   );
 }
 
@@ -171,8 +188,10 @@ export function MobileBottomNav({
   dictionary,
   cartItemCount,
   isSignedIn,
+  categories,
 }: MobileBottomNavProps) {
   const pathname = usePathname() ?? `/${locale}`;
+  const [browseOpen, setBrowseOpen] = useState(false);
   const items = buildFloorNavItems(
     locale,
     dictionary,
@@ -180,75 +199,99 @@ export function MobileBottomNav({
   );
 
   return (
-    <nav
-      aria-label={dictionary.nav.navigation}
-      data-mobile-bottom-nav
-      className="mobile-bottom-nav pointer-events-none fixed inset-x-0 bottom-0 z-50 w-full md:hidden"
-    >
-      <div className="pointer-events-none mx-auto max-w-md">
-        <div
-          className="pointer-events-auto overflow-visible bg-white pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]"
-          style={{
-            borderTopLeftRadius: MOBILE_NAV_TOP_CORNER_RADIUS_PX,
-            borderTopRightRadius: MOBILE_NAV_TOP_CORNER_RADIUS_PX,
-            boxShadow: MOBILE_NAV_BOX_SHADOW,
-          }}
-        >
-          <div className="relative mx-auto max-w-md px-4 pt-3 pb-2">
-            <div className="flex items-center">
-              <div className="flex flex-1 items-center justify-between gap-1">
-                <SideLinkTab item={items.home} active={items.home.match(pathname)} />
-                <SideLinkTab
-                  item={items.wishlist}
-                  active={items.wishlist.match(pathname)}
-                />
+    <>
+      <nav
+        aria-label={dictionary.nav.navigation}
+        data-mobile-bottom-nav
+        className="mobile-bottom-nav pointer-events-none fixed inset-x-0 bottom-0 z-50 w-full md:hidden"
+      >
+        <div className="pointer-events-none mx-auto max-w-md">
+          <div
+            className="pointer-events-auto overflow-visible bg-white pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]"
+            style={{
+              borderTopLeftRadius: MOBILE_NAV_TOP_CORNER_RADIUS_PX,
+              borderTopRightRadius: MOBILE_NAV_TOP_CORNER_RADIUS_PX,
+              boxShadow: MOBILE_NAV_BOX_SHADOW,
+            }}
+          >
+            <div className="relative mx-auto max-w-md px-4 pt-3 pb-2">
+              <div className="flex items-center">
+                <div className="flex flex-1 items-center justify-between gap-1">
+                  <SideLinkTab
+                    item={items.home}
+                    active={items.home.match(pathname)}
+                  />
+                  <SideLinkTab
+                    item={items.wishlist}
+                    active={items.wishlist.match(pathname)}
+                  />
+                </div>
+                <div className="w-14 shrink-0" aria-hidden="true" />
+                <div className="flex flex-1 items-center justify-between gap-1">
+                  <CartDrawer
+                    locale={locale}
+                    currency={currency}
+                    dictionary={dictionary}
+                    itemCount={cartItemCount}
+                    renderTrigger={({
+                      open,
+                      badgeCount,
+                      label,
+                      openDrawer,
+                      prefetchDrawerView,
+                    }) => (
+                      <button
+                        type="button"
+                        onClick={openDrawer}
+                        onPointerEnter={prefetchDrawerView}
+                        onFocus={prefetchDrawerView}
+                        aria-label={label}
+                        aria-expanded={open}
+                        data-cart-fly-target
+                        className="flex min-h-[44px] flex-1 items-center justify-center px-1 py-1"
+                      >
+                        <SideTabGlyph
+                          slot="cart"
+                          active={open}
+                          badgeCount={badgeCount}
+                        />
+                      </button>
+                    )}
+                  />
+                  <SideLinkTab
+                    item={items.profile}
+                    active={items.profile.match(pathname)}
+                  />
+                </div>
               </div>
-              <div className="w-14 shrink-0" aria-hidden="true" />
-              <div className="flex flex-1 items-center justify-between gap-1">
-                <CartDrawer
-                  locale={locale}
-                  currency={currency}
-                  dictionary={dictionary}
-                  itemCount={cartItemCount}
-                  renderTrigger={({
-                    open,
-                    badgeCount,
-                    label,
-                    openDrawer,
-                    prefetchDrawerView,
-                  }) => (
-                    <button
-                      type="button"
-                      onClick={openDrawer}
-                      onPointerEnter={prefetchDrawerView}
-                      onFocus={prefetchDrawerView}
-                      aria-label={label}
-                      aria-expanded={open}
-                      data-cart-fly-target
-                      className="flex min-h-[44px] flex-1 items-center justify-center px-1 py-1"
-                    >
-                      <SideTabGlyph
-                        slot="cart"
-                        active={open}
-                        badgeCount={badgeCount}
-                      />
-                    </button>
-                  )}
-                />
-                <SideLinkTab
-                  item={items.profile}
-                  active={items.profile.match(pathname)}
-                />
-              </div>
-            </div>
-            <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2">
-              <div className="pointer-events-auto">
-                <CenterShopTab item={items.shop} />
+              <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2">
+                <div className="pointer-events-auto">
+                  <CenterShopTab
+                    label={items.shop.label}
+                    open={browseOpen}
+                    onOpen={() => setBrowseOpen(true)}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      <MobileCatalogBrowseDrawer
+        open={browseOpen}
+        onClose={() => setBrowseOpen(false)}
+        locale={locale}
+        categories={categories}
+        copy={{
+          title: dictionary.catalog.mobileBrowseTitle,
+          close: dictionary.catalog.closeBrowse,
+          allCategories: dictionary.catalog.allCategories,
+          more: dictionary.catalog.more,
+          searchPlaceholder: dictionary.catalog.mobileBrowseSearchPlaceholder,
+          searchSubmit: dictionary.header.searchSubmit,
+        }}
+      />
+    </>
   );
 }

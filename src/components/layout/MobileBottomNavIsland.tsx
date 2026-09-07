@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { getCartItemCount } from "@/features/cart/cart";
+import { getHeaderCategoryMenu } from "@/features/categories/application/load-header-category-menu";
 import { getCurrentUser } from "@/lib/auth/session";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 import type { Locale } from "@/lib/i18n/config";
@@ -27,9 +28,10 @@ async function MobileBottomNavAsync({
   currency,
   dictionary,
 }: MobileBottomNavIslandProps) {
-  const [user, cartItemCount] = await Promise.all([
+  const [user, cartItemCount, categories] = await Promise.all([
     getCurrentUser(),
     getCartItemCount(),
+    getHeaderCategoryMenu(locale),
   ]);
 
   return (
@@ -39,6 +41,7 @@ async function MobileBottomNavAsync({
       dictionary={dictionary}
       cartItemCount={cartItemCount}
       isSignedIn={Boolean(user)}
+      categories={categories}
     />
   );
 }
