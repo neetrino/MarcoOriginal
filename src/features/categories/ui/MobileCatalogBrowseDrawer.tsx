@@ -128,7 +128,7 @@ export function MobileCatalogBrowseDrawer({
 
       <div className={MOBILE_BROWSE_SCROLL_CLASS} data-mobile-browse-scroll>
         <MobileCatalogBrowseSearch
-          action={`/${locale}/products`}
+          locale={locale}
           placeholder={copy.searchPlaceholder}
           submitLabel={copy.searchSubmit}
           onSubmitNavigate={onClose}
