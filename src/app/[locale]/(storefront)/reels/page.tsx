@@ -46,6 +46,8 @@ export default async function ReelsPage({ params }: ReelsPageProps) {
       <ReelsPageGrid
         playLabel={dictionary.home.playReel}
         closeLabel={dictionary.home.closeReel}
+        muteLabel={dictionary.home.muteReel}
+        unmuteLabel={dictionary.home.unmuteReel}
         reels={reels.map((reel) => ({
           ...reel,
           title: reel.title || dictionary.home.untitledReel,

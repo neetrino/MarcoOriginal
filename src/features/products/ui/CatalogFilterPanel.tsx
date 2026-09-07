@@ -1,5 +1,6 @@
 "use client";
 
+import { findBrandFacetBySlug } from "@/features/products/domain/catalog-brand-facet-counts";
 import { findCategoryFacetBySlug } from "@/features/products/domain/catalog-category-facet-counts";
 import type { CatalogFacets } from "@/features/products/domain/catalog-filters";
 import {
@@ -78,7 +79,14 @@ export function CatalogFilterPanel({
         <CatalogBrandFilter
           brands={facets.brands}
           selectedSlugs={selectedBrands}
-          onToggle={(slug) => onFiltersChange(withToggledBrand(filters, slug))}
+          onToggle={(slug) => {
+            const facet = findBrandFacetBySlug(facets.brands, slug);
+            onFiltersChange(
+              withToggledBrand(filters, slug, {
+                forcePricePresence: facet?.forcePricePresence,
+              }),
+            );
+          }}
         />
       </section>
       {priceBounds ? (

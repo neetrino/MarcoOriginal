@@ -43,6 +43,19 @@
   --radius-4xl: 15px;
 }
 
+html,
+body {
+  /* Allow scroll; block pinch-zoom (viewport meta alone is ignored on iOS Safari). */
+  touch-action: pan-x pan-y;
+}
+
+/* touch-action is not inherited — apply on mobile hit targets too. */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    touch-action: pan-x pan-y;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -145,6 +158,28 @@ body {
   .animate-confirm-dialog-panel-out {
     animation-duration: 0.01ms;
     animation-iteration-count: 1;
+  }
+}
+
+@keyframes neetrino-credit {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.72;
+    transform: translateY(-4px);
+  }
+}
+
+.animate-neetrino-credit {
+  animation: neetrino-credit 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-neetrino-credit {
+    animation: none;
   }
 }
 

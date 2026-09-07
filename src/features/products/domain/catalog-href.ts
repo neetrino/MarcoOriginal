@@ -78,11 +78,18 @@ export function withToggledCategory(
 export function withToggledBrand(
   filters: CatalogSearchParams,
   slug: string,
+  options?: { forcePricePresence?: CatalogPricePresence },
 ): CatalogSearchParams {
+  const brandSlugs = toggleValue(filters.brandSlugs, slug);
+  const selecting = brandSlugs.includes(slug);
   return {
     ...filters,
     page: 1,
-    brandSlugs: toggleValue(filters.brandSlugs, slug),
+    brandSlugs,
+    pricePresence:
+      selecting && options?.forcePricePresence
+        ? options.forcePricePresence
+        : filters.pricePresence,
   };
 }
 

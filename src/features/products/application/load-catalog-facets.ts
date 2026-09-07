@@ -9,11 +9,16 @@ import {
   attributeValues,
   brands,
   categories,
+  productBrands,
   productCategories,
   products,
   type LocaleTranslation,
 } from "@/db/schema";
 import { buildCategoryTree } from "@/features/categories/domain/category-tree";
+import {
+  buildBrandFacetsWithCounts,
+  mergeBrandFacetsByPricePresence,
+} from "@/features/products/domain/catalog-brand-facet-counts";
 import {
   buildCategoryFacetsWithDistinctCounts,
   mergeCategoryFacetsByPricePresence,
@@ -137,7 +142,22 @@ async function loadCategoryFacets(
   );
 }
 
-async function loadBrandFacets(locale: Locale): Promise<CatalogBrandFacet[]> {
+function groupProductIdsByBrand(
+  rows: readonly { brandId: string; productId: string }[],
+): Map<string, Set<string>> {
+  const productIdsByBrandId = new Map<string, Set<string>>();
+  for (const row of rows) {
+    const productIds = productIdsByBrandId.get(row.brandId) ?? new Set();
+    productIds.add(row.productId);
+    productIdsByBrandId.set(row.brandId, productIds);
+  }
+  return productIdsByBrandId;
+}
+
+async function loadBrandFacets(
+  locale: Locale,
+  pricePresence: CatalogPricePresence,
+): Promise<CatalogBrandFacet[]> {
   const rows = await getDb()
     .select({
       id: brands.id,
@@ -147,17 +167,54 @@ async function loadBrandFacets(locale: Locale): Promise<CatalogBrandFacet[]> {
     .where(isNull(brands.deletedAt))
     .orderBy(asc(brands.sortOrder), asc(brands.createdAt));
 
-  const facets: CatalogBrandFacet[] = [];
+  const mapped: { id: string; slug: string; title: string }[] = [];
   for (const row of rows) {
     const translation = translationFor(row.translations, locale);
     if (!translation) continue;
-    facets.push({
+    mapped.push({
       id: row.id,
       slug: translation.slug,
       title: translation.title,
     });
   }
-  return facets;
+
+  const linkRows =
+    mapped.length === 0
+      ? []
+      : await getDb()
+          .select({
+            brandId: productBrands.brandId,
+            productId: productBrands.productId,
+            priceAmount: products.priceAmount,
+          })
+          .from(productBrands)
+          .innerJoin(products, eq(products.id, productBrands.productId))
+          .where(
+            and(
+              activeProductWhere,
+              inArray(
+                productBrands.brandId,
+                mapped.map((row) => row.id),
+              ),
+            ),
+          );
+
+  const withPriceRows = linkRows.filter((row) => row.priceAmount > 0);
+  const withoutPriceRows = linkRows.filter((row) => row.priceAmount === 0);
+  const withFacets = buildBrandFacetsWithCounts(
+    mapped,
+    groupProductIdsByBrand(withPriceRows),
+  );
+  const withoutFacets = buildBrandFacetsWithCounts(
+    mapped,
+    groupProductIdsByBrand(withoutPriceRows),
+  );
+
+  if (pricePresence === "without") {
+    return mergeBrandFacetsByPricePresence(withoutFacets, withFacets, "with");
+  }
+
+  return mergeBrandFacetsByPricePresence(withFacets, withoutFacets, "without");
 }
 
 async function loadAttributeFacets(
@@ -260,7 +317,7 @@ async function loadCatalogFacets(
 ): Promise<CatalogFacets> {
   const [categoryTree, brandList, attributeFacets, price] = await Promise.all([
     loadCategoryFacets(locale, pricePresence),
-    loadBrandFacets(locale),
+    loadBrandFacets(locale, pricePresence),
     loadAttributeFacets(locale),
     loadPriceBounds(),
   ]);
@@ -277,8 +334,8 @@ async function loadCatalogFacets(
 
 /**
  * Storefront filter facets: categories, brands, colors, and AMD price bounds.
- * Category counts prefer the active priced/unpriced mode; categories that only
- * exist in the other mode stay visible and switch mode on select.
+ * Category/brand counts prefer the active priced/unpriced mode; entries that
+ * only exist in the other mode stay visible and switch mode on select.
  */
 export async function getCatalogFacets(
   locale: Locale,

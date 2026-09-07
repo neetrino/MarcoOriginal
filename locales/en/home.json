@@ -15,6 +15,8 @@
   "untitledReel": "Untitled",
   "playReel": "Play reel",
   "closeReel": "Close",
+  "muteReel": "Mute",
+  "unmuteReel": "Unmute",
   "viewAll": "View more",
   "emptyFeatured": "No featured products yet.",
   "emptyReels": "No reels yet.",
@@ -23,5 +25,6 @@
   "promoLeftAria": "Featured promo",
   "promoRightAria": "MARCO — promotional area",
   "promoLeftCta": "SHOP NOW",
-  "promoRightCta": "MORE"
+  "promoRightCta": "MORE",
+  "neetrinoCredit": "NEETRINO"
 }

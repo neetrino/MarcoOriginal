@@ -44,8 +44,8 @@ describe("collectCategoryIdsForSlugs", () => {
 
 describe("collectBrandIdsForSlugs", () => {
   const brands: CatalogBrandFacet[] = [
-    { id: "b1", slug: "lex", title: "Lex" },
-    { id: "b2", slug: "aux", title: "AUX" },
+    { id: "b1", slug: "lex", title: "Lex", count: 1 },
+    { id: "b2", slug: "aux", title: "AUX", count: 2 },
   ];
 
   it("maps selected slugs to brand ids", () => {

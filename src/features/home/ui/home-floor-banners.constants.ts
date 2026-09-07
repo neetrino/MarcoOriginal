@@ -1,7 +1,10 @@
 /** Homepage floor banners — aligned with marco.am / localhost:3001. */
 
 export const HOME_FLOOR_BANNERS_PADDING_CLASS =
-  "pt-16 pb-2 md:pt-8 md:pb-10";
+  "pt-0 pb-2 md:pt-8 md:pb-10";
+
+/** Equal space above/below the mobile NEETRINO credit (between See more and floor banner). */
+export const HOME_NEETRINO_CREDIT_GAP_PX = 40;
 
 export const HOME_APP_BANNER_IMAGE_WIDTH = 2306;
 export const HOME_APP_BANNER_IMAGE_HEIGHT = 861;
