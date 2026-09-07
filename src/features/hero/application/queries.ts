@@ -18,6 +18,11 @@ import { mediaPublicUrl } from "@/lib/media/public-url";
 
 export type AdminHeroSlide = typeof heroSlides.$inferSelect;
 
+export type AdminHeroMobileImage = {
+  id: string;
+  url: string;
+};
+
 export type AdminHeroSlideListItem = {
   id: string;
   sortOrder: number;
@@ -27,7 +32,10 @@ export type AdminHeroSlideListItem = {
   buttonLabel: string | undefined;
   buttonUrl: string | undefined;
   desktopImageUrl: string | null;
+  /** First mobile image (floor banners / legacy single-slot UI). */
   mobileImageUrl: string | null;
+  /** Ordered mobile carousel images for this slide. */
+  mobileImages: AdminHeroMobileImage[];
 };
 
 export type StorefrontHeroSlide = {
@@ -35,16 +43,21 @@ export type StorefrontHeroSlide = {
   sortOrder: number;
   copy: HeroLocaleCopy;
   desktopImageUrl: string | null;
+  /** First mobile image; falls back to desktop when no mobile assets. */
   mobileImageUrl: string | null;
+  /** Ordered mobile carousel URLs (no desktop fallback). */
+  mobileImageUrls: string[];
+};
+
+type HeroMediaBundle = {
+  desktop: string | null;
+  mobileImages: AdminHeroMobileImage[];
 };
 
 async function loadHeroMediaBySlideIds(
   slideIds: string[],
-): Promise<Map<string, { desktop: string | null; mobile: string | null }>> {
-  const map = new Map<
-    string,
-    { desktop: string | null; mobile: string | null }
-  >();
+): Promise<Map<string, HeroMediaBundle>> {
+  const map = new Map<string, HeroMediaBundle>();
 
   if (slideIds.length === 0) {
     return map;
@@ -52,9 +65,12 @@ async function loadHeroMediaBySlideIds(
 
   const rows = await getDb()
     .select({
+      id: mediaAssets.id,
       heroSlideId: mediaAssets.heroSlideId,
       role: mediaAssets.role,
       objectKey: mediaAssets.objectKey,
+      sortOrder: mediaAssets.sortOrder,
+      createdAt: mediaAssets.createdAt,
     })
     .from(mediaAssets)
     .where(
@@ -66,7 +82,8 @@ async function loadHeroMediaBySlideIds(
           eq(mediaAssets.role, "HERO_MOBILE"),
         ),
       ),
-    );
+    )
+    .orderBy(asc(mediaAssets.sortOrder), asc(mediaAssets.createdAt));
 
   for (const row of rows) {
     if (!row.heroSlideId) {
@@ -74,19 +91,23 @@ async function loadHeroMediaBySlideIds(
     }
     const current = map.get(row.heroSlideId) ?? {
       desktop: null,
-      mobile: null,
+      mobileImages: [],
     };
     const url = mediaPublicUrl(row.objectKey);
     if (row.role === "HERO_DESKTOP") {
       current.desktop = url;
     }
     if (row.role === "HERO_MOBILE") {
-      current.mobile = url;
+      current.mobileImages.push({ id: row.id, url });
     }
     map.set(row.heroSlideId, current);
   }
 
   return map;
+}
+
+function firstMobileUrl(media: HeroMediaBundle | undefined): string | null {
+  return media?.mobileImages[0]?.url ?? null;
 }
 
 /** Lists all hero slides for the admin CMS, ordered by sort then created. */
@@ -115,7 +136,8 @@ export async function listAdminHeroSlides(): Promise<AdminHeroSlideListItem[]> {
       buttonLabel: copy.buttonLabel,
       buttonUrl: copy.buttonUrl,
       desktopImageUrl: media?.desktop ?? null,
-      mobileImageUrl: media?.mobile ?? null,
+      mobileImageUrl: firstMobileUrl(media),
+      mobileImages: media?.mobileImages ?? [],
     };
   });
 }
@@ -161,10 +183,13 @@ async function loadActiveHeroSlides(
 
   return withCopy.map((slide) => {
     const media = mediaBySlide.get(slide.id);
+    const mobileUrls = media?.mobileImages.map((image) => image.url) ?? [];
+    const firstMobile = mobileUrls[0] ?? null;
     return {
       ...slide,
       desktopImageUrl: media?.desktop ?? null,
-      mobileImageUrl: media?.mobile ?? media?.desktop ?? null,
+      mobileImageUrl: firstMobile ?? media?.desktop ?? null,
+      mobileImageUrls: mobileUrls,
     };
   });
 }
@@ -182,4 +207,3 @@ export async function listActiveHeroSlides(
     },
   )();
 }
-

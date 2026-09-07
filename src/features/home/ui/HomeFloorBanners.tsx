@@ -1,11 +1,6 @@
 import { pickHomeFloorBanners } from "@/features/hero/domain/hero-layout";
 import type { StorefrontHeroSlide } from "@/features/hero/application/queries";
 import { HomeAppBanner } from "@/features/home/ui/HomeAppBanner";
-import {
-  HOME_APP_BANNER_DEFAULT_PATH,
-  HOME_PROMO_LEFT_DEFAULT_PATH,
-  HOME_PROMO_RIGHT_DEFAULT_PATH,
-} from "@/features/hero/domain/home-floor-defaults";
 import { HOME_FLOOR_BANNERS_PADDING_CLASS } from "@/features/home/ui/home-floor-banners.constants";
 import { HomeMobileFloorBanner } from "@/features/home/ui/HomeMobileFloorBanner";
 import { HomePromoBanners } from "@/features/home/ui/HomePromoBanners";
@@ -32,42 +27,49 @@ function catalogHref(locale: Locale, buttonUrl?: string): string {
   return url || `/${locale}/products`;
 }
 
-/** App download + promo strip after brands, matching 3001. */
+/** App download + promo strip after brands — only CMS uploads, no static fallbacks. */
 export function HomeFloorBanners({
   locale,
   slides,
   copy,
 }: HomeFloorBannersProps) {
   const floor = pickHomeFloorBanners(slides);
-  const appImage =
-    floor.appDownload?.desktopImageUrl ?? HOME_APP_BANNER_DEFAULT_PATH;
+  const appImage = floor.appDownload?.desktopImageUrl ?? null;
   const promoLeftImage =
     floor.promoLeft?.desktopImageUrl ??
     floor.promoLeft?.mobileImageUrl ??
-    HOME_PROMO_LEFT_DEFAULT_PATH;
+    null;
   const promoRightImage =
     floor.promoRight?.desktopImageUrl ??
     floor.promoRight?.mobileImageUrl ??
-    HOME_PROMO_RIGHT_DEFAULT_PATH;
+    null;
   const mobileFloorImage =
     floor.promoLeft?.mobileImageUrl ??
     floor.promoLeft?.desktopImageUrl ??
-    HOME_PROMO_LEFT_DEFAULT_PATH;
+    null;
+
+  if (!appImage && !promoLeftImage && !promoRightImage && !mobileFloorImage) {
+    return null;
+  }
 
   return (
     <div className={`w-full ${HOME_FLOOR_BANNERS_PADDING_CLASS}`}>
-      <HomeAppBanner
-        imageUrl={appImage}
-        sectionLabel={copy.appBannerSection}
-        imageAlt={copy.appBannerAlt}
-      />
-      <HomeMobileFloorBanner
-        imageUrl={mobileFloorImage}
-        href={catalogHref(locale, floor.promoLeft?.copy.buttonUrl)}
-        ariaLabel={`${copy.promoLeftCta}. ${copy.promoLeftAria}`}
-        ctaLabel={copy.promoLeftCta}
-        neetrinoCreditLabel={copy.neetrinoCredit}
-      />
+      {appImage ? (
+        <HomeAppBanner
+          imageUrl={appImage}
+          sectionLabel={copy.appBannerSection}
+          imageAlt={copy.appBannerAlt}
+        />
+      ) : null}
+      {mobileFloorImage ? (
+        <HomeMobileFloorBanner
+          imageUrl={mobileFloorImage}
+          href={catalogHref(locale, floor.promoLeft?.copy.buttonUrl)}
+          ariaLabel={`${copy.promoLeftCta}. ${copy.promoLeftAria}`}
+          ctaLabel={copy.promoLeftCta}
+          neetrinoCreditLabel={copy.neetrinoCredit}
+        />
+      ) : null}
       <HomePromoBanners
         left={{
           imageUrl: promoLeftImage,

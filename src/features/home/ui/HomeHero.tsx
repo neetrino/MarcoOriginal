@@ -75,9 +75,14 @@ export function HomeHero({ slides }: HomeHeroProps) {
   const leftTop = layout.leftTop?.desktopImageUrl ?? null;
   const leftBottom = layout.leftBottom?.desktopImageUrl ?? null;
   const right = layout.right?.desktopImageUrl ?? null;
-  // Mobile storefront uses only the admin Mobile → Home hero image (leftTop).
-  const mobileUrl = layout.leftTop?.mobileImageUrl ?? null;
-  const mobileImages = mobileUrl ? [mobileUrl] : [];
+  // Mobile carousel: admin Mobile → Home hero images on leftTop (desktop fallback).
+  const mobileImages =
+    layout.leftTop?.mobileImageUrls &&
+    layout.leftTop.mobileImageUrls.length > 0
+      ? layout.leftTop.mobileImageUrls
+      : layout.leftTop?.desktopImageUrl
+        ? [layout.leftTop.desktopImageUrl]
+        : [];
 
   return (
     <section

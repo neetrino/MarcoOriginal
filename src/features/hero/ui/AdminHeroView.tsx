@@ -24,11 +24,10 @@ import {
   AdminHeroDesktopFloorSections,
   AdminHeroMobileFloorSection,
 } from "@/features/hero/ui/AdminHeroFloorSections";
+import { AdminHeroMobileHomeCard } from "@/features/hero/ui/AdminHeroMobileHomeCard";
 import {
   HERO_DESKTOP_PREVIEW_CLASS,
   HERO_DESKTOP_RADIUS_CLASS,
-  HERO_MOBILE_PREVIEW_CLASS,
-  HERO_MOBILE_RADIUS_CLASS,
 } from "@/features/hero/ui/hero-banner-classes";
 import { HeroBannerImageField } from "@/features/hero/ui/HeroBannerImageField";
 import {
@@ -41,7 +40,11 @@ type AdminHeroViewProps = {
   slides: AdminHeroSlideListItem[];
 };
 
-type BannerUploadSlot = HeroLayoutSlotKey | HomeFloorSlotKey | "mobile" | "floorMobile";
+type BannerUploadSlot =
+  | HeroLayoutSlotKey
+  | HomeFloorSlotKey
+  | "mobile"
+  | "floorMobile";
 
 type UploadingTarget = {
   slot: BannerUploadSlot;
@@ -59,12 +62,13 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
   const floor = pickHomeFloorBanners(slides);
   const [activeTab, setActiveTab] = useState<HeroBannerPlatformTab>("desktop");
   const [uploading, setUploading] = useState<UploadingTarget>(null);
+  const [mobileCarouselBusy, setMobileCarouselBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const role = roleForTab(activeTab);
-  const isBusy = uploading !== null || isPending;
+  const isBusy = uploading !== null || isPending || mobileCarouselBusy;
   const isDesktop = activeTab === "desktop";
 
   function runUpload(
@@ -235,23 +239,26 @@ export function AdminHeroView({ locale, slides }: AdminHeroViewProps) {
               </h2>
               <p className="text-sm text-gray-500">{copy.mobileHint}</p>
             </div>
-            <HeroBannerImageField
-              label={copy.heroBanner}
-              currentUrl={
-                layout.leftTop?.mobileImageUrl ??
-                layout.leftTop?.desktopImageUrl ??
-                null
-              }
-              uploading={uploading?.slot === "mobile"}
-              disabled={isBusy || !layout.leftTop}
-              previewClassName={HERO_MOBILE_PREVIEW_CLASS}
-              previewRadiusClassName={HERO_MOBILE_RADIUS_CLASS}
-              onUpload={(file) => runUpload(layout.leftTop, "mobile", file)}
-              onRemove={
-                layout.leftTop?.mobileImageUrl
-                  ? () => runRemove(layout.leftTop, "mobile")
-                  : undefined
-              }
+            <AdminHeroMobileHomeCard
+              locale={locale}
+              slide={layout.leftTop}
+              copy={copy}
+              disabled={isBusy}
+              onBusyChange={(busy) => {
+                setMobileCarouselBusy(busy);
+                if (busy) {
+                  setError(null);
+                  setMessage(null);
+                }
+              }}
+              onMessage={(next) => {
+                setError(null);
+                setMessage(next);
+              }}
+              onError={(next) => {
+                setMessage(null);
+                setError(next);
+              }}
             />
           </Card>
           <Card className="border border-gray-100 bg-white/95 p-4 shadow-sm sm:p-6">

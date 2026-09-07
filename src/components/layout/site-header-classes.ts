@@ -3,7 +3,7 @@ export const SITE_HEADER_INNER =
   "mx-auto max-w-7xl px-4 sm:px-6 lg:max-[1366px]:px-8 min-[1367px]:!px-[15px]";
 
 export const HEADER_SOCIAL_CIRCLE_CLASS =
-  "flex shrink-0 items-center justify-center rounded-full border border-marco-black/10 bg-marco-yellow text-marco-slate transition-[filter] hover:brightness-95 active:brightness-90";
+  "flex shrink-0 items-center justify-center rounded-full border border-marco-black/10 bg-marco-gray/40 text-marco-slate transition-colors hover:bg-marco-gray/70 active:bg-marco-gray/90";
 
 export const HEADER_SOCIAL_CIRCLE_SIZE_CLASS =
   "h-11 w-11 min-[1367px]:h-9 min-[1367px]:w-9";
