@@ -64,8 +64,8 @@ export function ProductDetailView({
           }}
         />
 
-        <div className="flex min-h-[420px] flex-col">
-          <div className="flex-1">
+        <div className="flex flex-col lg:min-h-[420px]">
+          <div className="lg:flex-1">
             <ProductInfoHeader
               locale={locale}
               title={product.translation.title}
@@ -81,7 +81,7 @@ export function ProductDetailView({
               priceFormatted={priceFormatted}
               compareAtFormatted={compareAtFormatted}
             />
-            <div className="mb-8">
+            <div className="mb-4 lg:mb-8">
               <ProductShortText
                 html={
                   product.translation.subtitle ??

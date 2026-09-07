@@ -18,6 +18,7 @@ type HomeFloorCopy = {
   promoRightAria: string;
   promoLeftCta: string;
   promoRightCta: string;
+  neetrinoCredit: string;
 };
 
 type HomeFloorBannersProps = {
@@ -65,6 +66,7 @@ export function HomeFloorBanners({
         href={catalogHref(locale, floor.promoLeft?.copy.buttonUrl)}
         ariaLabel={`${copy.promoLeftCta}. ${copy.promoLeftAria}`}
         ctaLabel={copy.promoLeftCta}
+        neetrinoCreditLabel={copy.neetrinoCredit}
       />
       <HomePromoBanners
         left={{

@@ -92,8 +92,8 @@ export function ProductPurchaseControls({
       : labels.buyNow;
 
   return (
-    <div className="mt-auto pt-6">
-      <div className="flex min-w-0 flex-nowrap items-center gap-2 pt-4 pb-2 sm:gap-3">
+    <div className="pt-2 lg:mt-auto lg:pt-6">
+      <div className="flex min-w-0 flex-nowrap items-center gap-2 pb-2 pt-2 sm:gap-3 lg:pt-4">
         <QuantityStepper
           quantity={quantity}
           disabled={disabled}

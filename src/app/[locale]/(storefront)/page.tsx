@@ -109,13 +109,12 @@ export default async function HomePage({ params }: HomePageProps) {
         title={dictionary.home.reelsTitle}
         playLabel={dictionary.home.playReel}
         closeLabel={dictionary.home.closeReel}
+        muteLabel={dictionary.home.muteReel}
+        unmuteLabel={dictionary.home.unmuteReel}
         previousPageLabel={dictionary.catalog.previousPage}
         nextPageLabel={dictionary.catalog.nextPage}
         paginationLabel={dictionary.home.reelsPaginationLabel}
-        reels={homeReels.map((reel) => ({
-          ...reel,
-          title: reel.title || dictionary.home.untitledReel,
-        }))}
+        reels={homeReels}
       />
       <HomeFeaturedProducts
         {...productRail}
@@ -155,6 +154,7 @@ export default async function HomePage({ params }: HomePageProps) {
           promoRightAria: dictionary.home.promoRightAria,
           promoLeftCta: dictionary.home.promoLeftCta,
           promoRightCta: dictionary.home.promoRightCta,
+          neetrinoCredit: dictionary.home.neetrinoCredit,
         }}
       />
     </div>

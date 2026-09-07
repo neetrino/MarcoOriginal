@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
 
 import { incrementReelViewAction } from "@/features/reels/application/manage-reels";
 import type { StorefrontReel } from "@/features/reels/application/queries";
 import { reelThumbnailSrc } from "@/features/reels/domain/reel-rules";
+import { ReelFeedViewer } from "@/features/reels/ui/ReelFeedViewer";
 import { chunkItems } from "@/features/home/paginate";
 import { HomePaginationDots } from "@/features/home/ui/HomePaginationDots";
 import { HomeSectionHeading } from "@/features/home/ui/HomeSectionHeading";
@@ -27,6 +27,8 @@ type HomeReelsProps = {
   title: string;
   playLabel: string;
   closeLabel: string;
+  muteLabel: string;
+  unmuteLabel: string;
   previousPageLabel: string;
   nextPageLabel: string;
   paginationLabel: string;
@@ -37,6 +39,8 @@ export function HomeReels({
   title,
   playLabel,
   closeLabel,
+  muteLabel,
+  unmuteLabel,
   previousPageLabel,
   nextPageLabel,
   paginationLabel,
@@ -51,14 +55,8 @@ export function HomeReels({
     Math.max(chunkItems(reels, REELS_DESKTOP_PAGE_SIZE).length, 1),
   );
   const carousel = isMaxMd ? mobile : desktop;
-  const active = reels.find((reel) => reel.id === activeId) ?? null;
 
   if (reels.length === 0) return null;
-
-  function openReel(reel: StorefrontReel): void {
-    setActiveId(reel.id);
-    void incrementReelViewAction({ reelId: reel.id });
-  }
 
   return (
     <section
@@ -87,7 +85,7 @@ export function HomeReels({
             playLabel={playLabel}
             scrollerRef={mobile.scrollerRef}
             onScroll={mobile.onScroll}
-            onOpen={openReel}
+            onOpen={(reel) => setActiveId(reel.id)}
           />
         </div>
         <div className="hidden md:block">
@@ -96,7 +94,7 @@ export function HomeReels({
             playLabel={playLabel}
             scrollerRef={desktop.scrollerRef}
             onScroll={desktop.onScroll}
-            onOpen={openReel}
+            onOpen={(reel) => setActiveId(reel.id)}
           />
         </div>
         <div style={{ marginTop: HOME_RAIL_TO_DOTS_GAP_PX }}>
@@ -112,11 +110,17 @@ export function HomeReels({
           />
         </div>
       </div>
-      {active ? (
-        <HomeReelDialog
-          reel={active}
+      {activeId ? (
+        <ReelFeedViewer
+          reels={reels}
+          initialReelId={activeId}
           closeLabel={closeLabel}
+          muteLabel={muteLabel}
+          unmuteLabel={unmuteLabel}
           onClose={() => setActiveId(null)}
+          onActiveChange={(reelId) => {
+            void incrementReelViewAction({ reelId });
+          }}
         />
       ) : null}
     </section>
@@ -177,16 +181,18 @@ function HomeReelTile({
   playLabel: string;
   onOpen: (reel: StorefrontReel) => void;
 }) {
-  const parts = reel.title.trim().split(/\s+/);
+  const title = reel.title.trim();
+  const parts = title.split(/\s+/);
   const twoWords = parts.length === 2;
+  const ariaLabel = title ? `${playLabel}: ${title}` : playLabel;
 
   return (
     <button
       type="button"
-      title={reel.title}
+      title={title || undefined}
       onClick={() => onOpen(reel)}
       className="group flex min-w-0 shrink-0 flex-col items-center gap-2.5 text-center transition-transform duration-200 hover:-translate-y-0.5 max-md:flex-[0_0_var(--reels-mobile-tile-basis)] md:min-w-[148px]"
-      aria-label={`${playLabel}: ${reel.title}`}
+      aria-label={ariaLabel}
     >
       <div className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-full border border-gray-200 bg-marco-gray shadow-[0_6px_16px_rgba(0,0,0,0.08)] transition-shadow group-hover:shadow-[0_12px_26px_rgba(0,0,0,0.18)] md:h-32 md:w-32">
         <video
@@ -198,62 +204,26 @@ function HomeReelTile({
           tabIndex={-1}
         />
       </div>
-      <span
-        className={`w-full max-w-full font-medium text-marco-slate md:whitespace-nowrap ${
-          twoWords ? "max-md:leading-snug" : "max-md:truncate"
-        }`}
-        style={{ fontSize: HOME_REELS_LABEL_FONT_SIZE_PX, lineHeight: "21px" }}
-      >
-        {twoWords ? (
-          <>
-            <span className="hidden md:inline">{reel.title}</span>
-            <span className="flex flex-col items-center md:hidden">
-              <span>{parts[0]}</span>
-              <span>{parts[1]}</span>
-            </span>
-          </>
-        ) : (
-          reel.title
-        )}
-      </span>
-    </button>
-  );
-}
-
-function HomeReelDialog({
-  reel,
-  closeLabel,
-  onClose,
-}: {
-  reel: StorefrontReel;
-  closeLabel: string;
-  onClose: () => void;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-[210] flex items-center justify-center bg-black/80 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={reel.title}
-    >
-      <button type="button" className="absolute inset-0" aria-label={closeLabel} onClick={onClose} />
-      <div className="relative z-[1] w-full max-w-sm">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute -top-2 -right-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-900 shadow"
-          aria-label={closeLabel}
+      {title ? (
+        <span
+          className={`w-full max-w-full font-medium text-marco-slate md:whitespace-nowrap ${
+            twoWords ? "max-md:leading-snug" : "max-md:truncate"
+          }`}
+          style={{ fontSize: HOME_REELS_LABEL_FONT_SIZE_PX, lineHeight: "21px" }}
         >
-          <X className="h-4 w-4" />
-        </button>
-        <video
-          src={reel.videoUrl}
-          className="aspect-[9/16] w-full rounded-2xl bg-black object-contain"
-          controls
-          autoPlay
-          playsInline
-        />
-      </div>
-    </div>
+          {twoWords ? (
+            <>
+              <span className="hidden md:inline">{title}</span>
+              <span className="flex flex-col items-center md:hidden">
+                <span>{parts[0]}</span>
+                <span>{parts[1]}</span>
+              </span>
+            </>
+          ) : (
+            title
+          )}
+        </span>
+      ) : null}
+    </button>
   );
 }

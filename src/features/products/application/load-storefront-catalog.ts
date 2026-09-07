@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getCatalogFacets } from "@/features/products/application/load-catalog-facets";
+import { resolvePricePresenceForSelectedBrands } from "@/features/products/domain/catalog-brand-facet-counts";
 import {
   attributeValueIdsForColorHexes,
   collectBrandIdsForSlugs,
@@ -18,6 +19,7 @@ import {
   parseCatalogSearchParams,
   type CatalogSearchParams,
 } from "@/features/products/domain/catalog-search-params";
+import type { CatalogPricePresence } from "@/features/products/domain/catalog-sort";
 import {
   getActiveProductsPage,
   type CatalogListFilter,
@@ -126,6 +128,24 @@ function toProductFilter(
   };
 }
 
+async function loadFacetsForPricePresence(
+  locale: Locale,
+  pricePresence: CatalogPricePresence,
+  brandSlugs: readonly string[],
+): Promise<{ facets: CatalogFacets; pricePresence: CatalogPricePresence }> {
+  let facets = await getCatalogFacets(locale, pricePresence);
+  const resolved = resolvePricePresenceForSelectedBrands(
+    facets.brands,
+    brandSlugs,
+    pricePresence,
+  );
+  if (resolved === pricePresence) {
+    return { facets, pricePresence };
+  }
+  facets = await getCatalogFacets(locale, resolved);
+  return { facets, pricePresence: resolved };
+}
+
 /** Loads the filtered storefront catalog, facets, and normalized URL state. */
 export async function loadStorefrontCatalog(
   locale: Locale,
@@ -133,8 +153,8 @@ export async function loadStorefrontCatalog(
   currency: Currency,
 ): Promise<StorefrontCatalogResult> {
   const parsed = parseCatalogSearchParams(searchParams);
-  const [facets, quote] = await Promise.all([
-    getCatalogFacets(locale, parsed.pricePresence),
+  const [{ facets, pricePresence }, quote] = await Promise.all([
+    loadFacetsForPricePresence(locale, parsed.pricePresence, parsed.brandSlugs),
     getCheckoutRateSnapshot(currency),
   ]);
   const priceBounds = toDisplayBounds(facets, currency, quote.rate);
@@ -148,6 +168,7 @@ export async function loadStorefrontCatalog(
     attributeValueIds,
     // Prefer attr ids; drop legacy color once resolved into attr.
     colorHexes: [],
+    pricePresence,
   };
   const listFilter = toProductFilter(
     filters,

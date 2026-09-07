@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { DisableMobileZoom } from "@/components/layout/DisableMobileZoom";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -51,6 +53,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
   maximumScale: 1,
   userScalable: false,
 };
@@ -65,6 +68,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col overflow-x-hidden antialiased`}
       >
+        <DisableMobileZoom />
         {children}
       </body>
     </html>
