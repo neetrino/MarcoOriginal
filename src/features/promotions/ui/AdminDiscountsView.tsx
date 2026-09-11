@@ -50,6 +50,7 @@ export function AdminDiscountsView({
               <GlobalDiscountCard
                 locale={locale}
                 initialPercent={board.globalPercent}
+                initialStartsAt={board.globalStartsAt}
                 initialEndsAt={board.globalEndsAt}
               />
               <DiscountInfoCard locale={locale} />

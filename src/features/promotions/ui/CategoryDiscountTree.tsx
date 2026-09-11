@@ -4,7 +4,10 @@ import { ChevronRight } from "lucide-react";
 
 import type { CategoryTreeNode } from "@/features/categories/domain/category-tree";
 import type { DiscountBoardCategory } from "@/features/promotions/application/discounts-board";
-import { DiscountEndsAtField } from "@/features/promotions/ui/DiscountEndsAtField";
+import {
+  DiscountScheduleField,
+  type DiscountScheduleCopy,
+} from "@/features/promotions/ui/DiscountScheduleField";
 import {
   DISCOUNT_FIELD,
   DISCOUNT_GHOST_BUTTON,
@@ -15,18 +18,22 @@ import {
 const INDENT_PER_LEVEL_PX = 16;
 
 type CategoryDiscountEditorProps = {
+  locale: string;
   drafts: Record<string, string>;
+  startsAtDrafts: Record<string, string>;
   endsAtDrafts: Record<string, string>;
+  scheduleCopy: DiscountScheduleCopy;
   expandedIds: ReadonlySet<string>;
   isSearching: boolean;
   disabled: boolean;
   discountForLabel: (name: string) => string;
-  endsAtLabel: string;
-  endsAtPlaceholder: string;
   clearLabel: string;
   onToggle: (categoryId: string) => void;
   onChange: (categoryId: string, value: string) => void;
-  onEndsAtChange: (categoryId: string, value: string) => void;
+  onScheduleChange: (
+    categoryId: string,
+    next: { startsAt: string; endsAt: string },
+  ) => void;
   onClear: (categoryId: string) => void;
 };
 
@@ -36,18 +43,19 @@ type CategoryDiscountTreeProps = CategoryDiscountEditorProps & {
 
 export function CategoryDiscountTree({
   nodes,
+  locale,
   drafts,
+  startsAtDrafts,
   endsAtDrafts,
+  scheduleCopy,
   expandedIds,
   isSearching,
   disabled,
   discountForLabel,
-  endsAtLabel,
-  endsAtPlaceholder,
   clearLabel,
   onToggle,
   onChange,
-  onEndsAtChange,
+  onScheduleChange,
   onClear,
 }: CategoryDiscountTreeProps) {
   return (
@@ -57,18 +65,19 @@ export function CategoryDiscountTree({
           key={node.id}
           node={node}
           depth={0}
+          locale={locale}
           drafts={drafts}
+          startsAtDrafts={startsAtDrafts}
           endsAtDrafts={endsAtDrafts}
+          scheduleCopy={scheduleCopy}
           expandedIds={expandedIds}
           isSearching={isSearching}
           disabled={disabled}
           discountForLabel={discountForLabel}
-          endsAtLabel={endsAtLabel}
-          endsAtPlaceholder={endsAtPlaceholder}
           clearLabel={clearLabel}
           onToggle={onToggle}
           onChange={onChange}
-          onEndsAtChange={onEndsAtChange}
+          onScheduleChange={onScheduleChange}
           onClear={onClear}
         />
       ))}
@@ -79,18 +88,19 @@ export function CategoryDiscountTree({
 function CategoryDiscountNode({
   node,
   depth,
+  locale,
   drafts,
+  startsAtDrafts,
   endsAtDrafts,
+  scheduleCopy,
   expandedIds,
   isSearching,
   disabled,
   discountForLabel,
-  endsAtLabel,
-  endsAtPlaceholder,
   clearLabel,
   onToggle,
   onChange,
-  onEndsAtChange,
+  onScheduleChange,
   onClear,
 }: CategoryDiscountEditorProps & {
   node: CategoryTreeNode<DiscountBoardCategory>;
@@ -115,16 +125,17 @@ function CategoryDiscountNode({
         <p className={`min-w-0 flex-1 ${titleClass}`}>{node.title}</p>
         <DiscountPercentField
           id={`cat-discount-${node.id}`}
+          locale={locale}
           label={discountForLabel(node.title)}
           value={drafts[node.id] ?? ""}
-          endsAtId={`cat-discount-ends-${node.id}`}
-          endsAtLabel={endsAtLabel}
-          endsAtPlaceholder={endsAtPlaceholder}
-          endsAtValue={endsAtDrafts?.[node.id] ?? ""}
+          scheduleId={`cat-discount-schedule-${node.id}`}
+          scheduleCopy={scheduleCopy}
+          startsAt={startsAtDrafts[node.id] ?? ""}
+          endsAt={endsAtDrafts[node.id] ?? ""}
           disabled={disabled}
           clearLabel={clearLabel}
           onChange={(value) => onChange(node.id, value)}
-          onEndsAtChange={(value) => onEndsAtChange(node.id, value)}
+          onScheduleChange={(next) => onScheduleChange(node.id, next)}
           onClear={() => onClear(node.id)}
         />
       </div>
@@ -134,18 +145,19 @@ function CategoryDiscountNode({
               key={child.id}
               node={child}
               depth={depth + 1}
+              locale={locale}
               drafts={drafts}
+              startsAtDrafts={startsAtDrafts}
               endsAtDrafts={endsAtDrafts}
+              scheduleCopy={scheduleCopy}
               expandedIds={expandedIds}
               isSearching={isSearching}
               disabled={disabled}
               discountForLabel={discountForLabel}
-              endsAtLabel={endsAtLabel}
-              endsAtPlaceholder={endsAtPlaceholder}
               clearLabel={clearLabel}
               onToggle={onToggle}
               onChange={onChange}
-              onEndsAtChange={onEndsAtChange}
+              onScheduleChange={onScheduleChange}
               onClear={onClear}
             />
           ))
@@ -179,29 +191,31 @@ function TreeToggle({
 
 function DiscountPercentField({
   id,
+  locale,
   label,
   value,
-  endsAtId,
-  endsAtLabel,
-  endsAtPlaceholder,
-  endsAtValue,
+  scheduleId,
+  scheduleCopy,
+  startsAt,
+  endsAt,
   disabled,
   clearLabel,
   onChange,
-  onEndsAtChange,
+  onScheduleChange,
   onClear,
 }: {
   id: string;
+  locale: string;
   label: string;
   value: string;
-  endsAtId: string;
-  endsAtLabel: string;
-  endsAtPlaceholder: string;
-  endsAtValue: string;
+  scheduleId: string;
+  scheduleCopy: DiscountScheduleCopy;
+  startsAt: string;
+  endsAt: string;
   disabled: boolean;
   clearLabel: string;
   onChange: (value: string) => void;
-  onEndsAtChange: (value: string) => void;
+  onScheduleChange: (next: { startsAt: string; endsAt: string }) => void;
   onClear: () => void;
 }) {
   return (
@@ -225,13 +239,14 @@ function DiscountPercentField({
         className={DISCOUNT_FIELD}
       />
       <span className="text-sm font-semibold text-marco-slate">%</span>
-      <DiscountEndsAtField
-        id={endsAtId}
-        label={endsAtLabel}
-        placeholder={endsAtPlaceholder}
-        value={endsAtValue}
+      <DiscountScheduleField
+        id={scheduleId}
+        locale={locale}
+        copy={scheduleCopy}
+        startsAt={startsAt}
+        endsAt={endsAt}
         disabled={disabled}
-        onChange={onEndsAtChange}
+        onChange={onScheduleChange}
       />
       <button
         type="button"

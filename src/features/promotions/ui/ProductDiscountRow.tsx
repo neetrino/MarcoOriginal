@@ -2,7 +2,10 @@
 
 import { applyPercentageToListPrice } from "@/features/promotions/domain/resolve-automatic-discount";
 import type { DiscountBoardProduct } from "@/features/promotions/application/discounts-board";
-import { DiscountEndsAtField } from "@/features/promotions/ui/DiscountEndsAtField";
+import {
+  DiscountScheduleField,
+  type DiscountScheduleCopy,
+} from "@/features/promotions/ui/DiscountScheduleField";
 import {
   DISCOUNT_FIELD,
   DISCOUNT_GHOST_BUTTON,
@@ -17,16 +20,16 @@ type ProductDiscountRowProps = {
   product: DiscountBoardProduct;
   locale: string;
   draft: string;
+  startsAtDraft: string;
   endsAtDraft: string;
+  scheduleCopy: DiscountScheduleCopy;
   busy: boolean;
   disabled: boolean;
   discountForLabel: string;
-  endsAtLabel: string;
-  endsAtPlaceholder: string;
   saveLabel: string;
   clearLabel: string;
   onChange: (value: string) => void;
-  onEndsAtChange: (value: string) => void;
+  onScheduleChange: (next: { startsAt: string; endsAt: string }) => void;
   onSave: () => void;
   onClear: () => void;
 };
@@ -35,16 +38,16 @@ export function ProductDiscountRow({
   product,
   locale,
   draft,
+  startsAtDraft,
   endsAtDraft,
+  scheduleCopy,
   busy,
   disabled,
   discountForLabel,
-  endsAtLabel,
-  endsAtPlaceholder,
   saveLabel,
   clearLabel,
   onChange,
-  onEndsAtChange,
+  onScheduleChange,
   onSave,
   onClear,
 }: ProductDiscountRowProps) {
@@ -84,13 +87,14 @@ export function ProductDiscountRow({
           className={DISCOUNT_FIELD}
         />
         <span className="text-sm font-semibold text-marco-slate">%</span>
-        <DiscountEndsAtField
-          id={`product-discount-ends-${product.id}`}
-          label={endsAtLabel}
-          placeholder={endsAtPlaceholder}
-          value={endsAtDraft}
+        <DiscountScheduleField
+          id={`product-discount-schedule-${product.id}`}
+          locale={locale}
+          copy={scheduleCopy}
+          startsAt={startsAtDraft}
+          endsAt={endsAtDraft}
           disabled={disabled}
-          onChange={onEndsAtChange}
+          onChange={onScheduleChange}
         />
         <button
           type="button"
@@ -102,7 +106,12 @@ export function ProductDiscountRow({
         </button>
         <button
           type="button"
-          disabled={disabled || (draft.length === 0 && endsAtDraft.length === 0)}
+          disabled={
+            disabled ||
+            (draft.length === 0 &&
+              startsAtDraft.length === 0 &&
+              endsAtDraft.length === 0)
+          }
           onClick={onClear}
           className={DISCOUNT_GHOST_BUTTON}
         >

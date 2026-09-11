@@ -4,11 +4,13 @@ type BoardDiscountRow = {
   id: string;
   title: string;
   discountPercent: number | null;
+  startsAt: string | null;
   endsAt: string | null;
 };
 
 type DirtyDiscountValues = {
   percentage: number | null;
+  startsAt: string | null;
   endsAt: string | null;
 };
 
@@ -18,6 +20,7 @@ type DirtyDiscountValues = {
 export function collectChangedDiscountRows(
   rows: readonly BoardDiscountRow[],
   drafts: Record<string, string>,
+  startsAtDrafts: Record<string, string>,
   endsAtDrafts: Record<string, string>,
 ):
   | { ok: true; changes: Array<BoardDiscountRow & DirtyDiscountValues> }
@@ -30,16 +33,19 @@ export function collectChangedDiscountRows(
       return { ok: false, invalidTitle: row.title };
     }
 
+    const startsAtRaw = (startsAtDrafts[row.id] ?? "").trim();
     const endsAtRaw = (endsAtDrafts[row.id] ?? "").trim();
+    const startsAt = startsAtRaw.length > 0 ? startsAtRaw : null;
     const endsAt = endsAtRaw.length > 0 ? endsAtRaw : null;
     if (
       percentage === row.discountPercent &&
+      startsAt === (row.startsAt ?? null) &&
       endsAt === (row.endsAt ?? null)
     ) {
       continue;
     }
 
-    changes.push({ ...row, percentage, endsAt });
+    changes.push({ ...row, percentage, startsAt, endsAt });
   }
 
   return { ok: true, changes };

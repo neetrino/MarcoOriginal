@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CircleDollarSign } from "lucide-react";
 
@@ -9,8 +9,10 @@ import {
   getAdminCopy,
 } from "@/features/admin/ui/get-admin-copy";
 import { setGlobalDiscountAction } from "@/features/promotions/application/manage-discounts";
-import { toDiscountEndsAtInput } from "@/features/promotions/domain/discount-ends-at";
-import { DiscountEndsAtField } from "@/features/promotions/ui/DiscountEndsAtField";
+import {
+  formatDiscountScheduleLabel,
+  toDiscountDateTimeInput,
+} from "@/features/promotions/domain/discount-ends-at";
 import {
   DISCOUNT_FIELD,
   DISCOUNT_GHOST_BUTTON,
@@ -22,6 +24,8 @@ import {
   DISCOUNT_STATUS_IDLE,
 } from "@/features/promotions/ui/discount-admin.classes";
 import { parseDiscountPercent } from "@/features/promotions/ui/discount-percent";
+import { DiscountScheduleField } from "@/features/promotions/ui/DiscountScheduleField";
+import { toDiscountScheduleCopy } from "@/features/promotions/ui/discount-schedule-copy";
 import { useSyncedState } from "@/lib/react/sync-state-from-prop";
 
 const QUICK_PERCENTS = [10, 20, 30, 50] as const;
@@ -29,33 +33,55 @@ const QUICK_PERCENTS = [10, 20, 30, 50] as const;
 type GlobalDiscountCardProps = {
   locale: string;
   initialPercent: number | null;
+  initialStartsAt: string | null;
   initialEndsAt: string | null;
 };
 
 export function GlobalDiscountCard({
   locale,
   initialPercent,
+  initialStartsAt,
   initialEndsAt,
 }: GlobalDiscountCardProps) {
   const copy = getAdminCopy(locale).discounts;
   const common = getAdminCopy(locale).common;
+  const scheduleCopy = useMemo(
+    () => toDiscountScheduleCopy(copy, common.clear),
+    [copy, common.clear],
+  );
   const router = useRouter();
   const sourceValue = initialPercent != null ? String(initialPercent) : "";
   const [value, setValue] = useSyncedState(sourceValue);
+  const [startsAt, setStartsAt] = useSyncedState(initialStartsAt ?? "");
   const [endsAt, setEndsAt] = useSyncedState(initialEndsAt ?? "");
   const [saved, setSaved] = useSyncedState(initialPercent);
+  const [savedStartsAt, setSavedStartsAt] = useSyncedState(initialStartsAt ?? "");
   const [savedEndsAt, setSavedEndsAt] = useSyncedState(initialEndsAt ?? "");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function save(next: number | null, nextEndsAt: string): void {
+  const savedScheduleLabel = formatDiscountScheduleLabel(
+    savedStartsAt,
+    savedEndsAt,
+    locale,
+  );
+
+  function save(
+    next: number | null,
+    nextStartsAt: string,
+    nextEndsAt: string,
+  ): void {
     startTransition(async () => {
       setError(null);
       setMessage(null);
+      const startsAtTrimmed = nextStartsAt.trim();
+      const endsAtTrimmed = nextEndsAt.trim();
       const result = await setGlobalDiscountAction(locale, {
         percentage: next,
-        endsAt: next == null || !nextEndsAt.trim() ? null : nextEndsAt.trim(),
+        startsAt:
+          next == null || !startsAtTrimmed ? null : startsAtTrimmed,
+        endsAt: next == null || !endsAtTrimmed ? null : endsAtTrimmed,
       });
       if (!result.ok) {
         setError(result.error.message);
@@ -65,10 +91,15 @@ export function GlobalDiscountCard({
       setValue(
         result.value.percentage != null ? String(result.value.percentage) : "",
       );
-      const endsAtInput = toDiscountEndsAtInput(
+      const startsAtInput = toDiscountDateTimeInput(
+        result.value.startsAt ? new Date(result.value.startsAt) : null,
+      );
+      const endsAtInput = toDiscountDateTimeInput(
         result.value.endsAt ? new Date(result.value.endsAt) : null,
       );
+      setStartsAt(startsAtInput);
       setEndsAt(endsAtInput);
+      setSavedStartsAt(startsAtInput);
       setSavedEndsAt(endsAtInput);
       setMessage(
         result.value.percentage == null
@@ -113,13 +144,17 @@ export function GlobalDiscountCard({
             className={DISCOUNT_FIELD}
           />
           <span className="w-8 text-sm font-semibold text-marco-slate">%</span>
-          <DiscountEndsAtField
-            id="global-discount-ends-at"
-            label={copy.endsAtLabel}
-            placeholder={copy.endsAtPlaceholder}
-            value={endsAt}
+          <DiscountScheduleField
+            id="global-discount-schedule"
+            locale={locale}
+            copy={scheduleCopy}
+            startsAt={startsAt}
+            endsAt={endsAt}
             disabled={isPending}
-            onChange={setEndsAt}
+            onChange={({ startsAt: nextStartsAt, endsAt: nextEndsAt }) => {
+              setStartsAt(nextStartsAt);
+              setEndsAt(nextEndsAt);
+            }}
           />
           <button
             type="button"
@@ -130,7 +165,7 @@ export function GlobalDiscountCard({
                 setError(copy.globalInvalid);
                 return;
               }
-              save(parsed, endsAt);
+              save(parsed, startsAt, endsAt);
             }}
             className={DISCOUNT_PRIMARY_BUTTON}
           >
@@ -138,16 +173,26 @@ export function GlobalDiscountCard({
           </button>
           <button
             type="button"
-            disabled={isPending || (value.length === 0 && endsAt.length === 0)}
+            disabled={
+              isPending ||
+              (value.length === 0 &&
+                startsAt.length === 0 &&
+                endsAt.length === 0)
+            }
             onClick={() => {
               setValue("");
+              setStartsAt("");
               setEndsAt("");
               setError(null);
-              if (saved == null && !savedEndsAt) {
+              if (
+                saved == null &&
+                !savedStartsAt &&
+                !savedEndsAt
+              ) {
                 setMessage(null);
                 return;
               }
-              save(null, "");
+              save(null, "", "");
             }}
             className={DISCOUNT_GHOST_BUTTON}
           >
@@ -159,7 +204,7 @@ export function GlobalDiscountCard({
           {saved == null
             ? copy.globalEmptyHint
             : formatAdminMessage(copy.globalActive, { percent: saved }) +
-              (savedEndsAt ? ` · ${savedEndsAt}` : "")}
+              (savedScheduleLabel ? ` · ${savedScheduleLabel}` : "")}
         </p>
 
         <div className="grid grid-cols-5 gap-2">
@@ -179,6 +224,7 @@ export function GlobalDiscountCard({
             disabled={isPending}
             onClick={() => {
               setValue("");
+              setStartsAt("");
               setEndsAt("");
               setError(null);
               setMessage(null);
