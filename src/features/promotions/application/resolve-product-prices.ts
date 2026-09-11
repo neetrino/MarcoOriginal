@@ -3,7 +3,8 @@ import "server-only";
 import { and, eq, inArray } from "drizzle-orm";
 
 import { getDb } from "@/db/client";
-import { productCategories, promotions } from "@/db/schema";
+import { productBrands, productCategories, promotions } from "@/db/schema";
+import { isAutomaticDiscountCurrentlyActive } from "@/features/promotions/domain/discount-ends-at";
 import {
   resolveCatalogPrice,
   type ResolvedCatalogPrice,
@@ -18,8 +19,11 @@ export type ProductPriceInput = {
 
 type AutomaticPromoRow = {
   discountValue: number;
+  startsAt: Date | null;
+  endsAt: Date | null;
   productId: string | null;
   categoryId: string | null;
+  brandId: string | null;
 };
 
 /**
@@ -35,34 +39,56 @@ export async function resolveProductPrices(
   }
 
   const productIds = products.map((product) => product.id);
-  const [globalDiscount, promoRows, categoryLinks] = await Promise.all([
-    getStoreGlobalDiscount(),
-    getDb()
-      .select({
-        discountValue: promotions.discountValue,
-        productId: promotions.productId,
-        categoryId: promotions.categoryId,
-      })
-      .from(promotions)
-      .where(
-        and(
-          eq(promotions.kind, "AUTOMATIC"),
-          eq(promotions.discountType, "PERCENTAGE"),
-          eq(promotions.isActive, true),
+  const now = new Date();
+  const [globalDiscount, promoRows, categoryLinks, brandLinks] =
+    await Promise.all([
+      getStoreGlobalDiscount(),
+      getDb()
+        .select({
+          discountValue: promotions.discountValue,
+          startsAt: promotions.startsAt,
+          endsAt: promotions.endsAt,
+          productId: promotions.productId,
+          categoryId: promotions.categoryId,
+          brandId: promotions.brandId,
+        })
+        .from(promotions)
+        .where(
+          and(
+            eq(promotions.kind, "AUTOMATIC"),
+            eq(promotions.discountType, "PERCENTAGE"),
+            eq(promotions.isActive, true),
+          ),
         ),
-      ),
-    getDb()
-      .select({
-        productId: productCategories.productId,
-        categoryId: productCategories.categoryId,
-      })
-      .from(productCategories)
-      .where(inArray(productCategories.productId, productIds)),
-  ]);
+      getDb()
+        .select({
+          productId: productCategories.productId,
+          categoryId: productCategories.categoryId,
+        })
+        .from(productCategories)
+        .where(inArray(productCategories.productId, productIds)),
+      getDb()
+        .select({
+          productId: productBrands.productId,
+          brandId: productBrands.brandId,
+        })
+        .from(productBrands)
+        .where(inArray(productBrands.productId, productIds)),
+    ]);
 
   const productPercent = new Map<string, number>();
   const categoryPercent = new Map<string, number>();
+  const brandPercent = new Map<string, number>();
   for (const promo of promoRows as AutomaticPromoRow[]) {
+    if (
+      !isAutomaticDiscountCurrentlyActive({
+        startsAt: promo.startsAt,
+        endsAt: promo.endsAt,
+        now,
+      })
+    ) {
+      continue;
+    }
     if (promo.productId) {
       const current = productPercent.get(promo.productId);
       if (current == null || promo.discountValue > current) {
@@ -75,6 +101,12 @@ export async function resolveProductPrices(
         categoryPercent.set(promo.categoryId, promo.discountValue);
       }
     }
+    if (promo.brandId) {
+      const current = brandPercent.get(promo.brandId);
+      if (current == null || promo.discountValue > current) {
+        brandPercent.set(promo.brandId, promo.discountValue);
+      }
+    }
   }
 
   const categoriesByProduct = new Map<string, string[]>();
@@ -84,10 +116,32 @@ export async function resolveProductPrices(
     categoriesByProduct.set(link.productId, list);
   }
 
+  const brandsByProduct = new Map<string, string[]>();
+  for (const link of brandLinks) {
+    const list = brandsByProduct.get(link.productId) ?? [];
+    list.push(link.brandId);
+    brandsByProduct.set(link.productId, list);
+  }
+
+  const globalPercent =
+    globalDiscount.percentage != null &&
+    isAutomaticDiscountCurrentlyActive({
+      endsAt: globalDiscount.endsAt
+        ? new Date(globalDiscount.endsAt)
+        : null,
+      now,
+    })
+      ? globalDiscount.percentage
+      : null;
+
   for (const product of products) {
     const categoryIds = categoriesByProduct.get(product.id) ?? [];
     const categoryPercents = categoryIds.map(
       (categoryId) => categoryPercent.get(categoryId) ?? null,
+    );
+    const brandIds = brandsByProduct.get(product.id) ?? [];
+    const brandPercents = brandIds.map(
+      (brandId) => brandPercent.get(brandId) ?? null,
     );
 
     result.set(
@@ -95,8 +149,9 @@ export async function resolveProductPrices(
       resolveCatalogPrice({
         listAmount: product.priceAmount,
         productPercent: productPercent.get(product.id) ?? null,
+        brandPercents,
         categoryPercents,
-        globalPercent: globalDiscount.percentage,
+        globalPercent,
         manualCompareAtAmount: product.compareAtAmount ?? null,
       }),
     );

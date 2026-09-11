@@ -11,7 +11,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { categories, products } from "@/db/schema/catalog";
+import { brands, categories, products } from "@/db/schema/catalog";
 import {
   createdAtColumn,
   idColumn,
@@ -30,6 +30,9 @@ export const promotions = pgTable(
       onDelete: "restrict",
     }),
     categoryId: text("category_id").references(() => categories.id, {
+      onDelete: "restrict",
+    }),
+    brandId: text("brand_id").references(() => brands.id, {
       onDelete: "restrict",
     }),
     discountType: discountTypeEnum("discount_type").notNull(),
@@ -58,6 +61,7 @@ export const promotions = pgTable(
     ),
     index("promotions_product_idx").on(table.productId),
     index("promotions_category_idx").on(table.categoryId),
+    index("promotions_brand_idx").on(table.brandId),
     check(
       "promotions_kind_chk",
       sql`(
@@ -66,15 +70,32 @@ export const promotions = pgTable(
           ${table.kind} = 'AUTOMATIC'
           AND ${table.code} IS NULL
           AND (
-            (${table.productId} IS NOT NULL AND ${table.categoryId} IS NULL)
-            OR (${table.productId} IS NULL AND ${table.categoryId} IS NOT NULL)
+            (
+              ${table.productId} IS NOT NULL
+              AND ${table.categoryId} IS NULL
+              AND ${table.brandId} IS NULL
+            )
+            OR (
+              ${table.productId} IS NULL
+              AND ${table.categoryId} IS NOT NULL
+              AND ${table.brandId} IS NULL
+            )
+            OR (
+              ${table.productId} IS NULL
+              AND ${table.categoryId} IS NULL
+              AND ${table.brandId} IS NOT NULL
+            )
           )
         )
       )`,
     ),
     check(
       "promotions_single_target_chk",
-      sql`NOT (${table.productId} IS NOT NULL AND ${table.categoryId} IS NOT NULL)`,
+      sql`(
+        (${table.productId} IS NOT NULL)::int
+        + (${table.categoryId} IS NOT NULL)::int
+        + (${table.brandId} IS NOT NULL)::int
+      ) <= 1`,
     ),
     check("promotions_value_chk", sql`${table.discountValue} > 0`),
     check("promotions_used_chk", sql`${table.usedCount} >= 0`),

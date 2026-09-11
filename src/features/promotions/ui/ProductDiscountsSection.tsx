@@ -9,6 +9,7 @@ import {
 } from "@/features/admin/ui/get-admin-copy";
 import type { DiscountBoardProduct } from "@/features/promotions/application/discounts-board";
 import { upsertTargetDiscountAction } from "@/features/promotions/application/manage-discounts";
+import { draftsFromEndsAt } from "@/features/promotions/domain/discount-ends-at";
 import { ProductDiscountRow } from "@/features/promotions/ui/ProductDiscountRow";
 import {
   DISCOUNT_EMPTY,
@@ -21,7 +22,7 @@ import {
   parseDiscountPercent,
 } from "@/features/promotions/ui/discount-percent";
 import { paginateDiscountItems } from "@/features/promotions/ui/discount-product-page";
-import { useSyncedState } from "@/lib/react/sync-state-from-prop";
+import { mergePreservingDirtyDrafts } from "@/features/promotions/ui/merge-discount-drafts";
 
 type ProductDiscountsSectionProps = {
   locale: string;
@@ -38,11 +39,28 @@ export function ProductDiscountsSection({
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const sourceDrafts = useMemo(() => draftsFromPercents(products), [products]);
-  const [drafts, setDrafts] = useSyncedState(sourceDrafts);
+  const sourceEndsAt = useMemo(() => draftsFromEndsAt(products), [products]);
+  const [drafts, setDrafts] = useState(sourceDrafts);
+  const [endsAtDrafts, setEndsAtDrafts] = useState(sourceEndsAt);
+  const [prevSourceDrafts, setPrevSourceDrafts] = useState(sourceDrafts);
+  const [prevSourceEndsAt, setPrevSourceEndsAt] = useState(sourceEndsAt);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  if (!Object.is(sourceDrafts, prevSourceDrafts)) {
+    setPrevSourceDrafts(sourceDrafts);
+    setDrafts((current) =>
+      mergePreservingDirtyDrafts(prevSourceDrafts, sourceDrafts, current),
+    );
+  }
+  if (!Object.is(sourceEndsAt, prevSourceEndsAt)) {
+    setPrevSourceEndsAt(sourceEndsAt);
+    setEndsAtDrafts((current) =>
+      mergePreservingDirtyDrafts(prevSourceEndsAt, sourceEndsAt, current),
+    );
+  }
 
   const filtered = useMemo(
     () => filterDiscountProducts(products, query),
@@ -56,6 +74,7 @@ export function ProductDiscountsSection({
       setError(formatAdminMessage(copy.invalidPercent, { name: title }));
       return;
     }
+    const endsAtRaw = (endsAtDrafts[productId] ?? "").trim();
 
     setSavingId(productId);
     startTransition(async () => {
@@ -65,6 +84,7 @@ export function ProductDiscountsSection({
         target: "product",
         targetId: productId,
         percentage: parsed,
+        endsAt: endsAtRaw.length > 0 ? endsAtRaw : null,
       });
       setSavingId(null);
       if (!result.ok) {
@@ -79,6 +99,39 @@ export function ProductDiscountsSection({
               name: title,
             }),
       );
+      router.refresh();
+    });
+  }
+
+  function clearOne(productId: string, title: string): void {
+    setDrafts((prev) => ({ ...prev, [productId]: "" }));
+    setEndsAtDrafts((prev) => ({ ...prev, [productId]: "" }));
+
+    const product = products.find((row) => row.id === productId);
+    const alreadyEmpty =
+      product?.discountPercent == null && (product?.endsAt ?? null) == null;
+    if (alreadyEmpty) {
+      setError(null);
+      setMessage(null);
+      return;
+    }
+
+    setSavingId(productId);
+    startTransition(async () => {
+      setError(null);
+      setMessage(null);
+      const result = await upsertTargetDiscountAction(locale, {
+        target: "product",
+        targetId: productId,
+        percentage: null,
+        endsAt: null,
+      });
+      setSavingId(null);
+      if (!result.ok) {
+        setError(result.error.message);
+        return;
+      }
+      setMessage(formatAdminMessage(copy.productCleared, { name: title }));
       router.refresh();
     });
   }
@@ -125,28 +178,38 @@ export function ProductDiscountsSection({
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
           <ul className="min-h-0 flex-1 space-y-3 overflow-y-auto">
-            {paged.items.map((product) => (
-              <ProductDiscountRow
-                key={product.id}
-                product={product}
-                locale={locale}
-                draft={drafts[product.id] ?? ""}
-                busy={isPending && savingId === product.id}
-                disabled={isPending}
-                discountForLabel={formatAdminMessage(copy.discountFor, {
-                  name: product.title,
-                })}
-                saveLabel={
-                  isPending && savingId === product.id
-                    ? common.saving
-                    : common.save
-                }
-                onChange={(value) =>
-                  setDrafts((prev) => ({ ...prev, [product.id]: value }))
-                }
-                onSave={() => saveOne(product.id, product.title)}
-              />
-            ))}
+            {paged.items.map((product) => {
+              const rowBusy = isPending && savingId === product.id;
+              return (
+                <ProductDiscountRow
+                  key={product.id}
+                  product={product}
+                  locale={locale}
+                  draft={drafts[product.id] ?? ""}
+                  endsAtDraft={endsAtDrafts[product.id] ?? ""}
+                  busy={rowBusy}
+                  disabled={rowBusy}
+                  discountForLabel={formatAdminMessage(copy.discountFor, {
+                    name: product.title,
+                  })}
+                  endsAtLabel={copy.endsAtLabel}
+                  endsAtPlaceholder={copy.endsAtPlaceholder}
+                  saveLabel={rowBusy ? common.saving : common.save}
+                  clearLabel={common.clear}
+                  onChange={(value) =>
+                    setDrafts((prev) => ({ ...prev, [product.id]: value }))
+                  }
+                  onEndsAtChange={(value) =>
+                    setEndsAtDrafts((prev) => ({
+                      ...prev,
+                      [product.id]: value,
+                    }))
+                  }
+                  onSave={() => saveOne(product.id, product.title)}
+                  onClear={() => clearOne(product.id, product.title)}
+                />
+              );
+            })}
           </ul>
           <DiscountProductPager
             page={paged.page}

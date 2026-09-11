@@ -1,9 +1,9 @@
-/** Parses a board percent field: empty, 1–100 integer, or invalid. */
+/** Parses a board percent field: empty/0 clears, 1–100 integer, or invalid. */
 export function parseDiscountPercent(
   raw: string,
 ): number | null | "invalid" {
   const trimmed = raw.trim();
-  if (!trimmed) return null;
+  if (!trimmed || trimmed === "0") return null;
   const next = Number(trimmed);
   if (!Number.isInteger(next) || next < 1 || next > 100) return "invalid";
   return next;

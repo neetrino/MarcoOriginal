@@ -6,9 +6,10 @@ import {
 } from "@/features/promotions/ui/discount-percent";
 
 describe("parseDiscountPercent", () => {
-  it("treats blank as cleared", () => {
+  it("treats blank and zero as cleared", () => {
     expect(parseDiscountPercent("")).toBeNull();
     expect(parseDiscountPercent("  ")).toBeNull();
+    expect(parseDiscountPercent("0")).toBeNull();
   });
 
   it("accepts whole percents from 1 to 100", () => {
@@ -18,7 +19,6 @@ describe("parseDiscountPercent", () => {
   });
 
   it("rejects non-integers and out-of-range values", () => {
-    expect(parseDiscountPercent("0")).toBe("invalid");
     expect(parseDiscountPercent("10.5")).toBe("invalid");
     expect(parseDiscountPercent("101")).toBe("invalid");
     expect(parseDiscountPercent("abc")).toBe("invalid");

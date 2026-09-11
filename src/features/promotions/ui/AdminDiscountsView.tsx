@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { getAdminCopy } from "@/features/admin/ui/get-admin-copy";
 import type { AdminDiscountsBoard } from "@/features/promotions/application/discounts-board";
+import { BrandDiscountsSection } from "@/features/promotions/ui/BrandDiscountsSection";
 import { CategoryDiscountsSection } from "@/features/promotions/ui/CategoryDiscountsSection";
 import { DiscountInfoCard } from "@/features/promotions/ui/DiscountInfoCard";
 import { DiscountSettingsTabs } from "@/features/promotions/ui/DiscountSettingsTabs";
@@ -49,6 +50,7 @@ export function AdminDiscountsView({
               <GlobalDiscountCard
                 locale={locale}
                 initialPercent={board.globalPercent}
+                initialEndsAt={board.globalEndsAt}
               />
               <DiscountInfoCard locale={locale} />
             </div>
@@ -65,6 +67,17 @@ export function AdminDiscountsView({
                 locale={locale}
                 categories={board.categories}
               />
+            </div>
+          ) : null}
+
+          {activeTab === "brand" ? (
+            <div
+              role="tabpanel"
+              id="discount-settings-panel-brand"
+              aria-labelledby="discount-settings-tab-brand"
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <BrandDiscountsSection locale={locale} brands={board.brands} />
             </div>
           ) : null}
 

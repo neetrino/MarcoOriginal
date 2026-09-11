@@ -2,8 +2,10 @@
 
 import { applyPercentageToListPrice } from "@/features/promotions/domain/resolve-automatic-discount";
 import type { DiscountBoardProduct } from "@/features/promotions/application/discounts-board";
+import { DiscountEndsAtField } from "@/features/promotions/ui/DiscountEndsAtField";
 import {
   DISCOUNT_FIELD,
+  DISCOUNT_GHOST_BUTTON,
   DISCOUNT_PRIMARY_BUTTON,
   DISCOUNT_PRODUCT_ROW,
   DISCOUNT_SALE_BADGE,
@@ -15,24 +17,36 @@ type ProductDiscountRowProps = {
   product: DiscountBoardProduct;
   locale: string;
   draft: string;
+  endsAtDraft: string;
   busy: boolean;
   disabled: boolean;
   discountForLabel: string;
+  endsAtLabel: string;
+  endsAtPlaceholder: string;
   saveLabel: string;
+  clearLabel: string;
   onChange: (value: string) => void;
+  onEndsAtChange: (value: string) => void;
   onSave: () => void;
+  onClear: () => void;
 };
 
 export function ProductDiscountRow({
   product,
   locale,
   draft,
+  endsAtDraft,
   busy,
   disabled,
   discountForLabel,
+  endsAtLabel,
+  endsAtPlaceholder,
   saveLabel,
+  clearLabel,
   onChange,
+  onEndsAtChange,
   onSave,
+  onClear,
 }: ProductDiscountRowProps) {
   const parsed = parseDiscountPercent(draft);
   const percent = parsed === "invalid" ? null : parsed;
@@ -54,7 +68,7 @@ export function ProductDiscountRow({
           percent={pricing.discountPercent}
         />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <label className="sr-only" htmlFor={`product-discount-${product.id}`}>
           {discountForLabel}
         </label>
@@ -66,11 +80,18 @@ export function ProductDiscountRow({
           inputMode="numeric"
           disabled={disabled}
           value={draft}
-          placeholder="0"
           onChange={(event) => onChange(event.target.value)}
           className={DISCOUNT_FIELD}
         />
         <span className="text-sm font-semibold text-marco-slate">%</span>
+        <DiscountEndsAtField
+          id={`product-discount-ends-${product.id}`}
+          label={endsAtLabel}
+          placeholder={endsAtPlaceholder}
+          value={endsAtDraft}
+          disabled={disabled}
+          onChange={onEndsAtChange}
+        />
         <button
           type="button"
           disabled={disabled}
@@ -78,6 +99,14 @@ export function ProductDiscountRow({
           className={DISCOUNT_PRIMARY_BUTTON}
         >
           {saveLabel}
+        </button>
+        <button
+          type="button"
+          disabled={disabled || (draft.length === 0 && endsAtDraft.length === 0)}
+          onClick={onClear}
+          className={DISCOUNT_GHOST_BUTTON}
+        >
+          {clearLabel}
         </button>
         {busy ? <span className="sr-only">{saveLabel}</span> : null}
       </div>

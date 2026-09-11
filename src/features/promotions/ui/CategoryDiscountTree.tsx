@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 
 import type { CategoryTreeNode } from "@/features/categories/domain/category-tree";
 import type { DiscountBoardCategory } from "@/features/promotions/application/discounts-board";
+import { DiscountEndsAtField } from "@/features/promotions/ui/DiscountEndsAtField";
 import {
   DISCOUNT_FIELD,
   DISCOUNT_GHOST_BUTTON,
@@ -15,13 +16,17 @@ const INDENT_PER_LEVEL_PX = 16;
 
 type CategoryDiscountEditorProps = {
   drafts: Record<string, string>;
+  endsAtDrafts: Record<string, string>;
   expandedIds: ReadonlySet<string>;
   isSearching: boolean;
   disabled: boolean;
   discountForLabel: (name: string) => string;
+  endsAtLabel: string;
+  endsAtPlaceholder: string;
   clearLabel: string;
   onToggle: (categoryId: string) => void;
   onChange: (categoryId: string, value: string) => void;
+  onEndsAtChange: (categoryId: string, value: string) => void;
   onClear: (categoryId: string) => void;
 };
 
@@ -32,13 +37,17 @@ type CategoryDiscountTreeProps = CategoryDiscountEditorProps & {
 export function CategoryDiscountTree({
   nodes,
   drafts,
+  endsAtDrafts,
   expandedIds,
   isSearching,
   disabled,
   discountForLabel,
+  endsAtLabel,
+  endsAtPlaceholder,
   clearLabel,
   onToggle,
   onChange,
+  onEndsAtChange,
   onClear,
 }: CategoryDiscountTreeProps) {
   return (
@@ -49,13 +58,17 @@ export function CategoryDiscountTree({
           node={node}
           depth={0}
           drafts={drafts}
+          endsAtDrafts={endsAtDrafts}
           expandedIds={expandedIds}
           isSearching={isSearching}
           disabled={disabled}
           discountForLabel={discountForLabel}
+          endsAtLabel={endsAtLabel}
+          endsAtPlaceholder={endsAtPlaceholder}
           clearLabel={clearLabel}
           onToggle={onToggle}
           onChange={onChange}
+          onEndsAtChange={onEndsAtChange}
           onClear={onClear}
         />
       ))}
@@ -67,13 +80,17 @@ function CategoryDiscountNode({
   node,
   depth,
   drafts,
+  endsAtDrafts,
   expandedIds,
   isSearching,
   disabled,
   discountForLabel,
+  endsAtLabel,
+  endsAtPlaceholder,
   clearLabel,
   onToggle,
   onChange,
+  onEndsAtChange,
   onClear,
 }: CategoryDiscountEditorProps & {
   node: CategoryTreeNode<DiscountBoardCategory>;
@@ -100,9 +117,14 @@ function CategoryDiscountNode({
           id={`cat-discount-${node.id}`}
           label={discountForLabel(node.title)}
           value={drafts[node.id] ?? ""}
+          endsAtId={`cat-discount-ends-${node.id}`}
+          endsAtLabel={endsAtLabel}
+          endsAtPlaceholder={endsAtPlaceholder}
+          endsAtValue={endsAtDrafts?.[node.id] ?? ""}
           disabled={disabled}
           clearLabel={clearLabel}
           onChange={(value) => onChange(node.id, value)}
+          onEndsAtChange={(value) => onEndsAtChange(node.id, value)}
           onClear={() => onClear(node.id)}
         />
       </div>
@@ -113,13 +135,17 @@ function CategoryDiscountNode({
               node={child}
               depth={depth + 1}
               drafts={drafts}
+              endsAtDrafts={endsAtDrafts}
               expandedIds={expandedIds}
               isSearching={isSearching}
               disabled={disabled}
               discountForLabel={discountForLabel}
+              endsAtLabel={endsAtLabel}
+              endsAtPlaceholder={endsAtPlaceholder}
               clearLabel={clearLabel}
               onToggle={onToggle}
               onChange={onChange}
+              onEndsAtChange={onEndsAtChange}
               onClear={onClear}
             />
           ))
@@ -155,22 +181,32 @@ function DiscountPercentField({
   id,
   label,
   value,
+  endsAtId,
+  endsAtLabel,
+  endsAtPlaceholder,
+  endsAtValue,
   disabled,
   clearLabel,
   onChange,
+  onEndsAtChange,
   onClear,
 }: {
   id: string;
   label: string;
   value: string;
+  endsAtId: string;
+  endsAtLabel: string;
+  endsAtPlaceholder: string;
+  endsAtValue: string;
   disabled: boolean;
   clearLabel: string;
   onChange: (value: string) => void;
+  onEndsAtChange: (value: string) => void;
   onClear: () => void;
 }) {
   return (
     <div
-      className="flex items-center gap-2"
+      className="flex flex-wrap items-center gap-2"
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
     >
@@ -185,11 +221,18 @@ function DiscountPercentField({
         inputMode="numeric"
         disabled={disabled}
         value={value}
-        placeholder="0"
         onChange={(event) => onChange(event.target.value)}
         className={DISCOUNT_FIELD}
       />
       <span className="text-sm font-semibold text-marco-slate">%</span>
+      <DiscountEndsAtField
+        id={endsAtId}
+        label={endsAtLabel}
+        placeholder={endsAtPlaceholder}
+        value={endsAtValue}
+        disabled={disabled}
+        onChange={onEndsAtChange}
+      />
       <button
         type="button"
         disabled={disabled}

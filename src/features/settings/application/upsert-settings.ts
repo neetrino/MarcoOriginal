@@ -88,6 +88,7 @@ const upsertSchema = z.discriminatedUnion("key", [
     key: z.literal("store.globalDiscount"),
     value: z.object({
       percentage: z.number().int().min(1).max(100).nullable(),
+      endsAt: z.string().datetime().nullable().optional(),
     }),
   }),
   z.object({
