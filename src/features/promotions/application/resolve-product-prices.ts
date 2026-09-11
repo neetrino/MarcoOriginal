@@ -126,6 +126,9 @@ export async function resolveProductPrices(
   const globalPercent =
     globalDiscount.percentage != null &&
     isAutomaticDiscountCurrentlyActive({
+      startsAt: globalDiscount.startsAt
+        ? new Date(globalDiscount.startsAt)
+        : null,
       endsAt: globalDiscount.endsAt
         ? new Date(globalDiscount.endsAt)
         : null,

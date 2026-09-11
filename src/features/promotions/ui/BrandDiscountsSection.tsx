@@ -9,8 +9,10 @@ import {
 } from "@/features/admin/ui/get-admin-copy";
 import type { DiscountBoardBrand } from "@/features/promotions/application/discounts-board";
 import { saveBrandDiscountsAction } from "@/features/promotions/application/manage-discounts";
-import { draftsFromEndsAt } from "@/features/promotions/domain/discount-ends-at";
-import { DiscountEndsAtField } from "@/features/promotions/ui/DiscountEndsAtField";
+import {
+  draftsFromEndsAt,
+  draftsFromStartsAt,
+} from "@/features/promotions/domain/discount-ends-at";
 import {
   DISCOUNT_EMPTY,
   DISCOUNT_FIELD,
@@ -21,10 +23,10 @@ import {
   DISCOUNT_TREE_LIST,
   DISCOUNT_TREE_ROW,
 } from "@/features/promotions/ui/discount-admin.classes";
-import {
-  draftsFromPercents,
-} from "@/features/promotions/ui/discount-percent";
 import { collectChangedDiscountRows } from "@/features/promotions/ui/discount-dirty";
+import { draftsFromPercents } from "@/features/promotions/ui/discount-percent";
+import { DiscountScheduleField } from "@/features/promotions/ui/DiscountScheduleField";
+import { toDiscountScheduleCopy } from "@/features/promotions/ui/discount-schedule-copy";
 import { useSyncedState } from "@/lib/react/sync-state-from-prop";
 
 type BrandDiscountsSectionProps = {
@@ -39,10 +41,16 @@ export function BrandDiscountsSection({
   const copy = getAdminCopy(locale).discounts;
   const common = getAdminCopy(locale).common;
   const brandsCopy = getAdminCopy(locale).brands;
+  const scheduleCopy = useMemo(
+    () => toDiscountScheduleCopy(copy, common.clear),
+    [copy, common.clear],
+  );
   const router = useRouter();
   const sourceDrafts = useMemo(() => draftsFromPercents(brands), [brands]);
+  const sourceStartsAt = useMemo(() => draftsFromStartsAt(brands), [brands]);
   const sourceEndsAt = useMemo(() => draftsFromEndsAt(brands), [brands]);
   const [drafts, setDrafts] = useSyncedState(sourceDrafts);
+  const [startsAtDrafts, setStartsAtDrafts] = useSyncedState(sourceStartsAt);
   const [endsAtDrafts, setEndsAtDrafts] = useSyncedState(sourceEndsAt);
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +63,12 @@ export function BrandDiscountsSection({
   );
 
   function saveAll(): void {
-    const collected = collectChangedDiscountRows(brands, drafts, endsAtDrafts);
+    const collected = collectChangedDiscountRows(
+      brands,
+      drafts,
+      startsAtDrafts,
+      endsAtDrafts,
+    );
     if (!collected.ok) {
       setError(
         formatAdminMessage(copy.invalidPercent, {
@@ -77,6 +90,7 @@ export function BrandDiscountsSection({
         items: collected.changes.map((row) => ({
           brandId: row.id,
           percentage: row.percentage,
+          startsAt: row.startsAt,
           endsAt: row.endsAt,
         })),
       });
@@ -165,24 +179,30 @@ export function BrandDiscountsSection({
                     className={DISCOUNT_FIELD}
                   />
                   <span className="text-sm font-semibold text-marco-slate">%</span>
-                  <DiscountEndsAtField
-                    id={`brand-discount-ends-${brand.id}`}
-                    label={copy.endsAtLabel}
-                    placeholder={copy.endsAtPlaceholder}
-                    value={endsAtDrafts[brand.id] ?? ""}
+                  <DiscountScheduleField
+                    id={`brand-discount-schedule-${brand.id}`}
+                    locale={locale}
+                    copy={scheduleCopy}
+                    startsAt={startsAtDrafts[brand.id] ?? ""}
+                    endsAt={endsAtDrafts[brand.id] ?? ""}
                     disabled={isPending}
-                    onChange={(value) =>
+                    onChange={({ startsAt, endsAt }) => {
+                      setStartsAtDrafts((prev) => ({
+                        ...prev,
+                        [brand.id]: startsAt,
+                      }));
                       setEndsAtDrafts((prev) => ({
                         ...prev,
-                        [brand.id]: value,
-                      }))
-                    }
+                        [brand.id]: endsAt,
+                      }));
+                    }}
                   />
                   <button
                     type="button"
                     disabled={isPending}
                     onClick={() => {
                       setDrafts((prev) => ({ ...prev, [brand.id]: "" }));
+                      setStartsAtDrafts((prev) => ({ ...prev, [brand.id]: "" }));
                       setEndsAtDrafts((prev) => ({ ...prev, [brand.id]: "" }));
                     }}
                     className={DISCOUNT_GHOST_BUTTON}

@@ -52,6 +52,8 @@ export type StoreRevenue = {
 export type StoreGlobalDiscount = {
   /** Store-wide percentage discount (1–100), or null when disabled. */
   percentage: number | null;
+  /** Inclusive start datetime ISO string, or null when open-ended. */
+  startsAt: string | null;
   /** Inclusive end datetime ISO string, or null when no expiry. */
   endsAt: string | null;
 };
@@ -139,10 +141,14 @@ export function parseStacking(value: unknown): StoreStacking {
 
 export function parseGlobalDiscount(value: unknown): StoreGlobalDiscount {
   if (!value || typeof value !== "object") {
-    return { percentage: null, endsAt: null };
+    return { percentage: null, startsAt: null, endsAt: null };
   }
 
-  const record = value as { percentage?: unknown; endsAt?: unknown };
+  const record = value as {
+    percentage?: unknown;
+    startsAt?: unknown;
+    endsAt?: unknown;
+  };
   const raw = record.percentage;
   let percentage: number | null = null;
   if (!(raw === null || raw === undefined || raw === "")) {
@@ -152,15 +158,18 @@ export function parseGlobalDiscount(value: unknown): StoreGlobalDiscount {
     }
   }
 
-  let endsAt: string | null = null;
-  if (typeof record.endsAt === "string" && record.endsAt.trim()) {
-    const parsed = new Date(record.endsAt);
-    if (!Number.isNaN(parsed.getTime())) {
-      endsAt = parsed.toISOString();
-    }
+  function parseIso(rawValue: unknown): string | null {
+    if (typeof rawValue !== "string" || !rawValue.trim()) return null;
+    const parsed = new Date(rawValue);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toISOString();
   }
 
-  return { percentage, endsAt };
+  return {
+    percentage,
+    startsAt: parseIso(record.startsAt),
+    endsAt: parseIso(record.endsAt),
+  };
 }
 
 export function parseIdentity(value: unknown): StoreIdentity {

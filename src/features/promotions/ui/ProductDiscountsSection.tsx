@@ -9,7 +9,10 @@ import {
 } from "@/features/admin/ui/get-admin-copy";
 import type { DiscountBoardProduct } from "@/features/promotions/application/discounts-board";
 import { upsertTargetDiscountAction } from "@/features/promotions/application/manage-discounts";
-import { draftsFromEndsAt } from "@/features/promotions/domain/discount-ends-at";
+import {
+  draftsFromEndsAt,
+  draftsFromStartsAt,
+} from "@/features/promotions/domain/discount-ends-at";
 import { ProductDiscountRow } from "@/features/promotions/ui/ProductDiscountRow";
 import {
   DISCOUNT_EMPTY,
@@ -23,6 +26,7 @@ import {
 } from "@/features/promotions/ui/discount-percent";
 import { paginateDiscountItems } from "@/features/promotions/ui/discount-product-page";
 import { mergePreservingDirtyDrafts } from "@/features/promotions/ui/merge-discount-drafts";
+import { toDiscountScheduleCopy } from "@/features/promotions/ui/discount-schedule-copy";
 
 type ProductDiscountsSectionProps = {
   locale: string;
@@ -35,14 +39,24 @@ export function ProductDiscountsSection({
 }: ProductDiscountsSectionProps) {
   const copy = getAdminCopy(locale).discounts;
   const common = getAdminCopy(locale).common;
+  const scheduleCopy = useMemo(
+    () => toDiscountScheduleCopy(copy, common.clear),
+    [copy, common.clear],
+  );
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const sourceDrafts = useMemo(() => draftsFromPercents(products), [products]);
+  const sourceStartsAt = useMemo(
+    () => draftsFromStartsAt(products),
+    [products],
+  );
   const sourceEndsAt = useMemo(() => draftsFromEndsAt(products), [products]);
   const [drafts, setDrafts] = useState(sourceDrafts);
+  const [startsAtDrafts, setStartsAtDrafts] = useState(sourceStartsAt);
   const [endsAtDrafts, setEndsAtDrafts] = useState(sourceEndsAt);
   const [prevSourceDrafts, setPrevSourceDrafts] = useState(sourceDrafts);
+  const [prevSourceStartsAt, setPrevSourceStartsAt] = useState(sourceStartsAt);
   const [prevSourceEndsAt, setPrevSourceEndsAt] = useState(sourceEndsAt);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +67,12 @@ export function ProductDiscountsSection({
     setPrevSourceDrafts(sourceDrafts);
     setDrafts((current) =>
       mergePreservingDirtyDrafts(prevSourceDrafts, sourceDrafts, current),
+    );
+  }
+  if (!Object.is(sourceStartsAt, prevSourceStartsAt)) {
+    setPrevSourceStartsAt(sourceStartsAt);
+    setStartsAtDrafts((current) =>
+      mergePreservingDirtyDrafts(prevSourceStartsAt, sourceStartsAt, current),
     );
   }
   if (!Object.is(sourceEndsAt, prevSourceEndsAt)) {
@@ -74,6 +94,7 @@ export function ProductDiscountsSection({
       setError(formatAdminMessage(copy.invalidPercent, { name: title }));
       return;
     }
+    const startsAtRaw = (startsAtDrafts[productId] ?? "").trim();
     const endsAtRaw = (endsAtDrafts[productId] ?? "").trim();
 
     setSavingId(productId);
@@ -84,6 +105,7 @@ export function ProductDiscountsSection({
         target: "product",
         targetId: productId,
         percentage: parsed,
+        startsAt: startsAtRaw.length > 0 ? startsAtRaw : null,
         endsAt: endsAtRaw.length > 0 ? endsAtRaw : null,
       });
       setSavingId(null);
@@ -105,11 +127,14 @@ export function ProductDiscountsSection({
 
   function clearOne(productId: string, title: string): void {
     setDrafts((prev) => ({ ...prev, [productId]: "" }));
+    setStartsAtDrafts((prev) => ({ ...prev, [productId]: "" }));
     setEndsAtDrafts((prev) => ({ ...prev, [productId]: "" }));
 
     const product = products.find((row) => row.id === productId);
     const alreadyEmpty =
-      product?.discountPercent == null && (product?.endsAt ?? null) == null;
+      product?.discountPercent == null &&
+      (product?.startsAt ?? null) == null &&
+      (product?.endsAt ?? null) == null;
     if (alreadyEmpty) {
       setError(null);
       setMessage(null);
@@ -124,6 +149,7 @@ export function ProductDiscountsSection({
         target: "product",
         targetId: productId,
         percentage: null,
+        startsAt: null,
         endsAt: null,
       });
       setSavingId(null);
@@ -186,25 +212,29 @@ export function ProductDiscountsSection({
                   product={product}
                   locale={locale}
                   draft={drafts[product.id] ?? ""}
+                  startsAtDraft={startsAtDrafts[product.id] ?? ""}
                   endsAtDraft={endsAtDrafts[product.id] ?? ""}
+                  scheduleCopy={scheduleCopy}
                   busy={rowBusy}
                   disabled={rowBusy}
                   discountForLabel={formatAdminMessage(copy.discountFor, {
                     name: product.title,
                   })}
-                  endsAtLabel={copy.endsAtLabel}
-                  endsAtPlaceholder={copy.endsAtPlaceholder}
                   saveLabel={rowBusy ? common.saving : common.save}
                   clearLabel={common.clear}
                   onChange={(value) =>
                     setDrafts((prev) => ({ ...prev, [product.id]: value }))
                   }
-                  onEndsAtChange={(value) =>
+                  onScheduleChange={({ startsAt, endsAt }) => {
+                    setStartsAtDrafts((prev) => ({
+                      ...prev,
+                      [product.id]: startsAt,
+                    }));
                     setEndsAtDrafts((prev) => ({
                       ...prev,
-                      [product.id]: value,
-                    }))
-                  }
+                      [product.id]: endsAt,
+                    }));
+                  }}
                   onSave={() => saveOne(product.id, product.title)}
                   onClear={() => clearOne(product.id, product.title)}
                 />

@@ -6,7 +6,7 @@ import { getDb } from "@/db/client";
 import { mediaAssets, products, promotions } from "@/db/schema";
 import { listAdminBrands } from "@/features/brands/application/list-admin-brands";
 import { listAdminCategories } from "@/features/categories/application/list-admin-categories";
-import { toDiscountEndsAtInput } from "@/features/promotions/domain/discount-ends-at";
+import { toDiscountDateTimeInput } from "@/features/promotions/domain/discount-ends-at";
 import { getStoreGlobalDiscount } from "@/features/settings/application/queries";
 import type { Locale } from "@/lib/i18n/config";
 import { mediaPublicUrl } from "@/lib/media/public-url";
@@ -16,6 +16,7 @@ export type DiscountBoardCategory = {
   title: string;
   parentId: string | null;
   discountPercent: number | null;
+  startsAt: string | null;
   endsAt: string | null;
   promotionId: string | null;
 };
@@ -25,6 +26,7 @@ export type DiscountBoardBrand = {
   title: string;
   sku: string;
   discountPercent: number | null;
+  startsAt: string | null;
   endsAt: string | null;
   promotionId: string | null;
 };
@@ -37,12 +39,14 @@ export type DiscountBoardProduct = {
   priceAmount: number;
   imageUrl: string | null;
   discountPercent: number | null;
+  startsAt: string | null;
   endsAt: string | null;
   promotionId: string | null;
 };
 
 export type AdminDiscountsBoard = {
   globalPercent: number | null;
+  globalStartsAt: string | null;
   globalEndsAt: string | null;
   categories: DiscountBoardCategory[];
   brands: DiscountBoardBrand[];
@@ -52,6 +56,7 @@ export type AdminDiscountsBoard = {
 type AutomaticTargetPromo = {
   id: string;
   discountValue: number;
+  startsAt: Date | null;
   endsAt: Date | null;
   productId: string | null;
   categoryId: string | null;
@@ -87,6 +92,7 @@ export async function getAdminDiscountsBoard(
       .select({
         id: promotions.id,
         discountValue: promotions.discountValue,
+        startsAt: promotions.startsAt,
         endsAt: promotions.endsAt,
         productId: promotions.productId,
         categoryId: promotions.categoryId,
@@ -139,9 +145,14 @@ export async function getAdminDiscountsBoard(
 
   return {
     globalPercent: globalDiscount.percentage,
-    globalEndsAt: toDiscountEndsAtInput(
-      globalDiscount.endsAt ? new Date(globalDiscount.endsAt) : null,
-    ) || null,
+    globalStartsAt:
+      toDiscountDateTimeInput(
+        globalDiscount.startsAt ? new Date(globalDiscount.startsAt) : null,
+      ) || null,
+    globalEndsAt:
+      toDiscountDateTimeInput(
+        globalDiscount.endsAt ? new Date(globalDiscount.endsAt) : null,
+      ) || null,
     categories: categoryRows.map((category) => {
       const promo = byCategory.get(category.id);
       return {
@@ -149,7 +160,8 @@ export async function getAdminDiscountsBoard(
         title: category.title,
         parentId: category.parentId,
         discountPercent: promo?.discountValue ?? null,
-        endsAt: toDiscountEndsAtInput(promo?.endsAt) || null,
+        startsAt: toDiscountDateTimeInput(promo?.startsAt) || null,
+        endsAt: toDiscountDateTimeInput(promo?.endsAt) || null,
         promotionId: promo?.id ?? null,
       };
     }),
@@ -160,7 +172,8 @@ export async function getAdminDiscountsBoard(
         title: brand.title,
         sku: brand.sku,
         discountPercent: promo?.discountValue ?? null,
-        endsAt: toDiscountEndsAtInput(promo?.endsAt) || null,
+        startsAt: toDiscountDateTimeInput(promo?.startsAt) || null,
+        endsAt: toDiscountDateTimeInput(promo?.endsAt) || null,
         promotionId: promo?.id ?? null,
       };
     }),
@@ -178,7 +191,8 @@ export async function getAdminDiscountsBoard(
         priceAmount: product.priceAmount,
         imageUrl: images.get(product.id) ?? null,
         discountPercent: promo?.discountValue ?? null,
-        endsAt: toDiscountEndsAtInput(promo?.endsAt) || null,
+        startsAt: toDiscountDateTimeInput(promo?.startsAt) || null,
+        endsAt: toDiscountDateTimeInput(promo?.endsAt) || null,
         promotionId: promo?.id ?? null,
       };
     }),

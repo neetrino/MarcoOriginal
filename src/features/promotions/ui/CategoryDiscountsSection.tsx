@@ -15,7 +15,10 @@ import {
 } from "@/features/categories/domain/category-tree";
 import type { DiscountBoardCategory } from "@/features/promotions/application/discounts-board";
 import { saveCategoryDiscountsAction } from "@/features/promotions/application/manage-discounts";
-import { draftsFromEndsAt } from "@/features/promotions/domain/discount-ends-at";
+import {
+  draftsFromEndsAt,
+  draftsFromStartsAt,
+} from "@/features/promotions/domain/discount-ends-at";
 import { CategoryDiscountTree } from "@/features/promotions/ui/CategoryDiscountTree";
 import {
   DISCOUNT_EMPTY,
@@ -24,10 +27,9 @@ import {
   DISCOUNT_SEARCH_FIELD,
   DISCOUNT_SECTION_CARD,
 } from "@/features/promotions/ui/discount-admin.classes";
-import {
-  draftsFromPercents,
-} from "@/features/promotions/ui/discount-percent";
 import { collectChangedDiscountRows } from "@/features/promotions/ui/discount-dirty";
+import { draftsFromPercents } from "@/features/promotions/ui/discount-percent";
+import { toDiscountScheduleCopy } from "@/features/promotions/ui/discount-schedule-copy";
 import { useSyncedState } from "@/lib/react/sync-state-from-prop";
 
 type CategoryDiscountsSectionProps = {
@@ -42,9 +44,17 @@ export function CategoryDiscountsSection({
   const copy = getAdminCopy(locale).discounts;
   const common = getAdminCopy(locale).common;
   const categoriesCopy = getAdminCopy(locale).categories;
+  const scheduleCopy = useMemo(
+    () => toDiscountScheduleCopy(copy, common.clear),
+    [copy, common.clear],
+  );
   const router = useRouter();
   const sourceDrafts = useMemo(
     () => draftsFromPercents(categories),
+    [categories],
+  );
+  const sourceStartsAt = useMemo(
+    () => draftsFromStartsAt(categories),
     [categories],
   );
   const sourceEndsAt = useMemo(
@@ -52,6 +62,7 @@ export function CategoryDiscountsSection({
     [categories],
   );
   const [drafts, setDrafts] = useSyncedState(sourceDrafts);
+  const [startsAtDrafts, setStartsAtDrafts] = useSyncedState(sourceStartsAt);
   const [endsAtDrafts, setEndsAtDrafts] = useSyncedState(sourceEndsAt);
   const [query, setQuery] = useState("");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -79,6 +90,7 @@ export function CategoryDiscountsSection({
     const collected = collectChangedDiscountRows(
       categories,
       drafts,
+      startsAtDrafts,
       endsAtDrafts,
     );
     if (!collected.ok) {
@@ -102,6 +114,7 @@ export function CategoryDiscountsSection({
         items: collected.changes.map((row) => ({
           categoryId: row.id,
           percentage: row.percentage,
+          startsAt: row.startsAt,
           endsAt: row.endsAt,
         })),
       });
@@ -160,16 +173,17 @@ export function CategoryDiscountsSection({
       <CategoryList
         categories={categories}
         visible={visible}
+        locale={locale}
         drafts={drafts}
+        startsAtDrafts={startsAtDrafts}
         endsAtDrafts={endsAtDrafts}
+        scheduleCopy={scheduleCopy}
         expandedIds={needle ? searchExpandedIds : expandedIds}
         isSearching={Boolean(needle)}
         disabled={isPending}
         emptyLabel={copy.categoryEmpty}
         noMatchLabel={categoriesCopy.noMatch}
         clearLabel={common.clear}
-        endsAtLabel={copy.endsAtLabel}
-        endsAtPlaceholder={copy.endsAtPlaceholder}
         discountForLabel={(name) =>
           formatAdminMessage(copy.discountFor, { name })
         }
@@ -179,11 +193,13 @@ export function CategoryDiscountsSection({
         onChange={(categoryId, value) =>
           setDrafts((prev) => ({ ...prev, [categoryId]: value }))
         }
-        onEndsAtChange={(categoryId, value) =>
-          setEndsAtDrafts((prev) => ({ ...prev, [categoryId]: value }))
-        }
+        onScheduleChange={(categoryId, { startsAt, endsAt }) => {
+          setStartsAtDrafts((prev) => ({ ...prev, [categoryId]: startsAt }));
+          setEndsAtDrafts((prev) => ({ ...prev, [categoryId]: endsAt }));
+        }}
         onClear={(categoryId) => {
           setDrafts((prev) => ({ ...prev, [categoryId]: "" }));
+          setStartsAtDrafts((prev) => ({ ...prev, [categoryId]: "" }));
           setEndsAtDrafts((prev) => ({ ...prev, [categoryId]: "" }));
         }}
       />
@@ -204,38 +220,43 @@ function toggleId(current: Set<string>, id: string): Set<string> {
 function CategoryList({
   categories,
   visible,
+  locale,
   drafts,
+  startsAtDrafts,
   endsAtDrafts,
+  scheduleCopy,
   expandedIds,
   isSearching,
   disabled,
   emptyLabel,
   noMatchLabel,
   clearLabel,
-  endsAtLabel,
-  endsAtPlaceholder,
   discountForLabel,
   onToggle,
   onChange,
-  onEndsAtChange,
+  onScheduleChange,
   onClear,
 }: {
   categories: DiscountBoardCategory[];
   visible: CategoryTreeNode<DiscountBoardCategory>[];
+  locale: string;
   drafts: Record<string, string>;
+  startsAtDrafts: Record<string, string>;
   endsAtDrafts: Record<string, string>;
+  scheduleCopy: ReturnType<typeof toDiscountScheduleCopy>;
   expandedIds: ReadonlySet<string>;
   isSearching: boolean;
   disabled: boolean;
   emptyLabel: string;
   noMatchLabel: string;
   clearLabel: string;
-  endsAtLabel: string;
-  endsAtPlaceholder: string;
   discountForLabel: (name: string) => string;
   onToggle: (categoryId: string) => void;
   onChange: (categoryId: string, value: string) => void;
-  onEndsAtChange: (categoryId: string, value: string) => void;
+  onScheduleChange: (
+    categoryId: string,
+    next: { startsAt: string; endsAt: string },
+  ) => void;
   onClear: (categoryId: string) => void;
 }) {
   if (categories.length === 0) {
@@ -249,18 +270,19 @@ function CategoryList({
     <div className="flex min-h-0 flex-1 flex-col">
       <CategoryDiscountTree
         nodes={visible}
+        locale={locale}
         drafts={drafts}
+        startsAtDrafts={startsAtDrafts}
         endsAtDrafts={endsAtDrafts}
+        scheduleCopy={scheduleCopy}
         expandedIds={expandedIds}
         isSearching={isSearching}
         disabled={disabled}
         discountForLabel={discountForLabel}
-        endsAtLabel={endsAtLabel}
-        endsAtPlaceholder={endsAtPlaceholder}
         clearLabel={clearLabel}
         onToggle={onToggle}
         onChange={onChange}
-        onEndsAtChange={onEndsAtChange}
+        onScheduleChange={onScheduleChange}
         onClear={onClear}
       />
     </div>

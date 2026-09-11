@@ -7,7 +7,7 @@ import { z } from "zod";
 import { auditLogs, promotions } from "@/db/schema";
 import { withTransaction, type DbTransaction } from "@/db/transaction";
 import { upsertStoreSettingAction } from "@/features/settings/application/upsert-settings";
-import { parseDiscountEndsAtInput } from "@/features/promotions/domain/discount-ends-at";
+import { parseDiscountDateTimeInput } from "@/features/promotions/domain/discount-ends-at";
 import { requireAdmin } from "@/lib/auth/policies";
 import { invalidateProductsCache } from "@/lib/cache/invalidate-public";
 import { createId } from "@/lib/id";
@@ -19,10 +19,10 @@ const nullablePercentSchema = z.number().int().min(1).max(100).nullable();
 /** Catalog entity ids are text (UUID or imported source CUID). */
 const catalogEntityIdSchema = z.string().trim().min(1).max(128);
 
-/** Board date fields are YYYY-MM-DD, or null when cleared. */
-const endsAtInputSchema = z
+/** Board datetime fields are YYYY-MM-DDTHH:mm (or legacy YYYY-MM-DD). */
+const dateTimeInputSchema = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .regex(/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/)
   .nullable();
 
 const DISCOUNT_TARGET_PRIORITIES = {
@@ -37,7 +37,8 @@ const targetDiscountSchema = z.object({
   target: z.enum(["product", "category", "brand"]),
   targetId: catalogEntityIdSchema,
   percentage: nullablePercentSchema,
-  endsAt: endsAtInputSchema,
+  startsAt: dateTimeInputSchema,
+  endsAt: dateTimeInputSchema,
 });
 
 const categoryBatchSchema = z.object({
@@ -46,7 +47,8 @@ const categoryBatchSchema = z.object({
       z.object({
         categoryId: catalogEntityIdSchema,
         percentage: nullablePercentSchema,
-        endsAt: endsAtInputSchema,
+        startsAt: dateTimeInputSchema,
+        endsAt: dateTimeInputSchema,
       }),
     )
     .max(500),
@@ -58,7 +60,8 @@ const brandBatchSchema = z.object({
       z.object({
         brandId: catalogEntityIdSchema,
         percentage: nullablePercentSchema,
-        endsAt: endsAtInputSchema,
+        startsAt: dateTimeInputSchema,
+        endsAt: dateTimeInputSchema,
       }),
     )
     .max(500),
@@ -66,13 +69,15 @@ const brandBatchSchema = z.object({
 
 const globalDiscountSchema = z.object({
   percentage: nullablePercentSchema,
-  endsAt: endsAtInputSchema,
+  startsAt: dateTimeInputSchema,
+  endsAt: dateTimeInputSchema,
 });
 
 type TargetDiscountInput = {
   target: DiscountTarget;
   targetId: string;
   percentage: number | null;
+  startsAt: Date | null;
   endsAt: Date | null;
 };
 
@@ -91,10 +96,13 @@ function targetWhere(target: DiscountTarget, targetId: string) {
   return eq(promotions.categoryId, targetId);
 }
 
-function resolveEndsAt(raw: string | null): Result<Date | null> {
-  const parsed = parseDiscountEndsAtInput(raw ?? "");
+function resolveDateTime(
+  raw: string | null,
+  label: string,
+): Result<Date | null> {
+  const parsed = parseDiscountDateTimeInput(raw ?? "");
   if (parsed === "invalid") {
-    return err("VALIDATION_ERROR", "Invalid discount end date.");
+    return err("VALIDATION_ERROR", `Invalid discount ${label} date.`);
   }
   return ok(parsed);
 }
@@ -104,7 +112,7 @@ async function upsertTargetDiscountInTx(
   actorId: string,
   input: TargetDiscountInput,
 ): Promise<void> {
-  const { target, targetId, percentage, endsAt } = input;
+  const { target, targetId, percentage, startsAt, endsAt } = input;
   const [existing] = await tx
     .select()
     .from(promotions)
@@ -140,9 +148,11 @@ async function upsertTargetDiscountInTx(
 
   if (existing) {
     const samePercent = existing.discountValue === percentage;
+    const sameStartsAt =
+      (existing.startsAt?.getTime() ?? null) === (startsAt?.getTime() ?? null);
     const sameEndsAt =
       (existing.endsAt?.getTime() ?? null) === (endsAt?.getTime() ?? null);
-    if (samePercent && sameEndsAt && existing.isActive) {
+    if (samePercent && sameStartsAt && sameEndsAt && existing.isActive) {
       return;
     }
 
@@ -151,6 +161,7 @@ async function upsertTargetDiscountInTx(
       .set({
         discountType: "PERCENTAGE",
         discountValue: percentage,
+        startsAt,
         endsAt,
         isActive: true,
         updatedAt: now,
@@ -165,9 +176,10 @@ async function upsertTargetDiscountInTx(
       targetId: existing.id,
       beforeDiff: {
         discountValue: existing.discountValue,
+        startsAt: existing.startsAt,
         endsAt: existing.endsAt,
       },
-      afterDiff: { discountValue: percentage, endsAt },
+      afterDiff: { discountValue: percentage, startsAt, endsAt },
       correlationId,
     });
     return;
@@ -183,6 +195,7 @@ async function upsertTargetDiscountInTx(
     brandId: target === "brand" ? targetId : null,
     discountType: "PERCENTAGE",
     discountValue: percentage,
+    startsAt,
     endsAt,
     isActive: true,
     priority: DISCOUNT_TARGET_PRIORITIES[target],
@@ -199,6 +212,7 @@ async function upsertTargetDiscountInTx(
       kind: "AUTOMATIC",
       discountType: "PERCENTAGE",
       discountValue: percentage,
+      startsAt,
       endsAt,
     },
     correlationId,
@@ -209,7 +223,13 @@ async function upsertTargetDiscountInTx(
 export async function setGlobalDiscountAction(
   locale: string,
   raw: z.infer<typeof globalDiscountSchema>,
-): Promise<Result<{ percentage: number | null; endsAt: string | null }>> {
+): Promise<
+  Result<{
+    percentage: number | null;
+    startsAt: string | null;
+    endsAt: string | null;
+  }>
+> {
   if (!isLocale(locale)) {
     return err("INVALID_LOCALE", "Invalid locale.");
   }
@@ -219,18 +239,20 @@ export async function setGlobalDiscountAction(
     return err("VALIDATION_ERROR", "Percentage must be 1–100 or empty.");
   }
 
-  const endsAtResult = resolveEndsAt(parsed.data.endsAt);
-  if (!endsAtResult.ok) {
-    return endsAtResult;
-  }
+  const startsAtResult = resolveDateTime(parsed.data.startsAt, "start");
+  if (!startsAtResult.ok) return startsAtResult;
+  const endsAtResult = resolveDateTime(parsed.data.endsAt, "end");
+  if (!endsAtResult.ok) return endsAtResult;
 
   const percentage = parsed.data.percentage;
+  const startsAt =
+    percentage == null ? null : (startsAtResult.value?.toISOString() ?? null);
   const endsAt =
     percentage == null ? null : (endsAtResult.value?.toISOString() ?? null);
 
   const result = await upsertStoreSettingAction(locale, {
     key: "store.globalDiscount",
-    value: { percentage, endsAt },
+    value: { percentage, startsAt, endsAt },
   });
 
   if (!result.ok) {
@@ -239,7 +261,7 @@ export async function setGlobalDiscountAction(
 
   revalidateDiscounts(locale);
   revalidatePath(`/${locale}/admin/settings`);
-  return ok({ percentage, endsAt });
+  return ok({ percentage, startsAt, endsAt });
 }
 
 /** Creates, updates, or clears one product/category/brand percentage discount. */
@@ -256,13 +278,14 @@ export async function upsertTargetDiscountAction(
     return err("VALIDATION_ERROR", "Invalid discount payload.");
   }
 
-  const endsAtResult = resolveEndsAt(parsed.data.endsAt);
-  if (!endsAtResult.ok) {
-    return endsAtResult;
-  }
+  const startsAtResult = resolveDateTime(parsed.data.startsAt, "start");
+  if (!startsAtResult.ok) return startsAtResult;
+  const endsAtResult = resolveDateTime(parsed.data.endsAt, "end");
+  if (!endsAtResult.ok) return endsAtResult;
 
   const actor = await requireAdmin(locale as Locale);
   const { target, targetId, percentage } = parsed.data;
+  const startsAt = percentage == null ? null : startsAtResult.value;
   const endsAt = percentage == null ? null : endsAtResult.value;
 
   try {
@@ -271,6 +294,7 @@ export async function upsertTargetDiscountAction(
         target,
         targetId,
         percentage,
+        startsAt,
         endsAt,
       });
     });
@@ -322,14 +346,15 @@ export async function saveCategoryDiscountsAction(
 
   const items: TargetDiscountInput[] = [];
   for (const item of parsed.data.items) {
-    const endsAtResult = resolveEndsAt(item.endsAt);
-    if (!endsAtResult.ok) {
-      return endsAtResult;
-    }
+    const startsAtResult = resolveDateTime(item.startsAt, "start");
+    if (!startsAtResult.ok) return startsAtResult;
+    const endsAtResult = resolveDateTime(item.endsAt, "end");
+    if (!endsAtResult.ok) return endsAtResult;
     items.push({
       target: "category",
       targetId: item.categoryId,
       percentage: item.percentage,
+      startsAt: item.percentage == null ? null : startsAtResult.value,
       endsAt: item.percentage == null ? null : endsAtResult.value,
     });
   }
@@ -353,14 +378,15 @@ export async function saveBrandDiscountsAction(
 
   const items: TargetDiscountInput[] = [];
   for (const item of parsed.data.items) {
-    const endsAtResult = resolveEndsAt(item.endsAt);
-    if (!endsAtResult.ok) {
-      return endsAtResult;
-    }
+    const startsAtResult = resolveDateTime(item.startsAt, "start");
+    if (!startsAtResult.ok) return startsAtResult;
+    const endsAtResult = resolveDateTime(item.endsAt, "end");
+    if (!endsAtResult.ok) return endsAtResult;
     items.push({
       target: "brand",
       targetId: item.brandId,
       percentage: item.percentage,
+      startsAt: item.percentage == null ? null : startsAtResult.value,
       endsAt: item.percentage == null ? null : endsAtResult.value,
     });
   }
