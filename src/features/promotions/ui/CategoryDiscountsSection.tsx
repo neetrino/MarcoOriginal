@@ -15,6 +15,7 @@ import {
 } from "@/features/categories/domain/category-tree";
 import type { DiscountBoardCategory } from "@/features/promotions/application/discounts-board";
 import { saveCategoryDiscountsAction } from "@/features/promotions/application/manage-discounts";
+import { draftsFromEndsAt } from "@/features/promotions/domain/discount-ends-at";
 import { CategoryDiscountTree } from "@/features/promotions/ui/CategoryDiscountTree";
 import {
   DISCOUNT_EMPTY,
@@ -25,8 +26,8 @@ import {
 } from "@/features/promotions/ui/discount-admin.classes";
 import {
   draftsFromPercents,
-  parseDiscountPercent,
 } from "@/features/promotions/ui/discount-percent";
+import { collectChangedDiscountRows } from "@/features/promotions/ui/discount-dirty";
 import { useSyncedState } from "@/lib/react/sync-state-from-prop";
 
 type CategoryDiscountsSectionProps = {
@@ -46,7 +47,12 @@ export function CategoryDiscountsSection({
     () => draftsFromPercents(categories),
     [categories],
   );
+  const sourceEndsAt = useMemo(
+    () => draftsFromEndsAt(categories),
+    [categories],
+  );
   const [drafts, setDrafts] = useSyncedState(sourceDrafts);
+  const [endsAtDrafts, setEndsAtDrafts] = useSyncedState(sourceEndsAt);
   const [query, setQuery] = useState("");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -70,22 +76,35 @@ export function CategoryDiscountsSection({
   );
 
   function saveAll(): void {
-    const items: Array<{ categoryId: string; percentage: number | null }> = [];
-    for (const category of categories) {
-      const parsed = parseDiscountPercent(drafts[category.id] ?? "");
-      if (parsed === "invalid") {
-        setError(
-          formatAdminMessage(copy.invalidPercent, { name: category.title }),
-        );
-        return;
-      }
-      items.push({ categoryId: category.id, percentage: parsed });
+    const collected = collectChangedDiscountRows(
+      categories,
+      drafts,
+      endsAtDrafts,
+    );
+    if (!collected.ok) {
+      setError(
+        formatAdminMessage(copy.invalidPercent, {
+          name: collected.invalidTitle,
+        }),
+      );
+      return;
+    }
+    if (collected.changes.length === 0) {
+      setError(null);
+      setMessage(null);
+      return;
     }
 
     startTransition(async () => {
       setError(null);
       setMessage(null);
-      const result = await saveCategoryDiscountsAction(locale, { items });
+      const result = await saveCategoryDiscountsAction(locale, {
+        items: collected.changes.map((row) => ({
+          categoryId: row.id,
+          percentage: row.percentage,
+          endsAt: row.endsAt,
+        })),
+      });
       if (!result.ok) {
         setError(result.error.message);
         return;
@@ -142,12 +161,15 @@ export function CategoryDiscountsSection({
         categories={categories}
         visible={visible}
         drafts={drafts}
+        endsAtDrafts={endsAtDrafts}
         expandedIds={needle ? searchExpandedIds : expandedIds}
         isSearching={Boolean(needle)}
         disabled={isPending}
         emptyLabel={copy.categoryEmpty}
         noMatchLabel={categoriesCopy.noMatch}
         clearLabel={common.clear}
+        endsAtLabel={copy.endsAtLabel}
+        endsAtPlaceholder={copy.endsAtPlaceholder}
         discountForLabel={(name) =>
           formatAdminMessage(copy.discountFor, { name })
         }
@@ -157,9 +179,13 @@ export function CategoryDiscountsSection({
         onChange={(categoryId, value) =>
           setDrafts((prev) => ({ ...prev, [categoryId]: value }))
         }
-        onClear={(categoryId) =>
-          setDrafts((prev) => ({ ...prev, [categoryId]: "" }))
+        onEndsAtChange={(categoryId, value) =>
+          setEndsAtDrafts((prev) => ({ ...prev, [categoryId]: value }))
         }
+        onClear={(categoryId) => {
+          setDrafts((prev) => ({ ...prev, [categoryId]: "" }));
+          setEndsAtDrafts((prev) => ({ ...prev, [categoryId]: "" }));
+        }}
       />
 
       {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
@@ -179,29 +205,37 @@ function CategoryList({
   categories,
   visible,
   drafts,
+  endsAtDrafts,
   expandedIds,
   isSearching,
   disabled,
   emptyLabel,
   noMatchLabel,
   clearLabel,
+  endsAtLabel,
+  endsAtPlaceholder,
   discountForLabel,
   onToggle,
   onChange,
+  onEndsAtChange,
   onClear,
 }: {
   categories: DiscountBoardCategory[];
   visible: CategoryTreeNode<DiscountBoardCategory>[];
   drafts: Record<string, string>;
+  endsAtDrafts: Record<string, string>;
   expandedIds: ReadonlySet<string>;
   isSearching: boolean;
   disabled: boolean;
   emptyLabel: string;
   noMatchLabel: string;
   clearLabel: string;
+  endsAtLabel: string;
+  endsAtPlaceholder: string;
   discountForLabel: (name: string) => string;
   onToggle: (categoryId: string) => void;
   onChange: (categoryId: string, value: string) => void;
+  onEndsAtChange: (categoryId: string, value: string) => void;
   onClear: (categoryId: string) => void;
 }) {
   if (categories.length === 0) {
@@ -216,13 +250,17 @@ function CategoryList({
       <CategoryDiscountTree
         nodes={visible}
         drafts={drafts}
+        endsAtDrafts={endsAtDrafts}
         expandedIds={expandedIds}
         isSearching={isSearching}
         disabled={disabled}
         discountForLabel={discountForLabel}
+        endsAtLabel={endsAtLabel}
+        endsAtPlaceholder={endsAtPlaceholder}
         clearLabel={clearLabel}
         onToggle={onToggle}
         onChange={onChange}
+        onEndsAtChange={onEndsAtChange}
         onClear={onClear}
       />
     </div>

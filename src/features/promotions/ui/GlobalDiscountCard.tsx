@@ -9,8 +9,11 @@ import {
   getAdminCopy,
 } from "@/features/admin/ui/get-admin-copy";
 import { setGlobalDiscountAction } from "@/features/promotions/application/manage-discounts";
+import { toDiscountEndsAtInput } from "@/features/promotions/domain/discount-ends-at";
+import { DiscountEndsAtField } from "@/features/promotions/ui/DiscountEndsAtField";
 import {
   DISCOUNT_FIELD,
+  DISCOUNT_GHOST_BUTTON,
   DISCOUNT_GLOBAL_CARD,
   DISCOUNT_ICON_ROSE,
   DISCOUNT_PRIMARY_BUTTON,
@@ -26,27 +29,34 @@ const QUICK_PERCENTS = [10, 20, 30, 50] as const;
 type GlobalDiscountCardProps = {
   locale: string;
   initialPercent: number | null;
+  initialEndsAt: string | null;
 };
 
 export function GlobalDiscountCard({
   locale,
   initialPercent,
+  initialEndsAt,
 }: GlobalDiscountCardProps) {
   const copy = getAdminCopy(locale).discounts;
   const common = getAdminCopy(locale).common;
   const router = useRouter();
   const sourceValue = initialPercent != null ? String(initialPercent) : "";
   const [value, setValue] = useSyncedState(sourceValue);
+  const [endsAt, setEndsAt] = useSyncedState(initialEndsAt ?? "");
   const [saved, setSaved] = useSyncedState(initialPercent);
+  const [savedEndsAt, setSavedEndsAt] = useSyncedState(initialEndsAt ?? "");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function save(next: number | null): void {
+  function save(next: number | null, nextEndsAt: string): void {
     startTransition(async () => {
       setError(null);
       setMessage(null);
-      const result = await setGlobalDiscountAction(locale, next);
+      const result = await setGlobalDiscountAction(locale, {
+        percentage: next,
+        endsAt: next == null || !nextEndsAt.trim() ? null : nextEndsAt.trim(),
+      });
       if (!result.ok) {
         setError(result.error.message);
         return;
@@ -55,6 +65,11 @@ export function GlobalDiscountCard({
       setValue(
         result.value.percentage != null ? String(result.value.percentage) : "",
       );
+      const endsAtInput = toDiscountEndsAtInput(
+        result.value.endsAt ? new Date(result.value.endsAt) : null,
+      );
+      setEndsAt(endsAtInput);
+      setSavedEndsAt(endsAtInput);
       setMessage(
         result.value.percentage == null
           ? copy.globalCleared
@@ -91,13 +106,21 @@ export function GlobalDiscountCard({
             min={0}
             max={100}
             inputMode="numeric"
-            placeholder="0"
+            placeholder=""
             value={value}
             disabled={isPending}
             onChange={(event) => setValue(event.target.value)}
             className={DISCOUNT_FIELD}
           />
           <span className="w-8 text-sm font-semibold text-marco-slate">%</span>
+          <DiscountEndsAtField
+            id="global-discount-ends-at"
+            label={copy.endsAtLabel}
+            placeholder={copy.endsAtPlaceholder}
+            value={endsAt}
+            disabled={isPending}
+            onChange={setEndsAt}
+          />
           <button
             type="button"
             disabled={isPending}
@@ -107,18 +130,36 @@ export function GlobalDiscountCard({
                 setError(copy.globalInvalid);
                 return;
               }
-              save(parsed);
+              save(parsed, endsAt);
             }}
             className={DISCOUNT_PRIMARY_BUTTON}
           >
             {isPending ? common.saving : common.save}
+          </button>
+          <button
+            type="button"
+            disabled={isPending || (value.length === 0 && endsAt.length === 0)}
+            onClick={() => {
+              setValue("");
+              setEndsAt("");
+              setError(null);
+              if (saved == null && !savedEndsAt) {
+                setMessage(null);
+                return;
+              }
+              save(null, "");
+            }}
+            className={DISCOUNT_GHOST_BUTTON}
+          >
+            {common.clear}
           </button>
         </div>
 
         <p className={saved == null ? DISCOUNT_STATUS_IDLE : DISCOUNT_STATUS_ACTIVE}>
           {saved == null
             ? copy.globalEmptyHint
-            : formatAdminMessage(copy.globalActive, { percent: saved })}
+            : formatAdminMessage(copy.globalActive, { percent: saved }) +
+              (savedEndsAt ? ` · ${savedEndsAt}` : "")}
         </p>
 
         <div className="grid grid-cols-5 gap-2">
@@ -138,6 +179,7 @@ export function GlobalDiscountCard({
             disabled={isPending}
             onClick={() => {
               setValue("");
+              setEndsAt("");
               setError(null);
               setMessage(null);
             }}

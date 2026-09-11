@@ -271,11 +271,12 @@
   },
   "discounts": {
     "title": "Discounts",
-    "subtitle": "Manage global, category, and product discounts",
+    "subtitle": "Manage global, category, brand, and product discounts",
     "tabsLabel": "Discount sections",
     "tabs": {
       "global": "Global",
       "category": "Categories",
+      "brand": "Brands",
       "product": "Products"
     },
     "detailTitle": "Automatic discount",
@@ -298,6 +299,13 @@
     "categoryTitle": "Category Discounts",
     "categorySubtitle": "Apply discounts to each product within a category",
     "categoryEmpty": "No categories found",
+    "brandTitle": "Brand Discounts",
+    "brandSubtitle": "Set discounts for products of a specific brand",
+    "brandEmpty": "No brands found",
+    "brandSaved": "Saved {count} brand discount(s).",
+    "endsAtLabel": "Discount end date",
+    "endsAtPlaceholder": "Select date",
+    "invalidEndsAt": "Invalid end date for “{name}”.",
     "discountFor": "Discount for {name}",
     "invalidPercent": "Invalid percentage for “{name}”. Use 1–100.",
     "categorySaved": "Saved {count} category discount(s).",

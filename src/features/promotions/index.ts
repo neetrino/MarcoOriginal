@@ -6,6 +6,7 @@ export {
   updatePromotionAction,
 } from "@/features/promotions/application/upsert-promotion";
 export {
+  saveBrandDiscountsAction,
   saveCategoryDiscountsAction,
   setGlobalDiscountAction,
   upsertTargetDiscountAction,
@@ -17,6 +18,7 @@ export {
 export {
   getAdminDiscountsBoard,
   type AdminDiscountsBoard,
+  type DiscountBoardBrand,
   type DiscountBoardCategory,
   type DiscountBoardProduct,
 } from "@/features/promotions/application/discounts-board";

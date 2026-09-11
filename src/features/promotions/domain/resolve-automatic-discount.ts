@@ -1,9 +1,14 @@
 /**
  * Pure automatic-discount resolution for catalog and checkout pricing.
- * Precedence: product rule > best category rule > store global %.
+ * Precedence: product > best brand > best category > store global %.
  */
 
-export type AutomaticDiscountSource = "product" | "category" | "global" | null;
+export type AutomaticDiscountSource =
+  | "product"
+  | "brand"
+  | "category"
+  | "global"
+  | null;
 
 export type AutomaticDiscountPick = {
   percent: number | null;
@@ -24,6 +29,18 @@ function normalizePercent(value: number | null | undefined): number | null {
   return value;
 }
 
+function bestPercent(
+  values: ReadonlyArray<number | null | undefined> | undefined,
+): number | null {
+  return (values ?? [])
+    .map((value) => normalizePercent(value ?? null))
+    .filter((value): value is number => value != null)
+    .reduce<number | null>(
+      (best, value) => (best == null || value > best ? value : best),
+      null,
+    );
+}
+
 /** Badge percent implied by a sale price vs compare-at (manual markdown). */
 function discountPercentFromCompareAtAmounts(
   unitAmount: number,
@@ -38,6 +55,7 @@ function discountPercentFromCompareAtAmounts(
 /** Picks the winning automatic percentage for one product. */
 export function pickAutomaticDiscountPercent(input: {
   productPercent?: number | null;
+  brandPercents?: ReadonlyArray<number | null | undefined>;
   categoryPercents?: ReadonlyArray<number | null | undefined>;
   globalPercent?: number | null;
 }): AutomaticDiscountPick {
@@ -46,14 +64,12 @@ export function pickAutomaticDiscountPercent(input: {
     return { percent: productPercent, source: "product" };
   }
 
-  const categoryBest = (input.categoryPercents ?? [])
-    .map((value) => normalizePercent(value ?? null))
-    .filter((value): value is number => value != null)
-    .reduce<number | null>(
-      (best, value) => (best == null || value > best ? value : best),
-      null,
-    );
+  const brandBest = bestPercent(input.brandPercents);
+  if (brandBest != null) {
+    return { percent: brandBest, source: "brand" };
+  }
 
+  const categoryBest = bestPercent(input.categoryPercents);
   if (categoryBest != null) {
     return { percent: categoryBest, source: "category" };
   }
@@ -104,6 +120,7 @@ export function applyPercentageToListPrice(
 export function resolveCatalogPrice(input: {
   listAmount: number;
   productPercent?: number | null;
+  brandPercents?: ReadonlyArray<number | null | undefined>;
   categoryPercents?: ReadonlyArray<number | null | undefined>;
   globalPercent?: number | null;
   /** Manual compare-at from the product row when no automatic discount applies. */

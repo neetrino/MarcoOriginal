@@ -1,4 +1,9 @@
-export const DISCOUNT_TAB_IDS = ["global", "category", "product"] as const;
+export const DISCOUNT_TAB_IDS = [
+  "global",
+  "category",
+  "brand",
+  "product",
+] as const;
 
 export type DiscountSettingsTabId = (typeof DISCOUNT_TAB_IDS)[number];
 

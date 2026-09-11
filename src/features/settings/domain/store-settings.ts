@@ -52,6 +52,8 @@ export type StoreRevenue = {
 export type StoreGlobalDiscount = {
   /** Store-wide percentage discount (1–100), or null when disabled. */
   percentage: number | null;
+  /** Inclusive end datetime ISO string, or null when no expiry. */
+  endsAt: string | null;
 };
 
 /** Quote major units per 1 AMD (e.g. usd: "0.0026" → 1 AMD = 0.0026 USD). */
@@ -137,24 +139,28 @@ export function parseStacking(value: unknown): StoreStacking {
 
 export function parseGlobalDiscount(value: unknown): StoreGlobalDiscount {
   if (!value || typeof value !== "object") {
-    return { percentage: null };
+    return { percentage: null, endsAt: null };
   }
 
-  const raw = (value as { percentage?: unknown }).percentage;
-  if (raw === null || raw === undefined || raw === "") {
-    return { percentage: null };
+  const record = value as { percentage?: unknown; endsAt?: unknown };
+  const raw = record.percentage;
+  let percentage: number | null = null;
+  if (!(raw === null || raw === undefined || raw === "")) {
+    const next = typeof raw === "number" ? raw : Number(raw);
+    if (Number.isInteger(next) && next >= 1 && next <= 100) {
+      percentage = next;
+    }
   }
 
-  const percentage = typeof raw === "number" ? raw : Number(raw);
-  if (
-    !Number.isInteger(percentage) ||
-    percentage < 1 ||
-    percentage > 100
-  ) {
-    return { percentage: null };
+  let endsAt: string | null = null;
+  if (typeof record.endsAt === "string" && record.endsAt.trim()) {
+    const parsed = new Date(record.endsAt);
+    if (!Number.isNaN(parsed.getTime())) {
+      endsAt = parsed.toISOString();
+    }
   }
 
-  return { percentage };
+  return { percentage, endsAt };
 }
 
 export function parseIdentity(value: unknown): StoreIdentity {

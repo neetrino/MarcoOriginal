@@ -7,17 +7,28 @@ import {
 } from "@/features/promotions/domain/resolve-automatic-discount";
 
 describe("pickAutomaticDiscountPercent", () => {
-  it("prefers product over category and global", () => {
+  it("prefers product over brand, category and global", () => {
     expect(
       pickAutomaticDiscountPercent({
         productPercent: 15,
+        brandPercents: [30],
         categoryPercents: [40, 20],
         globalPercent: 50,
       }),
     ).toEqual({ percent: 15, source: "product" });
   });
 
-  it("uses the strongest category when no product rule exists", () => {
+  it("prefers brand over category and global", () => {
+    expect(
+      pickAutomaticDiscountPercent({
+        brandPercents: [12, 18],
+        categoryPercents: [40],
+        globalPercent: 50,
+      }),
+    ).toEqual({ percent: 18, source: "brand" });
+  });
+
+  it("uses the strongest category when no product or brand rule exists", () => {
     expect(
       pickAutomaticDiscountPercent({
         categoryPercents: [10, 25, null, 5],
